@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Po Runner Placeholder</title>
+    <style>
+        body { margin: 0; background: #1a1a1a; color: #ffbf00; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+        .btn { padding: 10px 20px; background: #ffbf00; color: #1a1a1a; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Po Runner Mini-Game</h1>
+    <p>Waiting for instructions...</p>
+    <button class="btn" onclick="complete()">Finish Mini-Game</button>
+    <script>
+        window.addEventListener("message", (event) => {
+            console.log("Godot received:", event.data);
+        });
+
+        function complete() {
+            window.parent.postMessage({ type: "minigame_complete" }, "*");
+        }
+    </script>
+</body>
+</html>
