@@ -52,12 +52,29 @@ export interface GameErrorEvent {
   data: { message: string };
 }
 
+export interface NarrativeStartEvent {
+  type: "narrative_start";
+  data: { beatId: string };
+}
+
+export interface NarrativeEndEvent {
+  type: "narrative_end";
+  data: { beatId: string };
+}
+
+export interface OnboardingCompleteEvent {
+  type: "onboarding_complete";
+}
+
 export type GodotEvent =
   | NavigateEvent
   | MiniGameCompleteEvent
   | PlayerStateEvent
   | GameReadyEvent
-  | GameErrorEvent;
+  | GameErrorEvent
+  | NarrativeStartEvent
+  | NarrativeEndEvent
+  | OnboardingCompleteEvent;
 
 export type GodotEventType = GodotEvent["type"];
 
@@ -69,6 +86,9 @@ const VALID_EVENT_TYPES: ReadonlySet<string> = new Set([
   "player_state",
   "game_ready",
   "game_error",
+  "narrative_start",
+  "narrative_end",
+  "onboarding_complete",
 ]);
 
 export function isGodotEvent(data: unknown): data is GodotEvent {

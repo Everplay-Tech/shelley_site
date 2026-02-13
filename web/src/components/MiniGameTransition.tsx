@@ -6,7 +6,7 @@ import { useTransition } from "./TransitionContext";
 import type { GodotEvent } from "@/lib/godot-messages";
 
 const MiniGameTransition: React.FC = () => {
-  const { isActive, skip, complete } = useTransition();
+  const { isActive, activeGame, skip, complete } = useTransition();
 
   const handleGodotEvent = (event: GodotEvent) => {
     if (event.type === "minigame_complete") {
@@ -23,14 +23,14 @@ const MiniGameTransition: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isActive, skip]);
 
-  if (!isActive) return null;
+  if (!isActive || !activeGame) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
       <div className="w-full max-w-4xl px-4">
-        <GodotEmbed gameName="po_runner" onEvent={handleGodotEvent} />
+        <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
         <div className="mt-4 flex justify-between items-center text-white">
-          <p className="font-mono text-sm text-white/60">Po is traveling...</p>
+          <p className="font-mono text-sm text-white/60">{activeGame.label}</p>
           <button
             onClick={skip}
             className="px-4 py-2 bg-shelley-amber text-shelley-charcoal font-bold rounded hover:bg-yellow-400 transition-colors"

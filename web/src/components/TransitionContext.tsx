@@ -1,17 +1,15 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { getGameForRoute, type RouteGameConfig } from "@/lib/game-routes";
 
 interface TransitionContextValue {
-  /** Trigger a mini-game transition before navigating to a URL */
   startTransition: (url: string) => void;
-  /** Skip the current transition and navigate immediately */
   skip: () => void;
-  /** Whether a transition is currently playing */
   isActive: boolean;
-  /** The URL we're transitioning to */
   pendingUrl: string | null;
-  /** Called when the mini-game signals completion */
+  /** The game config for the current transition (null = no game, just navigate) */
+  activeGame: RouteGameConfig | null;
   complete: () => void;
 }
 
@@ -26,17 +24,25 @@ export function useTransition() {
 export function TransitionProvider({ children }: { children: React.ReactNode }) {
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const [activeGame, setActiveGame] = useState<RouteGameConfig | null>(null);
 
   const navigate = useCallback((url: string) => {
     setIsActive(false);
     setPendingUrl(null);
-    // Use window.location for a clean nav after the transition overlay clears
+    setActiveGame(null);
     window.location.href = url;
   }, []);
 
   const startTransition = useCallback((url: string) => {
-    setPendingUrl(url);
-    setIsActive(true);
+    const game = getGameForRoute(url);
+    if (game) {
+      setPendingUrl(url);
+      setActiveGame(game);
+      setIsActive(true);
+    } else {
+      // No game for this route — navigate directly
+      window.location.href = url;
+    }
   }, []);
 
   const skip = useCallback(() => {
@@ -45,6 +51,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
     } else {
       setIsActive(false);
       setPendingUrl(null);
+      setActiveGame(null);
     }
   }, [pendingUrl, navigate]);
 
@@ -55,7 +62,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   }, [pendingUrl, navigate]);
 
   return (
-    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, complete }}>
+    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, complete }}>
       {children}
     </TransitionContext.Provider>
   );
