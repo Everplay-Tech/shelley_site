@@ -1,0 +1,43 @@
+[
+  {
+    "id": "intro",
+    "trigger_distance": 200,
+    "lines": [
+      "DIALOGUE HERE",
+      "DIALOGUE HERE",
+      "DIALOGUE HERE"
+    ]
+  },
+  {
+    "id": "workshop",
+    "trigger_distance": 600,
+    "lines": [
+      "DIALOGUE HERE",
+      "DIALOGUE HERE"
+    ]
+  },
+  {
+    "id": "gallery",
+    "trigger_distance": 1200,
+    "lines": [
+      "DIALOGUE HERE",
+      "DIALOGUE HERE"
+    ]
+  },
+  {
+    "id": "invitation",
+    "trigger_distance": 1800,
+    "lines": [
+      "DIALOGUE HERE",
+      "DIALOGUE HERE"
+    ]
+  },
+  {
+    "id": "complete",
+    "trigger_distance": 2000,
+    "lines": [
+      "DIALOGUE HERE"
+    ],
+    "signal": "onboarding_complete"
+  }
+]

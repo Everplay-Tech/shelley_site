@@ -1,0 +1,109 @@
+[gd_scene load_steps=7 format=3 uid="uid://main_scene"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
+[ext_resource type="Script" path="res://scripts/narrative.gd" id="3_narrative"]
+[ext_resource type="Script" path="res://scripts/ground_scroller.gd" id="4_ground"]
+[ext_resource type="Script" path="res://scripts/obstacle_spawner.gd" id="5_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/obstacle.tscn" id="6_obstacle"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="WebBridge" type="Node" parent="."]
+script = ExtResource("2_bridge")
+
+[node name="Ground" type="ParallaxBackground" parent="."]
+script = ExtResource("4_ground")
+
+[node name="BGLayer" type="ParallaxLayer" parent="Ground"]
+motion_scale = Vector2(0.3, 0)
+motion_mirroring = Vector2(640, 0)
+
+[node name="BGColor" type="ColorRect" parent="Ground/BGLayer"]
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.102, 0.102, 0.102, 1)
+
+[node name="MidLayer" type="ParallaxLayer" parent="Ground"]
+motion_scale = Vector2(0.6, 0)
+motion_mirroring = Vector2(640, 0)
+
+[node name="MidGround" type="ColorRect" parent="Ground/MidLayer"]
+offset_top = 280.0
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.2, 0.157, 0.11, 1)
+
+[node name="FGLayer" type="ParallaxLayer" parent="Ground"]
+motion_scale = Vector2(1, 0)
+motion_mirroring = Vector2(640, 0)
+
+[node name="GroundRect" type="ColorRect" parent="Ground/FGLayer"]
+offset_top = 310.0
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.29, 0.216, 0.157, 1)
+
+[node name="GroundLine" type="ColorRect" parent="Ground/FGLayer"]
+offset_top = 308.0
+offset_right = 640.0
+offset_bottom = 312.0
+color = Color(1.0, 0.749, 0.0, 0.3)
+
+[node name="Po" parent="." instance="res://scenes/po.tscn"]
+position = Vector2(100, 288)
+
+[node name="ObstacleSpawner" type="Node2D" parent="."]
+position = Vector2(0, 308)
+script = ExtResource("5_spawner")
+obstacle_scene = ExtResource("6_obstacle")
+
+[node name="Narrative" type="Node" parent="."]
+script = ExtResource("3_narrative")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScorePanel" type="HBoxContainer" parent="UI"]
+offset_left = 540.0
+offset_top = 10.0
+offset_right = 630.0
+offset_bottom = 30.0
+
+[node name="PickIcon" type="ColorRect" parent="UI/ScorePanel"]
+custom_minimum_size = Vector2(12, 12)
+color = Color(1.0, 0.749, 0.0, 1)
+
+[node name="ScoreLabel" type="Label" parent="UI/ScorePanel" node_paths=PackedStringArray()]
+unique_name_in_owner = true
+text = "0"
+horizontal_alignment = 2
+
+[node name="DistanceLabel" type="Label" parent="UI"]
+unique_name_in_owner = true
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 120.0
+offset_bottom = 30.0
+text = "0m"
+
+[node name="SpeechBubble" type="PanelContainer" parent="UI"]
+unique_name_in_owner = true
+visible = false
+offset_left = 60.0
+offset_top = 160.0
+offset_right = 580.0
+offset_bottom = 260.0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/SpeechBubble"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="SpeechLabel" type="RichTextLabel" parent="UI/SpeechBubble/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+fit_content = true

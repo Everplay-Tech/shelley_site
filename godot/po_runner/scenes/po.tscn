@@ -1,0 +1,109 @@
+[gd_scene load_steps=14 format=3 uid="uid://po_character"]
+
+[ext_resource type="Script" path="res://scripts/po.gd" id="1_po"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_00.png" id="2_frame0"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_01.png" id="3_frame1"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_02.png" id="4_frame2"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_03.png" id="5_frame3"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_04.png" id="6_frame4"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05.png" id="7_frame5"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05b.png" id="8_frame5b"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05c.png" id="9_frame5c"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_06.png" id="10_frame6"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_07.png" id="11_frame7"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_po"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_frame0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_frame1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_frame0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_frame1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_frame0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_frame1")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_frame2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_frame3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_frame4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_frame5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_frame5b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_frame5c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_frame6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_frame7")
+}],
+"loop": false,
+"name": &"jump",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_frame2")
+}],
+"loop": true,
+"name": &"slide",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_frame6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_frame0")
+}],
+"loop": false,
+"name": &"stumble",
+"speed": 4.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_po"]
+size = Vector2(24, 40)
+
+[node name="Po" type="CharacterBody2D"]
+script = ExtResource("1_po")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_po")
+animation = &"idle"
+scale = Vector2(2, 2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_po")
+
+[node name="StumbleTimer" type="Timer" parent="."]
+one_shot = true
