@@ -4,11 +4,13 @@ import React, { useEffect } from "react";
 import GodotEmbed from "./GodotEmbed";
 import { useTransition } from "./TransitionContext";
 import type { GodotEvent } from "@/lib/godot-messages";
+import { emitGameEvent } from "@/lib/game-events";
 
 const MiniGameTransition: React.FC = () => {
   const { isActive, activeGame, skip, complete } = useTransition();
 
   const handleGodotEvent = (event: GodotEvent) => {
+    emitGameEvent(event);
     if (event.type === "minigame_complete") {
       complete();
     }
