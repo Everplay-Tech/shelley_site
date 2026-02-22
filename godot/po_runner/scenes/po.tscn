@@ -158,6 +158,7 @@ script = ExtResource("1_po")
 sprite_frames = SubResource("SpriteFrames_po")
 animation = &"idle"
 scale = Vector2(2, 2)
+texture_filter = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_po")
