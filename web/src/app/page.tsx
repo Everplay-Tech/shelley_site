@@ -41,7 +41,7 @@ export default function Home() {
   }, []);
 
   const handleSkip = useCallback(() => {
-    setCookie(ONBOARDING_COOKIE, "1");
+    // Only dismiss for this session — no cookie, game comes back on refresh
     setGameComplete(true);
     setFadeOut(true);
     setTimeout(() => setShowGame(false), 600);
