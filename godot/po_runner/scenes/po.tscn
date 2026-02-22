@@ -1,25 +1,58 @@
-[gd_scene load_steps=14 format=3 uid="uid://po_character"]
+[gd_scene load_steps=33 format=3 uid="uid://po_character"]
 
 [ext_resource type="Script" path="res://scripts/po.gd" id="1_po"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_00.png" id="2_frame0"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_01.png" id="3_frame1"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_02.png" id="4_frame2"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_03.png" id="5_frame3"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_04.png" id="6_frame4"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05.png" id="7_frame5"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05b.png" id="8_frame5b"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05c.png" id="9_frame5c"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_06.png" id="10_frame6"]
-[ext_resource type="Texture2D" path="res://sprites/po/po_jump_07.png" id="11_frame7"]
+
+; --- Idle frames (4) ---
+[ext_resource type="Texture2D" path="res://sprites/po/idle/frame_00.png" id="idle_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/idle/frame_01.png" id="idle_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/idle/frame_02.png" id="idle_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/idle/frame_03.png" id="idle_3"]
+
+; --- Run frames (6) ---
+[ext_resource type="Texture2D" path="res://sprites/po/run/frame_00.png" id="run_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/run/frame_01.png" id="run_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/run/frame_02.png" id="run_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/run/frame_03.png" id="run_3"]
+[ext_resource type="Texture2D" path="res://sprites/po/run/frame_04.png" id="run_4"]
+[ext_resource type="Texture2D" path="res://sprites/po/run/frame_05.png" id="run_5"]
+
+; --- Jump frames (8 from original sprites) ---
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_00.png" id="jump_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_01.png" id="jump_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_02.png" id="jump_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_03.png" id="jump_3"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_04.png" id="jump_4"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_05.png" id="jump_5"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_06.png" id="jump_6"]
+[ext_resource type="Texture2D" path="res://sprites/po/po_jump_07.png" id="jump_7"]
+
+; --- Slide frames (4) ---
+[ext_resource type="Texture2D" path="res://sprites/po/slide/frame_00.png" id="slide_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/slide/frame_01.png" id="slide_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/slide/frame_02.png" id="slide_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/slide/frame_03.png" id="slide_3"]
+
+; --- Stumble frames (5) ---
+[ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_00.png" id="stumble_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_01.png" id="stumble_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_02.png" id="stumble_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_03.png" id="stumble_3"]
+[ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_04.png" id="stumble_4"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_po"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_frame0")
+"texture": ExtResource("idle_0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_frame1")
+"texture": ExtResource("idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_3")
 }],
 "loop": true,
 "name": &"idle",
@@ -27,45 +60,51 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_frame0")
+"texture": ExtResource("run_0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_frame1")
+"texture": ExtResource("run_1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_frame0")
+"texture": ExtResource("run_2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_frame1")
+"texture": ExtResource("run_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_5")
 }],
 "loop": true,
 "name": &"run",
-"speed": 8.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("4_frame2")
+"texture": ExtResource("jump_0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_frame3")
+"texture": ExtResource("jump_1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_frame4")
+"texture": ExtResource("jump_2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_frame5")
+"texture": ExtResource("jump_3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_frame5b")
+"texture": ExtResource("jump_4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("9_frame5c")
+"texture": ExtResource("jump_5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_frame6")
+"texture": ExtResource("jump_6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_frame7")
+"texture": ExtResource("jump_7")
 }],
 "loop": false,
 "name": &"jump",
@@ -73,22 +112,40 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("4_frame2")
+"texture": ExtResource("slide_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("slide_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("slide_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("slide_3")
 }],
-"loop": true,
+"loop": false,
 "name": &"slide",
-"speed": 1.0
+"speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("10_frame6")
+"texture": ExtResource("stumble_0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_frame0")
+"texture": ExtResource("stumble_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("stumble_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("stumble_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("stumble_4")
 }],
 "loop": false,
 "name": &"stumble",
-"speed": 4.0
+"speed": 6.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_po"]
