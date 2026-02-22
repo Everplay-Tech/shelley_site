@@ -1,5 +1,5 @@
 extends Node2D
-## Main game controller — ties together Po, obstacles, narrative, and web bridge.
+## Main game controller — ties together Po, obstacles, picks, narrative, and web bridge.
 
 var distance := 0.0
 var score := 0
@@ -11,6 +11,7 @@ const STATE_REPORT_INTERVAL := 2.0
 @onready var narrative: Node = $Narrative
 @onready var web_bridge: Node = $WebBridge
 @onready var obstacle_spawner: Node2D = $ObstacleSpawner
+@onready var pick_spawner: Node2D = $PickSpawner
 @onready var ground: ParallaxBackground = $Ground
 @onready var score_label: Label = %ScoreLabel
 @onready var distance_label: Label = %DistanceLabel
@@ -49,18 +50,20 @@ func _on_pick_collected(value: int) -> void:
 	score_label.text = str(score)
 
 func _on_stumbled() -> void:
-	# Brief pause, Po recovers automatically
+	# Brief pause on stumble — spawners keep going, adds pressure
 	pass
 
 func _on_narrative_started(beat_id: String) -> void:
 	po.enter_narrative()
 	obstacle_spawner.pause_spawning()
+	pick_spawner.pause_spawning()
 	ground.set_narrative_mode(true)
 	web_bridge.send_narrative_start(beat_id)
 
 func _on_narrative_ended(beat_id: String) -> void:
 	po.exit_narrative()
 	obstacle_spawner.resume_spawning()
+	pick_spawner.resume_spawning()
 	ground.set_narrative_mode(false)
 	web_bridge.send_narrative_end(beat_id)
 

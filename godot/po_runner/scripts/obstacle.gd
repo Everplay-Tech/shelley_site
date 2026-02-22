@@ -1,13 +1,23 @@
 extends StaticBody2D
-## An obstacle that scrolls left. Detects collision with Po.
+## An obstacle that scrolls left. Randomly selects visual variant.
+## Variants: bamboo stump, rock, mechanical debris.
 
 @export var scroll_speed := 200.0
 
 var _hit := false
 
+const TEXTURES = [
+	preload("res://sprites/objects/obstacle_bamboo.png"),
+	preload("res://sprites/objects/obstacle_rock.png"),
+	preload("res://sprites/objects/obstacle_mech.png"),
+]
+
+func _ready() -> void:
+	# Random visual variant
+	$Sprite2D.texture = TEXTURES[randi() % TEXTURES.size()]
+
 func _process(delta: float) -> void:
 	position.x -= scroll_speed * delta
-	# Remove when off-screen left
 	if position.x < -100:
 		queue_free()
 

@@ -3,40 +3,57 @@
     "id": "intro",
     "trigger_distance": 200,
     "lines": [
-      "DIALOGUE HERE",
-      "DIALOGUE HERE",
-      "DIALOGUE HERE"
+      "Oh hey! You're actually controlling me? Cool cool cool.",
+      "Name's Po. I'm... well, I'm not entirely sure WHAT I am.",
+      "Memory's a bit fuzzy. I know I'm a ghost. Skeleton type.",
+      "Also I'm apparently running through a bamboo forest? At night?",
+      "Look, just help me jump over stuff and we'll figure this out together."
     ]
   },
   {
     "id": "workshop",
     "trigger_distance": 600,
     "lines": [
-      "DIALOGUE HERE",
-      "DIALOGUE HERE"
+      "You know what's weird? I keep finding these glowing orbs.",
+      "They feel warm. Like music trapped in a marble.",
+      "Wait... is that sawdust I smell? And lacquer?",
+      "Oh man. I think we're near a luthier's workshop.",
+      "Don't know what a luthier is? Makes guitars, fam. Keep up."
     ]
   },
   {
     "id": "gallery",
     "trigger_distance": 1200,
     "lines": [
-      "DIALOGUE HERE",
-      "DIALOGUE HERE"
+      "OK this is getting spooky. Well, SPOOKIER.",
+      "These bamboo stalks have carvings on them...",
+      "They look like musical instruments. Old ones. Beautiful ones.",
+      "Some say I'm a Holy Ghost. They clearly have no idea.",
+      "This is about the closest I get to being holy — running through haunted bamboo.",
+      "*gestures at ghost tail* See? Ghost. Not holy. Just... misplaced."
     ]
   },
   {
     "id": "invitation",
     "trigger_distance": 1800,
     "lines": [
-      "DIALOGUE HERE",
-      "DIALOGUE HERE"
+      "HEY! You're still here! Most people bail by now.",
+      "I like you. You've got persistence. Or no life. Either way.",
+      "Listen, there's a place up ahead — Shelley Guitar.",
+      "Custom builds, wild designs, handcrafted everything.",
+      "They invited me to check it out. Probably because I'm dead cool.",
+      "...Get it? Dead? Because I'm a skeleton? I'll stop."
     ]
   },
   {
     "id": "complete",
     "trigger_distance": 2000,
     "lines": [
-      "DIALOGUE HERE"
+      "Alright! We made it through the Djinn World!",
+      "Thanks for running with me. Literally.",
+      "Go explore the site — check out the builds, the story, everything.",
+      "And if you see any of those glowing orbs lying around... they're MINE.",
+      "Po out. *ghost tail dissolve*"
     ],
     "signal": "onboarding_complete"
   }

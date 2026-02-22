@@ -29,3 +29,6 @@ yarn-error.log*
 .godot/
 *.import
 export_presets.cfg
+
+# Reference art (large JPGs, stored locally)
+reference_art/

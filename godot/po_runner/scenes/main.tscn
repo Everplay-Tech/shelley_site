@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=12 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -6,6 +6,11 @@
 [ext_resource type="Script" path="res://scripts/ground_scroller.gd" id="4_ground"]
 [ext_resource type="Script" path="res://scripts/obstacle_spawner.gd" id="5_spawner"]
 [ext_resource type="PackedScene" path="res://scenes/obstacle.tscn" id="6_obstacle"]
+[ext_resource type="Script" path="res://scripts/pick_spawner.gd" id="7_pickspawn"]
+[ext_resource type="PackedScene" path="res://scenes/pick.tscn" id="8_pick"]
+[ext_resource type="Texture2D" path="res://sprites/environment/bg_far.png" id="9_bgfar"]
+[ext_resource type="Texture2D" path="res://sprites/environment/bg_mid.png" id="10_bgmid"]
+[ext_resource type="Texture2D" path="res://sprites/environment/fg_ground.png" id="11_fgground"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -20,36 +25,29 @@ script = ExtResource("4_ground")
 motion_scale = Vector2(0.3, 0)
 motion_mirroring = Vector2(640, 0)
 
-[node name="BGColor" type="ColorRect" parent="Ground/BGLayer"]
-offset_right = 640.0
-offset_bottom = 360.0
-color = Color(0.102, 0.102, 0.102, 1)
+[node name="BGSprite" type="Sprite2D" parent="Ground/BGLayer"]
+centered = false
+texture = ExtResource("9_bgfar")
+texture_filter = 1
 
 [node name="MidLayer" type="ParallaxLayer" parent="Ground"]
 motion_scale = Vector2(0.6, 0)
 motion_mirroring = Vector2(640, 0)
 
-[node name="MidGround" type="ColorRect" parent="Ground/MidLayer"]
-offset_top = 280.0
-offset_right = 640.0
-offset_bottom = 360.0
-color = Color(0.2, 0.157, 0.11, 1)
+[node name="MidSprite" type="Sprite2D" parent="Ground/MidLayer"]
+centered = false
+texture = ExtResource("10_bgmid")
+texture_filter = 1
 
 [node name="FGLayer" type="ParallaxLayer" parent="Ground"]
 motion_scale = Vector2(1, 0)
 motion_mirroring = Vector2(640, 0)
 
-[node name="GroundRect" type="ColorRect" parent="Ground/FGLayer"]
-offset_top = 310.0
-offset_right = 640.0
-offset_bottom = 360.0
-color = Color(0.29, 0.216, 0.157, 1)
-
-[node name="GroundLine" type="ColorRect" parent="Ground/FGLayer"]
-offset_top = 308.0
-offset_right = 640.0
-offset_bottom = 312.0
-color = Color(1.0, 0.749, 0.0, 0.3)
+[node name="GroundSprite" type="Sprite2D" parent="Ground/FGLayer"]
+position = Vector2(0, 305)
+centered = false
+texture = ExtResource("11_fgground")
+texture_filter = 1
 
 [node name="Po" parent="." instance="res://scenes/po.tscn"]
 position = Vector2(100, 288)
@@ -58,6 +56,11 @@ position = Vector2(100, 288)
 position = Vector2(0, 308)
 script = ExtResource("5_spawner")
 obstacle_scene = ExtResource("6_obstacle")
+
+[node name="PickSpawner" type="Node2D" parent="."]
+position = Vector2(0, 288)
+script = ExtResource("7_pickspawn")
+pick_scene = ExtResource("8_pick")
 
 [node name="Narrative" type="Node" parent="."]
 script = ExtResource("3_narrative")
