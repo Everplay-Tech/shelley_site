@@ -12,10 +12,12 @@ interface GodotEmbedProps {
   gameName: string;
   onEvent?: (event: GodotEvent) => void;
   className?: string;
+  /** When true, fills the parent container instead of using aspect-video */
+  fullScreen?: boolean;
 }
 
 const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
-  function GodotEmbed({ gameName, onEvent, className }, ref) {
+  function GodotEmbed({ gameName, onEvent, className, fullScreen }, ref) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +27,9 @@ const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
 
     return (
       <div
-        className={`relative w-full aspect-video bg-shelley-charcoal rounded-lg overflow-hidden ${className ?? ""}`}
+        className={`relative bg-shelley-charcoal overflow-hidden ${
+          fullScreen ? "w-full h-full" : "w-full aspect-video rounded-lg"
+        } ${className ?? ""}`}
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10">
