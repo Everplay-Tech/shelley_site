@@ -47,7 +47,6 @@ const SWIPE_THRESHOLD := 40.0  # Min pixels to register as swipe
 func _ready() -> void:
 	stumble_timer.timeout.connect(_on_stumble_recover)
 	sprite.play("run")
-	print("PO READY — pos: ", global_position, " visible: ", visible, " sprite visible: ", sprite.visible, " sprite frames: ", sprite.sprite_frames != null, " texture: ", sprite.sprite_frames.get_frame_texture(&"run", 0) if sprite.sprite_frames else "NO FRAMES")
 
 # --- Touch Input ---
 func _input(event: InputEvent) -> void:
@@ -131,6 +130,9 @@ func _physics_process(delta: float) -> void:
 	was_on_floor = on_floor
 	velocity.x = RUN_SPEED
 	move_and_slide()
+	# Lock horizontal position — world scrolls, Po stays put.
+	# Without this, obstacle collisions push Po backward.
+	position.x = 100
 
 func _can_jump() -> bool:
 	if jumps_remaining <= 0:
@@ -194,6 +196,14 @@ func stumble() -> void:
 	stumble_timer.start(STUMBLE_DURATION)
 	stumbled.emit()
 	_screen_shake()
+	_stumble_blink()
+
+func _stumble_blink() -> void:
+	# Rapid blink during stumble — classic hit feedback
+	var blink = create_tween()
+	for i in range(4):
+		blink.tween_property(sprite, "modulate:a", 0.2, 0.05)
+		blink.tween_property(sprite, "modulate:a", 1.0, 0.05)
 
 func _screen_shake() -> void:
 	var original_pos = position
