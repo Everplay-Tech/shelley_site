@@ -69,16 +69,25 @@ func _typewrite(text: String) -> void:
 func _input(event: InputEvent) -> void:
 	if not is_active:
 		return
-	if event.is_action_pressed("advance"):
-		# If text is still typing, show all of it
-		if speech_label.visible_characters < speech_label.text.length():
-			speech_label.visible_characters = speech_label.text.length()
-			return
-		# Otherwise advance to next line
-		current_line_index += 1
-		var beat = beats[current_beat_index]
-		_show_line(beat)
+	# Touch support — tap to advance dialogue
+	if event is InputEventScreenTouch and not event.pressed:
+		_advance_text()
 		get_viewport().set_input_as_handled()
+		return
+	# Keyboard/mouse support
+	if event.is_action_pressed("advance"):
+		_advance_text()
+		get_viewport().set_input_as_handled()
+
+func _advance_text() -> void:
+	# If text is still typing, show all of it
+	if speech_label.visible_characters < speech_label.text.length():
+		speech_label.visible_characters = speech_label.text.length()
+		return
+	# Otherwise advance to next line
+	current_line_index += 1
+	var beat = beats[current_beat_index]
+	_show_line(beat)
 
 func _end_beat(beat: Dictionary) -> void:
 	speech_bubble.visible = false

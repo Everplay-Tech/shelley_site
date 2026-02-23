@@ -35,6 +35,11 @@ var jump_buffer_timer := 0.0
 var slide_timer := 0.0
 var was_on_floor := true
 
+# --- Touch input ---
+var _touch_start_pos := Vector2.ZERO
+var _touch_active := false
+const SWIPE_THRESHOLD := 40.0  # Min pixels to register as swipe
+
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var stumble_timer: Timer = $StumbleTimer
@@ -42,6 +47,28 @@ var was_on_floor := true
 func _ready() -> void:
 	stumble_timer.timeout.connect(_on_stumble_recover)
 	sprite.play("run")
+
+# --- Touch Input ---
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_touch_start_pos = event.position
+			_touch_active = true
+		elif _touch_active:
+			_touch_active = false
+			# During narrative/stumble, don't process game input —
+			# let narrative.gd handle the tap for dialogue advance
+			if is_narrative_paused or is_stumbling:
+				return
+			var swipe = event.position - _touch_start_pos
+			if swipe.y > SWIPE_THRESHOLD and abs(swipe.y) > abs(swipe.x) * 1.5:
+				# Swipe down → slide
+				if is_on_floor() and not is_jumping and not is_sliding:
+					_start_slide()
+			else:
+				# Tap → jump (feeds into jump buffer in _physics_process)
+				jump_buffer_timer = JUMP_BUFFER_TIME
+			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
 	if is_narrative_paused or is_stumbling:
