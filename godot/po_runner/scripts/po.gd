@@ -47,6 +47,7 @@ const SWIPE_THRESHOLD := 40.0  # Min pixels to register as swipe
 func _ready() -> void:
 	stumble_timer.timeout.connect(_on_stumble_recover)
 	sprite.play("run")
+	print("PO READY — pos: ", global_position, " visible: ", visible, " sprite visible: ", sprite.visible, " sprite frames: ", sprite.sprite_frames != null, " texture: ", sprite.sprite_frames.get_frame_texture(&"run", 0) if sprite.sprite_frames else "NO FRAMES")
 
 # --- Touch Input ---
 func _input(event: InputEvent) -> void:
