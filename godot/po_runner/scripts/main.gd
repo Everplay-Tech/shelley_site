@@ -17,6 +17,25 @@ const STATE_REPORT_INTERVAL := 2.0
 @onready var distance_label: Label = %DistanceLabel
 
 func _ready() -> void:
+	# === DEBUG: Code-created test rect (bypasses .tscn parsing) ===
+	var test_rect = ColorRect.new()
+	test_rect.size = Vector2(40, 60)
+	test_rect.color = Color.RED
+	test_rect.z_index = 100
+	test_rect.position = Vector2(100, 230)
+	add_child(test_rect)
+	print("=== MAIN DEBUG ===")
+	print("po node: ", po)
+	print("po null? ", po == null)
+	if po:
+		print("po visible: ", po.visible)
+		print("po global_pos: ", po.global_position)
+		print("po z_index: ", po.z_index)
+		print("po child count: ", po.get_child_count())
+		for child in po.get_children():
+			print("  child: ", child.name, " type: ", child.get_class(), " visible: ", child.visible if child is CanvasItem else "N/A")
+	# === END DEBUG ===
+
 	# Connect signals
 	po.pick_collected.connect(_on_pick_collected)
 	po.stumbled.connect(_on_stumbled)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=14 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://sprites/environment/bg_far.png" id="9_bgfar"]
 [ext_resource type="Texture2D" path="res://sprites/environment/bg_mid.png" id="10_bgmid"]
 [ext_resource type="Texture2D" path="res://sprites/environment/fg_ground.png" id="11_fgground"]
+[ext_resource type="PackedScene" path="res://scenes/po.tscn" id="12_po"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 20)
@@ -58,7 +59,8 @@ position = Vector2(320, 318)
 [node name="FloorCollision" type="CollisionShape2D" parent="Floor"]
 shape = SubResource("RectangleShape2D_floor")
 
-[node name="Po" parent="." instance="res://scenes/po.tscn"]
+[node name="Po" parent="." instance=ExtResource("12_po")]
+z_index = 10
 position = Vector2(100, 288)
 
 [node name="ObstacleSpawner" type="Node2D" parent="."]
