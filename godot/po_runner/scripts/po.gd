@@ -1,7 +1,7 @@
 extends CharacterBody2D
 ## Po character controller — Sega Genesis feel (Shinobi 3 / Contra Hard Corps).
 ## Auto-runs, player controls jump, slide, and fast-fall.
-## Tuned for snappy, responsive inputs with juice effects.
+## Tuned for snappy, responsive inputs with Sly Cooper juice layer.
 
 signal stumbled
 signal pick_collected(value: int)
@@ -19,6 +19,20 @@ const SLIDE_DURATION := 0.35      # Fixed slide duration — quick and punchy
 const STUMBLE_DURATION := 0.4     # Quick recovery
 const RUN_SPEED := 0.0            # World scrolls, Po stays in place
 
+# --- Juice Tuning (Sly Cooper layer) ---
+const GHOST_INTERVAL := 0.04          # Ghost spawn rate (seconds)
+const GHOST_FADE_TIME := 0.25         # How long afterimages linger
+const GHOST_JUMP_COLOR := Color(0.4, 0.7, 1.0, 0.55)   # Spectral blue
+const GHOST_SLIDE_COLOR := Color(0.3, 0.9, 0.4, 0.5)    # Hoodie green
+const GHOST_DOUBLE_JUMP_COLOR := Color(0.8, 0.5, 1.0, 0.7)  # Spirit purple
+const DUST_COLOR := Color(0.65, 0.55, 0.4, 0.7)         # Earthy dust
+const HIT_FREEZE_TIME := 0.04        # Near-pause duration on stumble
+const PICK_FLASH_COLOR := Color(3.0, 2.5, 1.0, 1.0)     # Overbright amber
+const SPEED_LINE_INTERVAL := 0.025     # Rapid streaks during slide
+const SPEED_LINE_LENGTH_MIN := 14.0
+const SPEED_LINE_LENGTH_MAX := 38.0
+const RUN_DUST_INTERVAL := 0.18        # Subtle footfall particles
+
 @export var can_double_jump := true
 
 # --- State ---
@@ -34,6 +48,9 @@ var coyote_timer := 0.0
 var jump_buffer_timer := 0.0
 var slide_timer := 0.0
 var was_on_floor := true
+var _ghost_timer := 0.0
+var _speed_line_timer := 0.0
+var _run_dust_timer := 0.0
 
 # --- Touch input ---
 var _touch_start_pos := Vector2.ZERO
@@ -80,8 +97,9 @@ func _physics_process(delta: float) -> void:
 	if on_floor:
 		coyote_timer = COYOTE_TIME
 		if not was_on_floor:
-			# Just landed — squash effect
+			# Just landed — squash + dust
 			_land_squash()
+			_spawn_dust()
 			is_jumping = false
 			if not is_sliding:
 				sprite.play("run")
@@ -127,6 +145,27 @@ func _physics_process(delta: float) -> void:
 			if _can_jump():
 				_do_jump()
 
+	# --- Ghost trail during jump/slide ---
+	if is_jumping or is_sliding:
+		_ghost_timer -= delta
+		if _ghost_timer <= 0:
+			_ghost_timer = GHOST_INTERVAL
+			_spawn_ghost(GHOST_SLIDE_COLOR if is_sliding else GHOST_JUMP_COLOR)
+
+	# --- Slide speed lines ---
+	if is_sliding:
+		_speed_line_timer -= delta
+		if _speed_line_timer <= 0:
+			_speed_line_timer = SPEED_LINE_INTERVAL
+			_spawn_speed_line()
+
+	# --- Run dust (subtle footfall particles) ---
+	if on_floor and not is_sliding and not is_stumbling:
+		_run_dust_timer -= delta
+		if _run_dust_timer <= 0:
+			_run_dust_timer = RUN_DUST_INTERVAL
+			_spawn_run_dust()
+
 	was_on_floor = on_floor
 	velocity.x = RUN_SPEED
 	move_and_slide()
@@ -156,6 +195,8 @@ func _do_jump() -> void:
 	sprite.play("jump")
 	current_action = "Jumping"
 	_jump_stretch()
+	if is_air_jump:
+		_double_jump_burst()
 
 func _start_slide() -> void:
 	is_sliding = true
@@ -165,6 +206,8 @@ func _start_slide() -> void:
 	collision_shape.shape.size.y = 20
 	collision_shape.position.y = 10
 	current_action = "Sliding"
+	_ghost_timer = 0.0  # Immediate first ghost
+	_speed_line_timer = 0.0  # Immediate first speed line
 
 func _end_slide() -> void:
 	is_sliding = false
@@ -174,7 +217,111 @@ func _end_slide() -> void:
 		sprite.play("run")
 		current_action = "Running"
 
-# --- Juice: Squash & Stretch ---
+# ============================================================
+# JUICE LAYER — Sly Cooper meets Shinobi 3
+# ============================================================
+
+# --- Ghost Afterimage Trail ---
+func _spawn_ghost(color: Color) -> void:
+	var ghost = Sprite2D.new()
+	ghost.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	ghost.global_position = sprite.global_position
+	ghost.scale = sprite.scale
+	ghost.modulate = color
+	ghost.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	ghost.z_index = z_index - 1
+	get_parent().add_child(ghost)
+	var tween = ghost.create_tween()
+	tween.tween_property(ghost, "modulate:a", 0.0, GHOST_FADE_TIME)
+	tween.parallel().tween_property(ghost, "scale", ghost.scale * 1.1, GHOST_FADE_TIME)
+	tween.tween_callback(ghost.queue_free)
+
+# --- Double Jump Spirit Burst ---
+func _double_jump_burst() -> void:
+	# Ring of 5 ghosts exploding outward — Po IS a ghost
+	for i in range(5):
+		var ghost = Sprite2D.new()
+		ghost.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+		ghost.global_position = sprite.global_position
+		ghost.scale = sprite.scale * 0.8
+		ghost.modulate = GHOST_DOUBLE_JUMP_COLOR
+		ghost.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		ghost.z_index = z_index - 1
+		get_parent().add_child(ghost)
+		# Radial burst
+		var angle = (i / 5.0) * TAU + randf_range(-0.3, 0.3)
+		var burst_offset = Vector2(cos(angle), sin(angle)) * 24.0
+		var tween = ghost.create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(ghost, "global_position", ghost.global_position + burst_offset, 0.3)
+		tween.tween_property(ghost, "modulate:a", 0.0, 0.3)
+		tween.tween_property(ghost, "scale", Vector2.ZERO, 0.35)
+		tween.set_parallel(false)
+		tween.tween_callback(ghost.queue_free)
+
+# --- Landing Dust ---
+func _spawn_dust() -> void:
+	for i in range(4):
+		var dust = Sprite2D.new()
+		# Use a tiny white rect via a placeholder — or just use ColorRect
+		var rect = ColorRect.new()
+		rect.size = Vector2(3, 3)
+		rect.color = DUST_COLOR
+		rect.position = Vector2(-1.5, -1.5)
+		dust.add_child(rect)
+		dust.global_position = global_position + Vector2(randf_range(-12, 12), 18)
+		dust.z_index = z_index - 1
+		get_parent().add_child(dust)
+		var dir = Vector2(randf_range(-40, 40), randf_range(-50, -20))
+		var tween = dust.create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(dust, "global_position", dust.global_position + dir * 0.3, 0.3)
+		tween.tween_property(rect, "modulate:a", 0.0, 0.3)
+		tween.tween_property(rect, "size", Vector2(1, 1), 0.3)
+		tween.set_parallel(false)
+		tween.tween_callback(dust.queue_free)
+
+# --- Slide Speed Lines ---
+func _spawn_speed_line() -> void:
+	# Horizontal streaks that convey blazing speed during slides
+	var line = ColorRect.new()
+	var length = randf_range(SPEED_LINE_LENGTH_MIN, SPEED_LINE_LENGTH_MAX)
+	line.size = Vector2(length, randf_range(1.0, 1.5))
+	line.color = Color(1.0, 1.0, 1.0, randf_range(0.12, 0.35))
+	# Spawn in a band around Po — some in front, some behind
+	line.global_position = global_position + Vector2(
+		randf_range(-10, 20),
+		randf_range(-22, 16)
+	)
+	line.z_index = z_index + 1
+	get_parent().add_child(line)
+	var tween = line.create_tween()
+	# Streak zooms left and fades — parallax feel
+	tween.tween_property(line, "global_position:x",
+		line.global_position.x - randf_range(50, 90), 0.1)
+	tween.parallel().tween_property(line, "modulate:a", 0.0, 0.1)
+	tween.tween_callback(line.queue_free)
+
+# --- Run Dust (Footfall Particles) ---
+func _spawn_run_dust() -> void:
+	# Tiny ground particles kicked up each stride — barely visible but felt
+	var dust = ColorRect.new()
+	dust.size = Vector2(randf_range(1.5, 2.5), randf_range(1.5, 2.5))
+	dust.color = Color(0.55, 0.45, 0.3, randf_range(0.15, 0.35))
+	dust.global_position = global_position + Vector2(randf_range(-6, 6), 18)
+	dust.z_index = z_index - 1
+	get_parent().add_child(dust)
+	var dir = Vector2(randf_range(-20, -8), randf_range(-15, -5))
+	var tween = dust.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(dust, "global_position",
+		dust.global_position + dir * 0.2, 0.3)
+	tween.tween_property(dust, "modulate:a", 0.0, 0.3)
+	tween.tween_property(dust, "size", Vector2(0.5, 0.5), 0.3)
+	tween.set_parallel(false)
+	tween.tween_callback(dust.queue_free)
+
+# --- Squash & Stretch ---
 func _land_squash() -> void:
 	var tween = create_tween()
 	tween.tween_property(sprite, "scale", Vector2(2.3, 1.7), 0.04)
@@ -195,22 +342,32 @@ func stumble() -> void:
 	velocity = Vector2.ZERO
 	stumble_timer.start(STUMBLE_DURATION)
 	stumbled.emit()
+	_hit_freeze()
 	_screen_shake()
 	_stumble_blink()
+
+func _hit_freeze() -> void:
+	# Fighting game impact pause — world stops for a heartbeat
+	Engine.time_scale = 0.05
+	get_tree().create_timer(HIT_FREEZE_TIME, true, false, true).timeout.connect(_unfreeze)
+
+func _unfreeze() -> void:
+	Engine.time_scale = 1.0
 
 func _stumble_blink() -> void:
 	# Rapid blink during stumble — classic hit feedback
 	var blink = create_tween()
-	for i in range(4):
-		blink.tween_property(sprite, "modulate:a", 0.2, 0.05)
-		blink.tween_property(sprite, "modulate:a", 1.0, 0.05)
+	for i in range(5):
+		blink.tween_property(sprite, "modulate:a", 0.15, 0.04)
+		blink.tween_property(sprite, "modulate:a", 1.0, 0.04)
 
 func _screen_shake() -> void:
 	var original_pos = position
 	var tween = create_tween()
-	for i in range(4):
-		var shake_x = randf_range(-4, 4)
-		var shake_y = randf_range(-2, 2)
+	for i in range(5):
+		var intensity = 5.0 - (i * 0.8)  # Decaying shake
+		var shake_x = randf_range(-intensity, intensity)
+		var shake_y = randf_range(-intensity * 0.5, intensity * 0.5)
 		tween.tween_property(self, "position", original_pos + Vector2(shake_x, shake_y), 0.03)
 	tween.tween_property(self, "position", original_pos, 0.03)
 
@@ -218,6 +375,19 @@ func _on_stumble_recover() -> void:
 	is_stumbling = false
 	sprite.play("run")
 	current_action = "Running"
+
+# --- Pick Collection ---
+func collect_pick(value: int = 1) -> void:
+	pick_collected.emit(value)
+	_pick_flash()
+
+func _pick_flash() -> void:
+	# Overbright amber flash + scale pop
+	sprite.modulate = PICK_FLASH_COLOR
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.15)
+	tween.parallel().tween_property(sprite, "scale", Vector2(2.3, 2.3), 0.06)
+	tween.tween_property(sprite, "scale", Vector2(2.0, 2.0), 0.1)
 
 # --- Narrative ---
 func enter_narrative() -> void:
@@ -230,6 +400,3 @@ func exit_narrative() -> void:
 	is_narrative_paused = false
 	sprite.play("run")
 	current_action = "Running"
-
-func collect_pick(value: int = 1) -> void:
-	pick_collected.emit(value)
