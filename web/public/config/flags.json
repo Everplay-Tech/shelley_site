@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "features": {
+    "rewards": false,
+    "fourthWall": false,
+    "aiDialogue": false,
+    "transitionGames": true,
+    "poStatusHud": true
+  }
+}

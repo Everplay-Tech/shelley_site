@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "routes": {
+    "/workshop": {
+      "gameName": "workshop_craft",
+      "label": "Entering the Workshop...",
+      "available": false,
+      "skipAllowed": true,
+      "rewardMultiplier": 1.0
+    },
+    "/gallery": {
+      "gameName": "gallery_run",
+      "label": "Heading to the Gallery...",
+      "available": false,
+      "skipAllowed": true,
+      "rewardMultiplier": 1.0
+    },
+    "/about": {
+      "gameName": "about_quest",
+      "label": "Learning the Story...",
+      "available": false,
+      "skipAllowed": true,
+      "rewardMultiplier": 1.0
+    },
+    "/contact": {
+      "gameName": "contact_dash",
+      "label": "Reaching Out...",
+      "available": false,
+      "skipAllowed": true,
+      "rewardMultiplier": 1.0
+    }
+  },
+  "landing": {
+    "firstVisit": {
+      "gameName": "po_runner",
+      "label": "Meet Po...",
+      "available": true
+    },
+    "returning": {
+      "gameName": "po_moped",
+      "label": "Po rides again!",
+      "available": false
+    }
+  }
+}

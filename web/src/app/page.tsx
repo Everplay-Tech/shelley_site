@@ -4,36 +4,50 @@ import { useState, useEffect, useCallback } from "react";
 import GodotEmbed from "@/components/GodotEmbed";
 import { getLandingGame, ONBOARDING_COOKIE } from "@/lib/game-routes";
 import { hasCookie, setCookie } from "@/lib/cookies";
+import { reportGameEvent } from "@/lib/player-state";
+import { usePlayerState } from "@/hooks/usePlayerState";
 import type { GodotEvent } from "@/lib/godot-messages";
 import { emitGameEvent } from "@/lib/game-events";
 
 export default function Home() {
+  const { progress } = usePlayerState();
   const [gameComplete, setGameComplete] = useState(false);
   const [showGame, setShowGame] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const [gameConfig, setGameConfig] = useState(() => getLandingGame(false));
 
   useEffect(() => {
-    const returning = hasCookie(ONBOARDING_COOKIE);
+    // Check both cookie (legacy) and server state
+    const returning = hasCookie(ONBOARDING_COOKIE) || progress.onboardingComplete;
     setGameConfig(getLandingGame(returning));
-    // Returning visitors skip the full-screen game
     if (returning) {
       setShowGame(false);
       setGameComplete(true);
     }
-  }, []);
+  }, [progress.onboardingComplete]);
 
   const handleGodotEvent = useCallback((event: GodotEvent) => {
     emitGameEvent(event);
     switch (event.type) {
       case "onboarding_complete":
+        // Report to server + set legacy cookie
+        reportGameEvent({ type: "onboarding_complete", gameName: "po_runner" });
         setCookie(ONBOARDING_COOKIE, "1");
         setGameComplete(true);
-        // Brief pause to let Po's final line land, then fade
         setTimeout(() => {
           setFadeOut(true);
           setTimeout(() => setShowGame(false), 800);
         }, 2000);
+        break;
+      case "player_state":
+        // Report score updates to server
+        if ("data" in event) {
+          reportGameEvent({
+            type: "score_update",
+            gameName: "po_runner",
+            score: event.data.score,
+          });
+        }
         break;
       default:
         break;
@@ -41,7 +55,8 @@ export default function Home() {
   }, []);
 
   const handleSkip = useCallback(() => {
-    // Only dismiss for this session — no cookie, game comes back on refresh
+    // Report skip to server
+    reportGameEvent({ type: "skipped", gameName: "po_runner" });
     setGameComplete(true);
     setFadeOut(true);
     setTimeout(() => setShowGame(false), 600);
@@ -56,7 +71,6 @@ export default function Home() {
             fadeOut ? "opacity-0" : "opacity-100"
           }`}
         >
-          {/* Game fills the entire viewport */}
           <div className="absolute inset-0">
             <GodotEmbed
               gameName={gameConfig.gameName}
@@ -65,7 +79,6 @@ export default function Home() {
             />
           </div>
 
-          {/* Skip button — small, unobtrusive, bottom-right */}
           {!gameComplete && (
             <button
               onClick={handleSkip}
