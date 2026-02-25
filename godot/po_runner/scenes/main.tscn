@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=28 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -23,6 +23,8 @@
 [ext_resource type="Texture2D" path="res://sprites/objects/picks/smoothie.png" id="21_smoothie"]
 [ext_resource type="PackedScene" path="res://scenes/projectile_sock.tscn" id="22_sock"]
 [ext_resource type="PackedScene" path="res://scenes/projectile_bill.tscn" id="23_bill"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="24_hud"]
+[ext_resource type="PackedScene" path="res://scenes/shockwave.tscn" id="25_shockwave"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 20)
@@ -92,36 +94,116 @@ mantigre_scene = ExtResource("14_mantigre")
 spidat_scene = ExtResource("15_spidat")
 projectile_sock_scene = ExtResource("22_sock")
 projectile_bill_scene = ExtResource("23_bill")
+shockwave_scene = ExtResource("25_shockwave")
 
 [node name="Narrative" type="Node" parent="."]
 script = ExtResource("3_narrative")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("24_hud")
 
-[node name="ScorePanel" type="HBoxContainer" parent="UI"]
+[node name="HeartContainer" type="HBoxContainer" parent="HUD"]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 110.0
+offset_bottom = 22.0
+theme_override_constants/separation = 3
+
+[node name="DistanceLabel" type="Label" parent="HUD"]
+unique_name_in_owner = true
+offset_left = 10.0
+offset_top = 24.0
+offset_right = 120.0
+offset_bottom = 40.0
+text = "0m"
+
+[node name="ScorePanel" type="HBoxContainer" parent="HUD"]
 offset_left = 540.0
 offset_top = 10.0
 offset_right = 630.0
 offset_bottom = 30.0
 
-[node name="PickIcon" type="ColorRect" parent="UI/ScorePanel"]
+[node name="PickIcon" type="ColorRect" parent="HUD/ScorePanel"]
 custom_minimum_size = Vector2(12, 12)
 color = Color(1.0, 0.749, 0.0, 1)
 
-[node name="ScoreLabel" type="Label" parent="UI/ScorePanel" node_paths=PackedStringArray()]
+[node name="ScoreLabel" type="Label" parent="HUD/ScorePanel"]
 unique_name_in_owner = true
 text = "0"
 horizontal_alignment = 2
 
-[node name="DistanceLabel" type="Label" parent="UI"]
-unique_name_in_owner = true
+[node name="TrophyContainer" type="HBoxContainer" parent="HUD"]
 offset_left = 10.0
-offset_top = 10.0
-offset_right = 120.0
-offset_bottom = 30.0
-text = "0m"
+offset_top = 336.0
+offset_right = 300.0
+offset_bottom = 352.0
+theme_override_constants/separation = 6
 
-[node name="SpeechBubble" type="PanelContainer" parent="UI"]
+[node name="PowerupSlot1" type="ColorRect" parent="HUD"]
+offset_left = 580.0
+offset_top = 332.0
+offset_right = 596.0
+offset_bottom = 348.0
+color = Color(0.2, 0.2, 0.2, 0.4)
+
+[node name="PowerupSlot2" type="ColorRect" parent="HUD"]
+offset_left = 602.0
+offset_top = 332.0
+offset_right = 618.0
+offset_bottom = 348.0
+color = Color(0.2, 0.2, 0.2, 0.4)
+
+[node name="GameOverPanel" type="PanelContainer" parent="HUD"]
+visible = false
+offset_left = 160.0
+offset_top = 100.0
+offset_right = 480.0
+offset_bottom = 260.0
+
+[node name="VBox" type="VBoxContainer" parent="HUD/GameOverPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Title" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "GAME OVER"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreHeader" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "Score"
+horizontal_alignment = 1
+
+[node name="ScoreValue" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "0"
+horizontal_alignment = 1
+
+[node name="DistanceHeader" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "Distance"
+horizontal_alignment = 1
+
+[node name="DistanceValue" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "0m"
+horizontal_alignment = 1
+
+[node name="TapLabel" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "TAP TO RUN AGAIN"
+horizontal_alignment = 1
+
+[node name="DangerVignette" type="ColorRect" parent="HUD"]
+visible = false
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.8, 0.1, 0.1, 0.2)
+mouse_filter = 2
+
+[node name="SpeechBubble" type="PanelContainer" parent="HUD"]
 unique_name_in_owner = true
 visible = false
 offset_left = 60.0
@@ -129,14 +211,14 @@ offset_top = 160.0
 offset_right = 580.0
 offset_bottom = 260.0
 
-[node name="MarginContainer" type="MarginContainer" parent="UI/SpeechBubble"]
+[node name="MarginContainer" type="MarginContainer" parent="HUD/SpeechBubble"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 12
 
-[node name="SpeechLabel" type="RichTextLabel" parent="UI/SpeechBubble/MarginContainer"]
+[node name="SpeechLabel" type="RichTextLabel" parent="HUD/SpeechBubble/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = ""

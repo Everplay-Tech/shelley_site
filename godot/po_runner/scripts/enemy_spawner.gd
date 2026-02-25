@@ -13,6 +13,7 @@ signal enemy_spawned(enemy: Area2D)
 @export var spidat_scene: PackedScene
 @export var projectile_sock_scene: PackedScene
 @export var projectile_bill_scene: PackedScene
+@export var shockwave_scene: PackedScene
 @export var obstacle_spawner_ref: Node2D  # Set in main.tscn or main.gd
 @export var initial_spawn_interval := 5.0
 @export var min_spawn_interval := 2.0
@@ -71,6 +72,7 @@ func _spawn_mantigre() -> Area2D:
 	if mantigre_scene == null:
 		return null
 	var e = mantigre_scene.instantiate()
+	e.shockwave_scene = shockwave_scene
 	e.position = Vector2(700, 0)  # Ground level (spawner is at y=308)
 	return e
 

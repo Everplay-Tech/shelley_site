@@ -35,6 +35,8 @@ var _spirit_mode := "ambient"  # "ambient", "narrative", "scatter", "attract"
 var _spirit_mode_timer := 0.0
 var _spirit_target_color := SPIRIT_COLOR_AMBIENT
 
+var is_game_over := false
+
 @onready var po: CharacterBody2D = $Po
 @onready var narrative: Node = $Narrative
 @onready var web_bridge: Node = $WebBridge
@@ -42,13 +44,15 @@ var _spirit_target_color := SPIRIT_COLOR_AMBIENT
 @onready var pick_spawner: Node2D = $PickSpawner
 @onready var enemy_spawner: Node2D = $EnemySpawner
 @onready var ground: ParallaxBackground = $Ground
-@onready var score_label: Label = %ScoreLabel
-@onready var distance_label: Label = %DistanceLabel
+@onready var hud: CanvasLayer = $HUD
 
 func _ready() -> void:
 	# Connect signals
 	po.pick_collected.connect(_on_pick_collected)
 	po.stumbled.connect(_on_stumbled)
+	po.died.connect(_on_po_died)
+	po.health_changed.connect(_on_health_changed)
+	hud.restart_requested.connect(_on_restart)
 	narrative.narrative_started.connect(_on_narrative_started)
 	narrative.narrative_ended.connect(_on_narrative_ended)
 	narrative.onboarding_complete.connect(_on_onboarding_complete)
@@ -72,7 +76,7 @@ func _process(delta: float) -> void:
 	# Spirits always breathe — ambiance even on welcome screen
 	_update_spirits(delta)
 
-	if not game_started:
+	if not game_started or is_game_over:
 		return
 
 	if narrative.is_active or po.is_stumbling:
@@ -86,7 +90,7 @@ func _process(delta: float) -> void:
 
 	# Accumulate distance
 	distance += game_speed * delta / 100.0  # Roughly meters
-	distance_label.text = "%dm" % int(distance)
+	hud.update_distance(int(distance))
 
 	# Feed distance to enemy spawner
 	enemy_spawner.distance_ref = distance
@@ -100,15 +104,40 @@ func _process(delta: float) -> void:
 		state_timer = 0.0
 		web_bridge.send_player_state(po.current_action, score, po.current_action)
 
-func _on_pick_collected(value: int) -> void:
+func _on_pick_collected(value: int, food_name: String) -> void:
 	score += value
-	score_label.text = str(score)
+	hud.update_score(score)
+	if food_name != "":
+		hud.add_trophy(food_name)
 	# Spirits pulse toward Po — drawn to the energy of collection
 	_attract_spirits()
 
 func _on_stumbled() -> void:
 	# Spirits scatter in shock — the world flinches when Po gets hit
 	_scatter_spirits()
+
+func _on_health_changed(current: int, max_val: int) -> void:
+	hud.update_hearts(current, max_val)
+
+func _on_po_died() -> void:
+	is_game_over = true
+	# Freeze everything
+	ground.pause()
+	obstacle_spawner.pause_spawning()
+	pick_spawner.pause_spawning()
+	enemy_spawner.pause_spawning()
+	_freeze_world_objects()
+	# Clear encounter state so we don't double-resume later
+	_encounter_enemy = null
+	# Show game over UI
+	hud.show_game_over(score, int(distance))
+	# Report to website
+	web_bridge.send_game_over(score, int(distance))
+	# The spirit world mourns
+	_scatter_spirits()
+
+func _on_restart() -> void:
+	get_tree().reload_current_scene()
 
 func _on_narrative_started(beat_id: String) -> void:
 	po.enter_narrative()
@@ -172,7 +201,7 @@ func _on_enemy_spawned(enemy: Area2D) -> void:
 
 func _on_enemy_defeated(enemy_type: String, pos: Vector2) -> void:
 	score += 3
-	score_label.text = str(score)
+	hud.update_score(score)
 	# Spirits pulse bright — the world celebrates a victory
 	_spirit_mode = "attract"
 	_spirit_mode_timer = 0.5

@@ -97,6 +97,11 @@ export interface ScoreUpdateEvent {
   data: { score: number; picks: number; distance: number };
 }
 
+export interface GameOverEvent {
+  type: "game_over";
+  data: { score: number; distance: number };
+}
+
 export interface GameSessionEvent {
   type: "game_session";
   data: {
@@ -117,6 +122,7 @@ export type GodotEvent =
   | NarrativeEndEvent
   | OnboardingCompleteEvent
   | ScoreUpdateEvent
+  | GameOverEvent
   | GameSessionEvent;
 
 export type GodotEventType = GodotEvent["type"];
@@ -133,6 +139,7 @@ const VALID_EVENT_TYPES: ReadonlySet<string> = new Set([
   "narrative_end",
   "onboarding_complete",
   "score_update",
+  "game_over",
   "game_session",
 ]);
 

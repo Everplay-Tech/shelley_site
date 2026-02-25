@@ -4,7 +4,9 @@ extends CharacterBody2D
 ## Tuned for snappy, responsive inputs with Sly Cooper juice layer.
 
 signal stumbled
-signal pick_collected(value: int)
+signal pick_collected(value: int, food_name: String)
+signal health_changed(current: int, max_val: int)
+signal died
 
 # --- Physics Tuning (Sega Genesis feel) ---
 const GRAVITY := 1200.0           # Higher gravity = snappier falls
@@ -35,6 +37,16 @@ const RUN_DUST_INTERVAL := 0.18        # Subtle footfall particles
 const GHOST_DEFEAT_COLOR := Color(1.0, 0.8, 0.2, 0.7)  # Golden amber for enemy defeat
 
 @export var can_double_jump := true
+
+# --- Health ---
+const MAX_HEALTH := 5
+const INVINCIBILITY_DURATION := 1.5
+const HEAL_FLASH_COLOR := Color(0.4, 1.5, 0.6, 1.0)  # Overbright green
+
+var health := MAX_HEALTH
+var is_dead := false
+var _invincible := false
+var _invincible_timer := 0.0
 
 # --- State ---
 var is_jumping := false
@@ -97,8 +109,17 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if not game_started:
+	if not game_started or is_dead:
 		return
+	# --- Invincibility tick ---
+	if _invincible:
+		_invincible_timer -= delta
+		if _invincible_timer <= 0:
+			_invincible = false
+			sprite.modulate.a = 1.0
+		else:
+			# Rapid alpha pulse during i-frames
+			sprite.modulate.a = 0.3 if fmod(_invincible_timer, 0.15) < 0.075 else 1.0
 	if is_narrative_paused or is_stumbling:
 		return
 
@@ -344,8 +365,14 @@ func _jump_stretch() -> void:
 	tween.tween_property(sprite, "scale", Vector2(2.0, 2.0), 0.1)
 
 # --- Hit / Stumble ---
-func stumble() -> void:
-	if is_stumbling or is_narrative_paused:
+func stumble(damage: int = 1) -> void:
+	if is_stumbling or is_narrative_paused or _invincible or is_dead:
+		return
+	health -= damage
+	health_changed.emit(health, MAX_HEALTH)
+	if health <= 0:
+		health = 0
+		_die()
 		return
 	is_stumbling = true
 	current_action = "Stumbled"
@@ -356,6 +383,25 @@ func stumble() -> void:
 	_hit_freeze()
 	_screen_shake()
 	_stumble_blink()
+	# Start invincibility frames
+	_invincible = true
+	_invincible_timer = INVINCIBILITY_DURATION
+
+func _die() -> void:
+	is_dead = true
+	is_stumbling = true
+	current_action = "Dead"
+	sprite.play("stumble")
+	velocity = Vector2.ZERO
+	_hit_freeze()
+	_screen_shake()
+	# Death blink — slower, more dramatic than stumble
+	var blink = create_tween()
+	for i in range(8):
+		blink.tween_property(sprite, "modulate:a", 0.0, 0.06)
+		blink.tween_property(sprite, "modulate:a", 0.8, 0.06)
+	blink.tween_property(sprite, "modulate:a", 0.3, 0.1)
+	died.emit()
 
 func _hit_freeze() -> void:
 	# Fighting game impact pause — world stops for a heartbeat
@@ -383,14 +429,29 @@ func _screen_shake() -> void:
 	tween.tween_property(self, "position", original_pos, 0.03)
 
 func _on_stumble_recover() -> void:
+	if is_dead:
+		return
 	is_stumbling = false
 	sprite.play("run")
 	current_action = "Running"
 
 # --- Pick Collection ---
-func collect_pick(value: int = 1) -> void:
-	pick_collected.emit(value)
-	_pick_flash()
+func collect_pick(value: int = 1, heals: bool = false, food_name: String = "") -> void:
+	pick_collected.emit(value, food_name)
+	if heals and health < MAX_HEALTH:
+		health = mini(health + 1, MAX_HEALTH)
+		health_changed.emit(health, MAX_HEALTH)
+		_heal_flash()
+	else:
+		_pick_flash()
+
+func _heal_flash() -> void:
+	# Green pulse on heal — distinct from amber pick flash
+	sprite.modulate = HEAL_FLASH_COLOR
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.2)
+	tween.parallel().tween_property(sprite, "scale", Vector2(2.2, 2.2), 0.08)
+	tween.tween_property(sprite, "scale", Vector2(2.0, 2.0), 0.12)
 
 func _pick_flash() -> void:
 	# Overbright amber flash + scale pop

@@ -75,3 +75,9 @@ func send_minigame_complete(score: int, skipped: bool) -> void:
 		"type": "minigame_complete",
 		"data": {"score": score, "skipped": skipped}
 	})
+
+func send_game_over(final_score: int, final_distance: int) -> void:
+	send_event({
+		"type": "game_over",
+		"data": {"score": final_score, "distance": final_distance}
+	})
