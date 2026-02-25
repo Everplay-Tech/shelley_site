@@ -1,10 +1,12 @@
 extends Node2D
 ## Spawns collectible picks at random intervals.
 ## Picks appear at varying heights — ground level and airborne.
+## Randomizes between food item textures (ramen, strudel, coffee, etc).
 
 @export var spawn_interval_min := 2.0
 @export var spawn_interval_max := 4.5
 @export var pick_scene: PackedScene
+@export var pickup_textures: Array[Texture2D] = []
 
 var spawn_timer := 0.0
 var next_spawn_time := 3.0
@@ -26,6 +28,11 @@ func _spawn_pick() -> void:
 	if pick_scene == null:
 		return
 	var pick = pick_scene.instantiate()
+	# Random food item texture
+	if pickup_textures.size() > 0:
+		var sprite = pick.get_node("Sprite2D")
+		if sprite:
+			sprite.texture = pickup_textures[randi() % pickup_textures.size()]
 	# Random height — some on ground, some in air (reward jumping)
 	var y_offsets = [0, -30, -60, -90]
 	pick.position = Vector2(700, y_offsets[randi() % y_offsets.size()])

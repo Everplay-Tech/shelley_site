@@ -153,74 +153,115 @@ export default function Home() {
             </div>
           )}
 
-          {/* ─── CONTROLS SCREEN ─── */}
+          {/* ─── CONTROLS INFOGRAPHIC ─── */}
           {screen === "controls" && (
-            <div className="absolute inset-0 z-[102] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <div className="flex flex-col items-center gap-8 px-6 text-center max-w-md">
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  CONTROLS
+            <div className="absolute inset-0 z-[102] flex items-center justify-center bg-black/75 backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-6 px-4 text-center max-w-sm w-full">
+                <h2 className="text-xl sm:text-2xl font-black tracking-widest text-white/90 uppercase font-mono">
+                  Controls
                 </h2>
 
-                {isMobile ? (
-                  /* Mobile controls preview */
-                  <div className="flex flex-col gap-4 w-full">
-                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-[#2C2C2C] border border-white/20 flex items-center justify-center text-white/70 text-xl font-bold">
-                          ↓
+                {/* Controller infographic card */}
+                <div className="w-full bg-[#1a1a1a]/90 border border-white/10 rounded-xl p-6 sm:p-8">
+                  {/* Game Boy layout with callouts */}
+                  <div className="flex items-center justify-between mb-6">
+                    {/* D-pad visual */}
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="relative w-[72px] h-[72px]">
+                        {/* Cross */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="absolute w-[24px] h-[66px] bg-[#333] rounded-[2px]" />
+                          <div className="absolute w-[66px] h-[24px] bg-[#333] rounded-[2px]" />
                         </div>
-                        <span className="text-white/70 font-mono text-sm">SLIDE</span>
+                        {/* Arrows */}
+                        <div className="absolute top-[4px] left-1/2 -translate-x-1/2 text-white/20 text-[10px]">▲</div>
+                        <div className="absolute top-1/2 left-[6px] -translate-y-1/2 text-white/20 text-[10px]">◀</div>
+                        <div className="absolute top-1/2 right-[6px] -translate-y-1/2 text-white/20 text-[10px]">▶</div>
+                        <div className="absolute bottom-[4px] left-1/2 -translate-x-1/2 text-shelley-amber text-[10px]">▼</div>
+                        {/* Center */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-white/10" />
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-white/70 font-mono text-sm">JUMP</span>
-                        <div className="w-12 h-12 rounded-full bg-[#2C2C2C] border border-white/20 flex items-center justify-center text-shelley-amber font-bold text-lg">
-                          A
+                      <span className="text-[10px] font-mono text-white/40 tracking-wider">D-PAD</span>
+                    </div>
+
+                    {/* A/B visual */}
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="relative w-[72px] h-[60px]">
+                        {/* B */}
+                        <div className="absolute top-0 left-0 w-[32px] h-[32px] rounded-full bg-[#333] border border-white/15 flex items-center justify-center">
+                          <span className="text-white/40 text-xs font-bold">B</span>
                         </div>
+                        {/* A */}
+                        <div className="absolute bottom-0 right-0 w-[32px] h-[32px] rounded-full bg-[#333] border border-shelley-amber/30 flex items-center justify-center">
+                          <span className="text-shelley-amber text-xs font-bold">A</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono text-white/40 tracking-wider">BUTTONS</span>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-full h-px bg-white/8 mb-5" />
+
+                  {/* Action callouts */}
+                  <div className="flex flex-col gap-3 text-left">
+                    {/* Jump */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-[#333] border border-shelley-amber/30 flex items-center justify-center shrink-0">
+                        <span className="text-shelley-amber text-[10px] font-bold">A</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-white/80 font-mono text-xs font-bold">JUMP</span>
+                        {!isMobile && (
+                          <span className="text-white/30 font-mono text-[10px] ml-2">SPACE / ↑</span>
+                        )}
                       </div>
                     </div>
-                    <p className="text-xs text-white/40 font-mono">
-                      On-screen buttons appear during gameplay
+
+                    {/* Slide */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1 shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-[#333] border border-white/15 flex items-center justify-center">
+                          <span className="text-white/40 text-[10px] font-bold">B</span>
+                        </div>
+                        <div className="w-7 h-7 rounded-sm bg-[#333] border border-white/15 flex items-center justify-center">
+                          <span className="text-shelley-amber text-[10px]">▼</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-white/80 font-mono text-xs font-bold">SLIDE</span>
+                        {!isMobile && (
+                          <span className="text-white/30 font-mono text-[10px] ml-2">↓ / S</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Advance (narrative) */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-[#333] border border-shelley-amber/30 flex items-center justify-center shrink-0">
+                        <span className="text-shelley-amber text-[10px] font-bold">A</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-white/80 font-mono text-xs font-bold">TALK</span>
+                        <span className="text-white/25 font-mono text-[10px] ml-2">during dialogue</span>
+                        {!isMobile && (
+                          <span className="text-white/30 font-mono text-[10px] ml-1">/ ENTER</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tip */}
+                  <div className="mt-5 pt-4 border-t border-white/5">
+                    <p className="text-[10px] text-white/25 font-mono leading-relaxed">
+                      Jump on enemies to defeat them. Slide through them for bonus points.
                     </p>
                   </div>
-                ) : (
-                  /* Desktop controls */
-                  <div className="flex flex-col gap-3 w-full">
-                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-4">
-                      <span className="text-white/70 font-mono text-sm">JUMP</span>
-                      <div className="flex gap-2">
-                        <kbd className="px-3 py-1.5 bg-white/10 rounded text-white/80 font-mono text-sm border border-white/20">
-                          SPACE
-                        </kbd>
-                        <kbd className="px-3 py-1.5 bg-white/10 rounded text-white/80 font-mono text-sm border border-white/20">
-                          ↑
-                        </kbd>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-4">
-                      <span className="text-white/70 font-mono text-sm">SLIDE</span>
-                      <div className="flex gap-2">
-                        <kbd className="px-3 py-1.5 bg-white/10 rounded text-white/80 font-mono text-sm border border-white/20">
-                          ↓
-                        </kbd>
-                        <kbd className="px-3 py-1.5 bg-white/10 rounded text-white/80 font-mono text-sm border border-white/20">
-                          S
-                        </kbd>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between bg-white/5 rounded-lg p-4">
-                      <span className="text-white/70 font-mono text-sm">ADVANCE</span>
-                      <div className="flex gap-2">
-                        <kbd className="px-3 py-1.5 bg-white/10 rounded text-white/80 font-mono text-sm border border-white/20">
-                          ENTER
-                        </kbd>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                </div>
 
                 <button
                   onClick={handleStart}
-                  className="px-10 py-3 bg-shelley-amber text-black font-bold text-lg rounded hover:bg-shelley-amber/90 transition-colors"
+                  className="px-10 py-3 bg-shelley-amber text-black font-bold text-lg rounded hover:bg-shelley-amber/90 transition-colors tracking-wider font-mono"
                 >
                   START
                 </button>

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=24 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -15,6 +15,12 @@
 [ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="13_enemyspawn"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_mantigre.tscn" id="14_mantigre"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_spidat.tscn" id="15_spidat"]
+[ext_resource type="Texture2D" path="res://sprites/objects/picks/ramen.png" id="16_ramen"]
+[ext_resource type="Texture2D" path="res://sprites/objects/picks/toaster_strudel.png" id="17_strudel"]
+[ext_resource type="Texture2D" path="res://sprites/objects/picks/coffee.png" id="18_coffee"]
+[ext_resource type="Texture2D" path="res://sprites/objects/picks/cavatappi.png" id="19_cavatappi"]
+[ext_resource type="Texture2D" path="res://sprites/objects/picks/blt.png" id="20_blt"]
+[ext_resource type="Texture2D" path="res://sprites/objects/picks/smoothie.png" id="21_smoothie"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 20)
@@ -75,6 +81,7 @@ obstacle_scene = ExtResource("6_obstacle")
 position = Vector2(0, 288)
 script = ExtResource("7_pickspawn")
 pick_scene = ExtResource("8_pick")
+pickup_textures = Array[Texture2D]([ExtResource("16_ramen"), ExtResource("17_strudel"), ExtResource("18_coffee"), ExtResource("19_cavatappi"), ExtResource("20_blt"), ExtResource("21_smoothie")])
 
 [node name="EnemySpawner" type="Node2D" parent="."]
 position = Vector2(0, 308)
