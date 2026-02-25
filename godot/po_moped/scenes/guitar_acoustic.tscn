@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/guitar_acoustic.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://sprites/guitars/acoustic/float/frame_00.png" id="f0"]
+[ext_resource type="Texture2D" path="res://sprites/guitars/acoustic/float/frame_01.png" id="f1"]
+[ext_resource type="Texture2D" path="res://sprites/guitars/acoustic/float/frame_02.png" id="f2"]
+[ext_resource type="Texture2D" path="res://sprites/guitars/acoustic/float/frame_03.png" id="f3"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_acoustic"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("f3")
+}],
+"loop": true,
+"name": &"float",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="HitShape"]
+size = Vector2(20, 20)
+
+[node name="AcousticGhost" type="Area2D"]
+script = ExtResource("1_script")
+collision_layer = 8
+collision_mask = 0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_acoustic")
+animation = &"float"
+autoplay = &"float"
+scale = Vector2(2, 2)
+offset = Vector2(0, -8)
+texture_filter = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -8)
+shape = SubResource("HitShape")

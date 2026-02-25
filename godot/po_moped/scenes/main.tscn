@@ -1,0 +1,107 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
+[ext_resource type="Script" path="res://scripts/guitar_spawner.gd" id="3_spawner"]
+[ext_resource type="Script" path="res://scripts/narrative.gd" id="4_narrative"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/po_moped.tscn" id="6_po"]
+[ext_resource type="PackedScene" path="res://scenes/spirit_bolt.tscn" id="7_bolt"]
+[ext_resource type="PackedScene" path="res://scenes/sound_wave.tscn" id="8_wave"]
+[ext_resource type="PackedScene" path="res://scenes/note_bomb.tscn" id="9_bomb"]
+[ext_resource type="PackedScene" path="res://scenes/guitar_acoustic.tscn" id="10_acoustic"]
+[ext_resource type="PackedScene" path="res://scenes/guitar_electric.tscn" id="11_electric"]
+[ext_resource type="PackedScene" path="res://scenes/guitar_bass.tscn" id="12_bass"]
+[ext_resource type="PackedScene" path="res://scenes/guitar_boss.tscn" id="13_boss"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+
+[node name="WebBridge" type="Node" parent="."]
+script = ExtResource("2_bridge")
+
+[node name="PoMoped" parent="." instance=ExtResource("6_po")]
+spirit_bolt_scene = ExtResource("7_bolt")
+
+[node name="GuitarSpawner" type="Node2D" parent="."]
+script = ExtResource("3_spawner")
+acoustic_scene = ExtResource("10_acoustic")
+electric_scene = ExtResource("11_electric")
+bass_scene = ExtResource("12_bass")
+boss_scene = ExtResource("13_boss")
+sound_wave_scene = ExtResource("8_wave")
+note_bomb_scene = ExtResource("9_bomb")
+
+[node name="Narrative" type="Node" parent="."]
+script = ExtResource("4_narrative")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("5_hud")
+
+[node name="HeartContainer" type="HBoxContainer" parent="HUD"]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 100.0
+offset_bottom = 25.0
+theme_override_constants/separation = 3
+
+[node name="ScoreLabel" type="Label" parent="HUD"]
+offset_left = 540.0
+offset_top = 8.0
+offset_right = 630.0
+offset_bottom = 24.0
+horizontal_alignment = 2
+text = "0"
+theme_override_font_sizes/font_size = 12
+
+[node name="ComboLabel" type="Label" parent="HUD"]
+offset_left = 540.0
+offset_top = 24.0
+offset_right = 630.0
+offset_bottom = 38.0
+horizontal_alignment = 2
+text = "x1"
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(1, 0.749, 0, 1)
+
+[node name="GameOverPanel" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -60.0
+offset_right = 100.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/GameOverPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="GameOverLabel" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "LIBERATED"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.749, 0, 1)
+
+[node name="ScoreValue" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 12
+
+[node name="TapLabel" type="Label" parent="HUD/GameOverPanel/VBox"]
+layout_mode = 2
+text = "TAP TO RIDE AGAIN"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)

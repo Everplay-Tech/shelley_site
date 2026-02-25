@@ -37,7 +37,7 @@ const DEFAULT_CONFIG: GamesConfig = {
   },
   landing: {
     firstVisit: { gameName: "po_runner", label: "Meet Po...", available: true },
-    returning: { gameName: "po_moped", label: "Po rides again!", available: false },
+    returning: { gameName: "po_moped", label: "Po rides again!", available: true },
   },
 };
 
