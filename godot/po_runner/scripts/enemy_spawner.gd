@@ -1,6 +1,6 @@
 extends Node2D
 ## Smart enemy spawner — distance-gated difficulty, weighted random enemy selection.
-## No enemies before 300m. Mantigre first, Spidat introduced at 800m.
+## Mantigre from 50m, Spidat introduced at 350m.
 ## Prevents spawn conflicts with ObstacleSpawner.
 
 signal enemy_spawned(enemy: Area2D)
@@ -8,10 +8,10 @@ signal enemy_spawned(enemy: Area2D)
 @export var mantigre_scene: PackedScene
 @export var spidat_scene: PackedScene
 @export var obstacle_spawner_ref: Node2D  # Set in main.tscn or main.gd
-@export var initial_spawn_interval := 8.0
-@export var min_spawn_interval := 3.0
+@export var initial_spawn_interval := 5.0
+@export var min_spawn_interval := 2.0
 @export var ramp_rate := 0.002  # Interval decreases per meter
-@export var min_distance := 300.0  # No enemies before this
+@export var min_distance := 50.0  # Enemies appear early (~25s into gameplay)
 
 var spawn_timer := 0.0
 var next_spawn_time := 10.0
@@ -20,7 +20,7 @@ var is_paused := false
 var distance_ref := 0.0  # Updated by main.gd each frame
 
 func _ready() -> void:
-	next_spawn_time = initial_spawn_interval + 2.0  # Late first spawn
+	next_spawn_time = initial_spawn_interval  # First spawn at normal interval
 
 func _process(delta: float) -> void:
 	if is_paused or distance_ref < min_distance:
@@ -47,7 +47,7 @@ func _try_spawn() -> void:
 
 	# Pick enemy type based on distance
 	var enemy: Area2D
-	if distance_ref < 800.0:
+	if distance_ref < 350.0:
 		# Only Mantigre for early enemies
 		enemy = _spawn_mantigre()
 	else:
