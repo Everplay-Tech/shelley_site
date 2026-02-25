@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://enemy_spidat"]
+[gd_scene load_steps=39 format=3 uid="uid://enemy_spidat"]
 
 [ext_resource type="Script" path="res://scripts/enemy_spidat.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://sprites/enemies/spidat/move/frame_00.png" id="m0"]
@@ -16,6 +16,25 @@
 [ext_resource type="Texture2D" path="res://sprites/enemies/spidat/defeat/frame_04.png" id="d4"]
 [ext_resource type="Texture2D" path="res://sprites/enemies/spidat/defeat/frame_05.png" id="d5"]
 [ext_resource type="Texture2D" path="res://sprites/enemies/spidat/defeat/frame_06.png" id="d6"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sonar/frame_00.png" id="s0"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sonar/frame_01.png" id="s1"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sonar/frame_02.png" id="s2"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sonar/frame_03.png" id="s3"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sonar/frame_04.png" id="s4"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sonar/frame_05.png" id="s5"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_web/frame_00.png" id="w0"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_web/frame_01.png" id="w1"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_web/frame_02.png" id="w2"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_web/frame_03.png" id="w3"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_web/frame_04.png" id="w4"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_web/frame_05.png" id="w5"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_00.png" id="t0"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_01.png" id="t1"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_02.png" id="t2"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_03.png" id="t3"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_04.png" id="t4"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_05.png" id="t5"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/spidat/attack_sock/frame_06.png" id="t6"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_spidat"]
 animations = [{
@@ -72,6 +91,78 @@ animations = [{
 }],
 "loop": false,
 "name": &"defeat",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("s0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("s1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("s2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("s3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("s4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("s5")
+}],
+"loop": false,
+"name": &"attack_sonar",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("w0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("w1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("w2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("w3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("w4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("w5")
+}],
+"loop": false,
+"name": &"attack_web",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("t0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("t1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("t2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("t3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("t4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("t5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("t6")
+}],
+"loop": false,
+"name": &"attack_sock",
 "speed": 10.0
 }]
 

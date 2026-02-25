@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=30 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -25,6 +25,8 @@
 [ext_resource type="PackedScene" path="res://scenes/projectile_bill.tscn" id="23_bill"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="24_hud"]
 [ext_resource type="PackedScene" path="res://scenes/shockwave.tscn" id="25_shockwave"]
+[ext_resource type="PackedScene" path="res://scenes/sonar_ring.tscn" id="26_sonar"]
+[ext_resource type="PackedScene" path="res://scenes/projectile_web.tscn" id="27_web"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 20)
@@ -95,6 +97,8 @@ spidat_scene = ExtResource("15_spidat")
 projectile_sock_scene = ExtResource("22_sock")
 projectile_bill_scene = ExtResource("23_bill")
 shockwave_scene = ExtResource("25_shockwave")
+sonar_ring_scene = ExtResource("26_sonar")
+projectile_web_scene = ExtResource("27_web")
 
 [node name="Narrative" type="Node" parent="."]
 script = ExtResource("3_narrative")

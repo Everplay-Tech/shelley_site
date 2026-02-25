@@ -14,6 +14,8 @@ signal enemy_spawned(enemy: Area2D)
 @export var projectile_sock_scene: PackedScene
 @export var projectile_bill_scene: PackedScene
 @export var shockwave_scene: PackedScene
+@export var sonar_ring_scene: PackedScene
+@export var projectile_web_scene: PackedScene
 @export var obstacle_spawner_ref: Node2D  # Set in main.tscn or main.gd
 @export var initial_spawn_interval := 5.0
 @export var min_spawn_interval := 2.0
@@ -85,6 +87,8 @@ func _spawn_spidat() -> Area2D:
 	# Pass projectile scenes so Spidat can spawn its ammo
 	e.projectile_sock_scene = projectile_sock_scene
 	e.projectile_bill_scene = projectile_bill_scene
+	e.sonar_ring_scene = sonar_ring_scene
+	e.projectile_web_scene = projectile_web_scene
 	# Air position — above ground, in Po's jump space
 	e.position = Vector2(700, randf_range(-70, -40))
 	return e
