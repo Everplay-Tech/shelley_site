@@ -15,9 +15,9 @@
       "skipAllowed": true,
       "rewardMultiplier": 1.0
     },
-    "/about": {
-      "gameName": "about_quest",
-      "label": "Learning the Story...",
+    "/librarynth": {
+      "gameName": "librarynth_quest",
+      "label": "Entering the Librarynth...",
       "available": false,
       "skipAllowed": true,
       "rewardMultiplier": 1.0

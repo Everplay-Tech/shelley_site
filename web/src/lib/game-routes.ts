@@ -32,7 +32,7 @@ const DEFAULT_CONFIG: GamesConfig = {
   routes: {
     "/workshop": { gameName: "workshop_craft", label: "Entering the Workshop...", available: false },
     "/gallery": { gameName: "gallery_run", label: "Heading to the Gallery...", available: false },
-    "/about": { gameName: "about_quest", label: "Learning the Story...", available: false },
+    "/librarynth": { gameName: "librarynth_quest", label: "Entering the Librarynth...", available: false },
     "/contact": { gameName: "contact_dash", label: "Reaching Out...", available: false },
   },
   landing: {

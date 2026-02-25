@@ -325,9 +325,9 @@ export default function Home() {
             <a href="/gallery" className="text-shelley-amber font-medium hover:underline">View Gallery &rarr;</a>
           </div>
           <div className="bg-white/5 p-8 rounded-2xl border border-white/5 hover:border-shelley-amber/30 transition-colors">
-            <h4 className="text-lg font-bold mb-4 uppercase">About Us</h4>
-            <p className="text-white/60 mb-6">Learn about the philosophy and hands behind the brand.</p>
-            <a href="/about" className="text-shelley-amber font-medium hover:underline">Learn More &rarr;</a>
+            <h4 className="text-lg font-bold mb-4 uppercase">The Librarynth</h4>
+            <p className="text-white/60 mb-6">Guitars, comics, music, and philosophy — the creative labyrinth.</p>
+            <a href="/librarynth" className="text-shelley-amber font-medium hover:underline">Enter &rarr;</a>
           </div>
         </div>
       </div>
