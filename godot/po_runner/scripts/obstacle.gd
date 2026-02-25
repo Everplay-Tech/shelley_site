@@ -13,6 +13,7 @@ const TEXTURES = [
 ]
 
 func _ready() -> void:
+	add_to_group("world_scrollable")
 	# Random visual variant
 	$Sprite2D.texture = TEXTURES[randi() % TEXTURES.size()]
 

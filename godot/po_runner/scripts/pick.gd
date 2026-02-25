@@ -7,6 +7,9 @@ extends Area2D
 
 var _time := 0.0
 
+func _ready() -> void:
+	add_to_group("world_scrollable")
+
 func _process(delta: float) -> void:
 	position.x -= scroll_speed * delta
 	# Gentle bob for juice

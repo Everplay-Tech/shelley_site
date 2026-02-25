@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://projectile_bill"]
+
+[ext_resource type="Script" path="res://scripts/projectile_bill.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://sprites/objects/projectiles/debt_bill.png" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_bill"]
+size = Vector2(12, 16)
+
+[node name="DebtBill" type="Area2D"]
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+texture_filter = 1
+scale = Vector2(1.5, 1.5)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectShape_bill")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

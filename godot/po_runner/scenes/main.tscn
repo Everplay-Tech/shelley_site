@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=26 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -21,6 +21,8 @@
 [ext_resource type="Texture2D" path="res://sprites/objects/picks/cavatappi.png" id="19_cavatappi"]
 [ext_resource type="Texture2D" path="res://sprites/objects/picks/blt.png" id="20_blt"]
 [ext_resource type="Texture2D" path="res://sprites/objects/picks/smoothie.png" id="21_smoothie"]
+[ext_resource type="PackedScene" path="res://scenes/projectile_sock.tscn" id="22_sock"]
+[ext_resource type="PackedScene" path="res://scenes/projectile_bill.tscn" id="23_bill"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 20)
@@ -88,6 +90,8 @@ position = Vector2(0, 308)
 script = ExtResource("13_enemyspawn")
 mantigre_scene = ExtResource("14_mantigre")
 spidat_scene = ExtResource("15_spidat")
+projectile_sock_scene = ExtResource("22_sock")
+projectile_bill_scene = ExtResource("23_bill")
 
 [node name="Narrative" type="Node" parent="."]
 script = ExtResource("3_narrative")

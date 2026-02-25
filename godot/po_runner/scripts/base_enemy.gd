@@ -6,6 +6,8 @@ extends Area2D
 
 signal enemy_defeated(enemy_type: String, pos: Vector2)
 signal enemy_hit_po(enemy_type: String)
+signal request_scroll_stop
+signal request_scroll_resume
 
 @export var scroll_speed := 200.0
 @export var enemy_type := "unknown"
@@ -22,6 +24,7 @@ var _hit := false
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 func _ready() -> void:
+	add_to_group("world_scrollable")
 	sprite.play("move")
 
 func _process(delta: float) -> void:

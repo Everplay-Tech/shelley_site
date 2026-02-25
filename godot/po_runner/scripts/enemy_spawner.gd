@@ -2,11 +2,17 @@ extends Node2D
 ## Smart enemy spawner — distance-gated difficulty, weighted random enemy selection.
 ## Mantigre from 75m (~38s), Spidat introduced at 200m (~100s).
 ## Prevents spawn conflicts with ObstacleSpawner.
+## Passes projectile scenes to Spidat for its attack modes.
+##
+## Rizky: Add new enemy types by adding @export PackedScene + spawn func.
+## The pattern is always: instantiate → configure → position → return.
 
 signal enemy_spawned(enemy: Area2D)
 
 @export var mantigre_scene: PackedScene
 @export var spidat_scene: PackedScene
+@export var projectile_sock_scene: PackedScene
+@export var projectile_bill_scene: PackedScene
 @export var obstacle_spawner_ref: Node2D  # Set in main.tscn or main.gd
 @export var initial_spawn_interval := 5.0
 @export var min_spawn_interval := 2.0
@@ -72,8 +78,13 @@ func _spawn_spidat() -> Area2D:
 	if spidat_scene == null:
 		return null
 	var e = spidat_scene.instantiate()
+	# Random mode: 50% confrontation (sock attack), 50% flyby (bill drop)
+	e.mode = e.Mode.FLYBY if randf() < 0.5 else e.Mode.CONFRONTATION
+	# Pass projectile scenes so Spidat can spawn its ammo
+	e.projectile_sock_scene = projectile_sock_scene
+	e.projectile_bill_scene = projectile_bill_scene
 	# Air position — above ground, in Po's jump space
-	e.position = Vector2(700, randf_range(-70, -50))
+	e.position = Vector2(700, randf_range(-70, -40))
 	return e
 
 func pause_spawning() -> void:

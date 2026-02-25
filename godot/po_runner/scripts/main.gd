@@ -9,6 +9,7 @@ var score := 0
 var game_speed := 200.0
 var state_timer := 0.0
 var game_started := false
+var _encounter_enemy: Area2D = null  # Active encounter enemy (scroll-stop)
 const STATE_REPORT_INTERVAL := 2.0
 
 # ============================================================
@@ -75,6 +76,12 @@ func _process(delta: float) -> void:
 		return
 
 	if narrative.is_active or po.is_stumbling:
+		return
+
+	# Don't accumulate distance during encounters (world is stopped)
+	if _encounter_enemy != null:
+		# Still feed distance to spawner so it doesn't reset
+		enemy_spawner.distance_ref = distance
 		return
 
 	# Accumulate distance
@@ -159,6 +166,9 @@ func _on_host_command(command: String, _data: Dictionary) -> void:
 func _on_enemy_spawned(enemy: Area2D) -> void:
 	enemy.enemy_defeated.connect(_on_enemy_defeated)
 	enemy.enemy_hit_po.connect(_on_enemy_hit_po)
+	# Encounter signals — enemies can request scroll-stop for dramatic face-offs
+	enemy.request_scroll_stop.connect(_on_enemy_request_scroll_stop.bind(enemy))
+	enemy.request_scroll_resume.connect(_on_enemy_request_scroll_resume)
 
 func _on_enemy_defeated(enemy_type: String, pos: Vector2) -> void:
 	score += 3
@@ -174,6 +184,51 @@ func _on_enemy_hit_po(_enemy_type: String) -> void:
 	# Enemy hit is handled by the enemy's body_entered → po.stumble()
 	# Spirits scatter same as obstacle stumble
 	_scatter_spirits()
+
+# ============================================================
+# ENCOUNTER SYSTEM — Scroll-Stop Face-Offs
+# ============================================================
+# Enemies can request the world to stop scrolling for dramatic encounters.
+# All "world_scrollable" objects freeze. World resumes when encounter ends.
+# Safety net: if encounter enemy dies/freed, world auto-resumes.
+
+func _on_enemy_request_scroll_stop(enemy: Area2D) -> void:
+	if _encounter_enemy != null:
+		return  # Already in an encounter — ignore
+	_encounter_enemy = enemy
+	enemy.tree_exiting.connect(_on_encounter_enemy_exiting, CONNECT_ONE_SHOT)
+	ground.pause()
+	obstacle_spawner.pause_spawning()
+	pick_spawner.pause_spawning()
+	enemy_spawner.pause_spawning()
+	_freeze_world_objects()
+
+func _on_enemy_request_scroll_resume() -> void:
+	if _encounter_enemy == null:
+		return  # No active encounter — nothing to resume
+	_encounter_enemy = null
+	ground.resume()
+	obstacle_spawner.resume_spawning()
+	pick_spawner.resume_spawning()
+	enemy_spawner.resume_spawning()
+	_unfreeze_world_objects()
+
+func _on_encounter_enemy_exiting() -> void:
+	# Safety net — if encounter enemy dies/freed, resume world
+	if _encounter_enemy != null:
+		_on_enemy_request_scroll_resume()
+
+func _freeze_world_objects() -> void:
+	## Stop all world-scrollable objects (enemies, obstacles, picks)
+	for node in get_tree().get_nodes_in_group("world_scrollable"):
+		if "scroll_speed" in node:
+			node.scroll_speed = 0.0
+
+func _unfreeze_world_objects() -> void:
+	## Restore scroll speed on all world-scrollable objects
+	for node in get_tree().get_nodes_in_group("world_scrollable"):
+		if "scroll_speed" in node:
+			node.scroll_speed = game_speed
 
 # ============================================================
 # SPIRIT WISP SYSTEM — The World Breathes
