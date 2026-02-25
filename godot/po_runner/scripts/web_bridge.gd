@@ -15,7 +15,7 @@ func _ready() -> void:
 					window._godotCommands.push(JSON.stringify(e.data));
 				}
 			});
-			window._godotCommands = [];
+			window._godotCommands = window._godotCommands || [];
 		""")
 
 func _process(_delta: float) -> void:

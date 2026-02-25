@@ -42,7 +42,8 @@ var is_sliding := false
 var is_stumbling := false
 var is_narrative_paused := false
 var jumps_remaining := 2
-var current_action := "Running"
+var current_action := "Idle"
+var game_started := false
 
 # --- Internal timers ---
 var coyote_timer := 0.0
@@ -64,10 +65,17 @@ const SWIPE_THRESHOLD := 40.0  # Min pixels to register as swipe
 
 func _ready() -> void:
 	stumble_timer.timeout.connect(_on_stumble_recover)
+	sprite.play("idle")
+
+func start_running() -> void:
+	game_started = true
 	sprite.play("run")
+	current_action = "Running"
 
 # --- Touch Input ---
 func _input(event: InputEvent) -> void:
+	if not game_started:
+		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			_touch_start_pos = event.position
@@ -89,6 +97,8 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
+	if not game_started:
+		return
 	if is_narrative_paused or is_stumbling:
 		return
 

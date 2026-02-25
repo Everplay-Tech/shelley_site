@@ -28,7 +28,23 @@ export interface ConfigCommand {
   };
 }
 
-export type GodotCommand = StartCommand | PauseCommand | ResumeCommand | MoveToCommand | ConfigCommand;
+export interface VirtualInputCommand {
+  command:
+    | "jump_press"
+    | "jump_release"
+    | "slide_press"
+    | "slide_release"
+    | "advance_press"
+    | "advance_release";
+}
+
+export type GodotCommand =
+  | StartCommand
+  | PauseCommand
+  | ResumeCommand
+  | MoveToCommand
+  | ConfigCommand
+  | VirtualInputCommand;
 
 export type GodotCommandType = GodotCommand["command"];
 

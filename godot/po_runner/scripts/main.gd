@@ -8,6 +8,7 @@ var distance := 0.0
 var score := 0
 var game_speed := 200.0
 var state_timer := 0.0
+var game_started := false
 const STATE_REPORT_INTERVAL := 2.0
 
 # ============================================================
@@ -54,6 +55,12 @@ func _ready() -> void:
 	enemy_spawner.enemy_spawned.connect(_on_enemy_spawned)
 	enemy_spawner.obstacle_spawner_ref = obstacle_spawner
 
+	# Start frozen — waiting for website "start" command
+	ground.pause()
+	obstacle_spawner.pause_spawning()
+	pick_spawner.pause_spawning()
+	enemy_spawner.pause_spawning()
+
 	# Tell the website we're ready
 	web_bridge.send_game_ready()
 
@@ -61,8 +68,11 @@ func _ready() -> void:
 	_create_spirit_system()
 
 func _process(delta: float) -> void:
-	# Spirits always breathe — they don't stop for narrative or stumble
+	# Spirits always breathe — ambiance even on welcome screen
 	_update_spirits(delta)
+
+	if not game_started:
+		return
 
 	if narrative.is_active or po.is_stumbling:
 		return
@@ -121,11 +131,30 @@ func _on_onboarding_complete() -> void:
 func _on_host_command(command: String, _data: Dictionary) -> void:
 	match command:
 		"start":
-			pass  # Game starts automatically
+			if not game_started:
+				game_started = true
+				po.start_running()
+				ground.resume()
+				obstacle_spawner.resume_spawning()
+				pick_spawner.resume_spawning()
+				enemy_spawner.resume_spawning()
 		"pause":
 			get_tree().paused = true
 		"resume":
 			get_tree().paused = false
+		# Virtual input from mobile gameboy controls
+		"jump_press":
+			Input.action_press("jump")
+		"jump_release":
+			Input.action_release("jump")
+		"slide_press":
+			Input.action_press("slide")
+		"slide_release":
+			Input.action_release("slide")
+		"advance_press":
+			Input.action_press("advance")
+		"advance_release":
+			Input.action_release("advance")
 
 func _on_enemy_spawned(enemy: Area2D) -> void:
 	enemy.enemy_defeated.connect(_on_enemy_defeated)
