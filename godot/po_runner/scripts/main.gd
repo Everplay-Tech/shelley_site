@@ -37,6 +37,9 @@ var _spirit_target_color := SPIRIT_COLOR_AMBIENT
 
 var is_game_over := false
 
+# Persists across reload_current_scene() — allows auto-start on restart
+static var _should_auto_start := false
+
 @onready var po: CharacterBody2D = $Po
 @onready var narrative: Node = $Narrative
 @onready var web_bridge: Node = $WebBridge
@@ -60,17 +63,26 @@ func _ready() -> void:
 	enemy_spawner.enemy_spawned.connect(_on_enemy_spawned)
 	enemy_spawner.obstacle_spawner_ref = obstacle_spawner
 
-	# Start frozen — waiting for website "start" command
-	ground.pause()
-	obstacle_spawner.pause_spawning()
-	pick_spawner.pause_spawning()
-	enemy_spawner.pause_spawning()
-
-	# Tell the website we're ready
-	web_bridge.send_game_ready()
-
 	# Birth the spirit world
 	_create_spirit_system()
+
+	# Check if this is a restart (scene was reloaded after game over)
+	if _should_auto_start:
+		_should_auto_start = false
+		game_started = true
+		po.start_running()
+		ground.resume()
+		obstacle_spawner.resume_spawning()
+		pick_spawner.resume_spawning()
+		enemy_spawner.resume_spawning()
+		web_bridge.send_game_ready()
+	else:
+		# Start frozen — waiting for website "start" command
+		ground.pause()
+		obstacle_spawner.pause_spawning()
+		pick_spawner.pause_spawning()
+		enemy_spawner.pause_spawning()
+		web_bridge.send_game_ready()
 
 func _process(delta: float) -> void:
 	# Spirits always breathe — ambiance even on welcome screen
@@ -137,6 +149,7 @@ func _on_po_died() -> void:
 	_scatter_spirits()
 
 func _on_restart() -> void:
+	_should_auto_start = true
 	get_tree().reload_current_scene()
 
 func _on_narrative_started(beat_id: String) -> void:
