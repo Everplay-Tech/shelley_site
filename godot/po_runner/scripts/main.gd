@@ -26,6 +26,7 @@ const SPIRIT_COLOR_NARRATIVE := Color(1.0, 0.82, 0.45, 0.16)  # Warm amber glow
 const SPIRIT_COLOR_ALERT := Color(0.9, 0.3, 0.3, 0.25)        # Red flash on stumble
 const SPIRIT_SCATTER_FORCE := 140.0
 const SPIRIT_ATTRACT_SPEED := 80.0
+const SPIRIT_COLOR_DEFEAT := Color(1.0, 0.95, 0.7, 0.20)  # Bright warm pulse on enemy defeat
 
 var _spirits: Array[Dictionary] = []
 var _spirit_mode := "ambient"  # "ambient", "narrative", "scatter", "attract"
@@ -37,6 +38,7 @@ var _spirit_target_color := SPIRIT_COLOR_AMBIENT
 @onready var web_bridge: Node = $WebBridge
 @onready var obstacle_spawner: Node2D = $ObstacleSpawner
 @onready var pick_spawner: Node2D = $PickSpawner
+@onready var enemy_spawner: Node2D = $EnemySpawner
 @onready var ground: ParallaxBackground = $Ground
 @onready var score_label: Label = %ScoreLabel
 @onready var distance_label: Label = %DistanceLabel
@@ -49,6 +51,8 @@ func _ready() -> void:
 	narrative.narrative_ended.connect(_on_narrative_ended)
 	narrative.onboarding_complete.connect(_on_onboarding_complete)
 	web_bridge.host_command_received.connect(_on_host_command)
+	enemy_spawner.enemy_spawned.connect(_on_enemy_spawned)
+	enemy_spawner.obstacle_spawner_ref = obstacle_spawner
 
 	# Tell the website we're ready
 	web_bridge.send_game_ready()
@@ -66,6 +70,9 @@ func _process(delta: float) -> void:
 	# Accumulate distance
 	distance += game_speed * delta / 100.0  # Roughly meters
 	distance_label.text = "%dm" % int(distance)
+
+	# Feed distance to enemy spawner
+	enemy_spawner.distance_ref = distance
 
 	# Check for narrative triggers
 	narrative.check_distance(distance)
@@ -90,6 +97,7 @@ func _on_narrative_started(beat_id: String) -> void:
 	po.enter_narrative()
 	obstacle_spawner.pause_spawning()
 	pick_spawner.pause_spawning()
+	enemy_spawner.pause_spawning()
 	ground.set_narrative_mode(true)
 	web_bridge.send_narrative_start(beat_id)
 	# Spirits slow down and glow warm — listening to Po's story
@@ -100,6 +108,7 @@ func _on_narrative_ended(beat_id: String) -> void:
 	po.exit_narrative()
 	obstacle_spawner.resume_spawning()
 	pick_spawner.resume_spawning()
+	enemy_spawner.resume_spawning()
 	ground.set_narrative_mode(false)
 	web_bridge.send_narrative_end(beat_id)
 	# Spirits return to ambient — back to the drift
@@ -117,6 +126,25 @@ func _on_host_command(command: String, _data: Dictionary) -> void:
 			get_tree().paused = true
 		"resume":
 			get_tree().paused = false
+
+func _on_enemy_spawned(enemy: Area2D) -> void:
+	enemy.enemy_defeated.connect(_on_enemy_defeated)
+	enemy.enemy_hit_po.connect(_on_enemy_hit_po)
+
+func _on_enemy_defeated(enemy_type: String, pos: Vector2) -> void:
+	score += 3
+	score_label.text = str(score)
+	# Spirits pulse bright — the world celebrates a victory
+	_spirit_mode = "attract"
+	_spirit_mode_timer = 0.5
+	_spirit_target_color = SPIRIT_COLOR_DEFEAT
+	for s in _spirits:
+		s["pulse_timer"] = 0.5
+
+func _on_enemy_hit_po(_enemy_type: String) -> void:
+	# Enemy hit is handled by the enemy's body_entered → po.stumble()
+	# Spirits scatter same as obstacle stumble
+	_scatter_spirits()
 
 # ============================================================
 # SPIRIT WISP SYSTEM — The World Breathes

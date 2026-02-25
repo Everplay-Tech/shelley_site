@@ -1,0 +1,96 @@
+[gd_scene load_steps=20 format=3 uid="uid://enemy_mantigre"]
+
+[ext_resource type="Script" path="res://scripts/enemy_mantigre.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_00.png" id="m0"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_01.png" id="m1"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_02.png" id="m2"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_03.png" id="m3"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_04.png" id="m4"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_05.png" id="m5"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_06.png" id="m6"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/move/frame_07.png" id="m7"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_00.png" id="d0"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_01.png" id="d1"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_02.png" id="d2"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_03.png" id="d3"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_04.png" id="d4"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_05.png" id="d5"]
+[ext_resource type="Texture2D" path="res://sprites/enemies/mantigre/defeat/frame_06.png" id="d6"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mantigre"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("m0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("m7")
+}],
+"loop": true,
+"name": &"move",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("d1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("d2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("d3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("d4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("d5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("d6")
+}],
+"loop": false,
+"name": &"defeat",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="HitShape_mantigre"]
+size = Vector2(24, 32)
+
+[node name="Mantigre" type="Area2D"]
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_mantigre")
+animation = &"move"
+autoplay = &"move"
+scale = Vector2(2, 2)
+offset = Vector2(0, -16)
+texture_filter = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -16)
+shape = SubResource("HitShape_mantigre")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

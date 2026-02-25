@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=18 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/web_bridge.gd" id="2_bridge"]
@@ -12,6 +12,9 @@
 [ext_resource type="Texture2D" path="res://sprites/environment/bg_mid.png" id="10_bgmid"]
 [ext_resource type="Texture2D" path="res://sprites/environment/fg_ground.png" id="11_fgground"]
 [ext_resource type="PackedScene" path="res://scenes/po.tscn" id="12_po"]
+[ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="13_enemyspawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_mantigre.tscn" id="14_mantigre"]
+[ext_resource type="PackedScene" path="res://scenes/enemy_spidat.tscn" id="15_spidat"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2000, 20)
@@ -72,6 +75,12 @@ obstacle_scene = ExtResource("6_obstacle")
 position = Vector2(0, 288)
 script = ExtResource("7_pickspawn")
 pick_scene = ExtResource("8_pick")
+
+[node name="EnemySpawner" type="Node2D" parent="."]
+position = Vector2(0, 308)
+script = ExtResource("13_enemyspawn")
+mantigre_scene = ExtResource("14_mantigre")
+spidat_scene = ExtResource("15_spidat")
 
 [node name="Narrative" type="Node" parent="."]
 script = ExtResource("3_narrative")

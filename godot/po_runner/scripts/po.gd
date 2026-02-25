@@ -32,6 +32,7 @@ const SPEED_LINE_INTERVAL := 0.025     # Rapid streaks during slide
 const SPEED_LINE_LENGTH_MIN := 14.0
 const SPEED_LINE_LENGTH_MAX := 38.0
 const RUN_DUST_INTERVAL := 0.18        # Subtle footfall particles
+const GHOST_DEFEAT_COLOR := Color(1.0, 0.8, 0.2, 0.7)  # Golden amber for enemy defeat
 
 @export var can_double_jump := true
 
@@ -388,6 +389,25 @@ func _pick_flash() -> void:
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.15)
 	tween.parallel().tween_property(sprite, "scale", Vector2(2.3, 2.3), 0.06)
 	tween.tween_property(sprite, "scale", Vector2(2.0, 2.0), 0.1)
+
+# --- Enemy Defeat ---
+func stomp_bounce() -> void:
+	# Weaker than double jump — Po bounces off defeated enemy
+	velocity.y = DOUBLE_JUMP_FORCE * 0.7
+	is_jumping = true
+	jumps_remaining = max(jumps_remaining, 1)  # Allow one more air jump after stomp
+	sprite.play("jump")
+	current_action = "Jumping"
+	_jump_stretch()
+
+func slide_defeat_flash() -> void:
+	# Golden flash when defeating enemy with slide
+	sprite.modulate = Color(1.5, 1.3, 0.8, 1.0)
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.12)
+	# Extra ghost trails in gold
+	for i in range(3):
+		_spawn_ghost(GHOST_DEFEAT_COLOR)
 
 # --- Narrative ---
 func enter_narrative() -> void:
