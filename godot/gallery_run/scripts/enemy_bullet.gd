@@ -48,6 +48,6 @@ func _spawn_trail() -> void:
 	trail.position = global_position + Vector2(randf_range(-2, 2), -3)
 	trail.color = Color(bullet_color.r, bullet_color.g, bullet_color.b, 0.3)
 	get_parent().add_child(trail)
-	var tween := trail.create_tween()
+	var tween: Tween = trail.create_tween()
 	tween.tween_property(trail, "color:a", 0.0, 0.2)
 	tween.tween_callback(trail.queue_free)

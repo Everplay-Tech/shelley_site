@@ -68,16 +68,17 @@ func _ready() -> void:
 	add_child(shape)
 	collision_layer = 8   # Enemies
 	collision_mask = 4     # Player bullets
-	# Try to load sprite
+	# Try to load sprite — file names map to actual PNGs on disk
 	var type_name: String
 	match enemy_type:
 		EnemyType.EYE_SPAWN: type_name = "eye_spawn"
 		EnemyType.TIGERFISH: type_name = "tigerfish"
-		EnemyType.EYE_KRAKEN: type_name = "eye_kraken"
+		EnemyType.EYE_KRAKEN: type_name = "kraken"
 	var tex_path := "res://sprites/enemies/%s.png" % type_name
 	if ResourceLoader.exists(tex_path):
 		_sprite = Sprite2D.new()
 		_sprite.texture = load(tex_path)
+		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		add_child(_sprite)
 	else:
 		_add_placeholder()
@@ -123,17 +124,17 @@ func take_hit() -> void:
 		_flash_white()
 
 func _flash_white() -> void:
-	if _placeholder:
+	if _sprite:
+		_sprite.modulate = Color.WHITE * 2.0
+		var tween: Tween = _sprite.create_tween()
+		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.15)
+	elif _placeholder:
 		for child in _placeholder.get_children():
 			if child is ColorRect:
 				var orig_color: Color = child.color
 				child.color = Color.WHITE
-				var tween := child.create_tween()
+				var tween: Tween = child.create_tween()
 				tween.tween_property(child, "color", orig_color, 0.15)
-	elif _sprite:
-		_sprite.modulate = Color.WHITE * 2.0
-		var tween := _sprite.create_tween()
-		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.15)
 
 func die() -> void:
 	_is_dead = true
@@ -153,7 +154,7 @@ func _spawn_death_burst() -> void:
 		var angle: float = (TAU / 6.0) * i + randf_range(-0.3, 0.3)
 		var dist: float = randf_range(15, 30)
 		var target := p.position + Vector2(cos(angle) * dist, sin(angle) * dist)
-		var tween := p.create_tween()
+		var tween: Tween = p.create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(p, "position", target, 0.3)
 		tween.tween_property(p, "color:a", 0.0, 0.3)

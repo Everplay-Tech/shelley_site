@@ -39,6 +39,7 @@ func _ready() -> void:
 	if ResourceLoader.exists(tex_path):
 		_sprite = Sprite2D.new()
 		_sprite.texture = load(tex_path)
+		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		add_child(_sprite)
 	else:
 		_add_placeholder()
@@ -132,12 +133,16 @@ func activate_triple_shot() -> void:
 	triple_shot = true
 	_triple_timer = 0.0
 	# Flash effect
-	if _placeholder:
+	if _sprite:
+		_sprite.modulate = Color(1.0, 0.85, 0.3, 1.0)
+		var tween: Tween = _sprite.create_tween()
+		tween.tween_property(_sprite, "modulate", Color.WHITE, 0.3)
+	elif _placeholder:
 		for child in _placeholder.get_children():
 			if child is ColorRect:
 				var orig: Color = child.color
 				child.color = Color(1.0, 0.85, 0.3, 1.0)
-				var tween := child.create_tween()
+				var tween: Tween = child.create_tween()
 				tween.tween_property(child, "color", orig, 0.3)
 
 func _add_placeholder() -> void:

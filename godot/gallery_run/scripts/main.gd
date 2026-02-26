@@ -246,14 +246,13 @@ func _on_enemy_defeated(enemy: Area2D) -> void:
 	_score_label.text = str(_score)
 	# Score pop
 	_score_label.scale = Vector2(1.3, 1.3)
-	var tween := _score_label.create_tween()
+	var tween: Tween = _score_label.create_tween()
 	tween.tween_property(_score_label, "scale", Vector2.ONE, 0.15)
 	# Floating score popup
 	_spawn_score_popup(enemy.global_position, pts)
 	# Power-up drop
 	if randf() < POWERUP_DROP_CHANCE:
-		ship.activate_triple_shot()
-		_spawn_powerup_text(enemy.global_position)
+		_spawn_powerup_drop(enemy.global_position)
 	# Wisps react
 	_wisps_react("kill")
 	# Hit freeze on enemy death (MvC impact)
@@ -382,13 +381,13 @@ func _update_hearts() -> void:
 			_hearts[i].color = Color(0.3, 0.15, 0.15, 0.4)
 			# Pop animation on loss
 			_hearts[i].scale = Vector2(1.4, 1.4)
-			var tween := _hearts[i].create_tween()
+			var tween: Tween = _hearts[i].create_tween()
 			tween.tween_property(_hearts[i], "scale", Vector2.ONE, 0.2)
 
 func _update_wave_label() -> void:
 	_wave_label.text = "WAVE %d" % _wave_number
 	_wave_label.modulate = Color(1, 1, 1, 1)
-	var tween := _wave_label.create_tween()
+	var tween: Tween = _wave_label.create_tween()
 	tween.tween_property(_wave_label, "modulate:a", 0.4, 1.0)
 
 func _build_touch_ui() -> void:
@@ -459,7 +458,7 @@ func _end_game(message: String) -> void:
 	_game_over_panel.size = Vector2(640, 360)
 	_game_over_panel.color = Color(0, 0, 0, 0)
 	hud.add_child(_game_over_panel)
-	var tween := _game_over_panel.create_tween()
+	var tween: Tween = _game_over_panel.create_tween()
 	tween.tween_property(_game_over_panel, "color:a", 0.7, 0.5)
 	# Title
 	var title := Label.new()
@@ -493,11 +492,51 @@ func _spawn_score_popup(pos: Vector2, pts: int) -> void:
 	popup.position = pos + Vector2(-10, -8)
 	popup.z_index = 10
 	add_child(popup)
-	var tween := popup.create_tween()
+	var tween: Tween = popup.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(popup, "position:y", pos.y - 30, 0.6)
 	tween.tween_property(popup, "modulate:a", 0.0, 0.6)
 	tween.chain().tween_callback(popup.queue_free)
+
+func _spawn_powerup_drop(from_pos: Vector2) -> void:
+	# Animated power-up icon that falls from enemy to ship, then activates
+	var icon: Node2D
+	var tex_path := "res://sprites/enemies/powerup.png"
+	if ResourceLoader.exists(tex_path):
+		var spr := Sprite2D.new()
+		spr.texture = load(tex_path)
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		icon = spr
+	else:
+		# Fallback: golden diamond
+		var fallback := ColorRect.new()
+		fallback.size = Vector2(10, 10)
+		fallback.position = Vector2(-5, -5)
+		fallback.color = Color(0.3, 1.0, 0.5, 0.9)
+		fallback.rotation = PI / 4.0
+		icon = Node2D.new()
+		icon.add_child(fallback)
+	icon.position = from_pos
+	icon.z_index = 12
+	add_child(icon)
+	# Tween: fall toward ship, then activate on arrival
+	var target_pos := ship.global_position + Vector2(0, -10)
+	var drop_tw: Tween = icon.create_tween()
+	drop_tw.set_parallel(true)
+	drop_tw.tween_property(icon, "position", target_pos, 0.5).set_ease(Tween.EASE_IN)
+	drop_tw.tween_property(icon, "scale", Vector2(1.3, 1.3), 0.25).set_ease(Tween.EASE_OUT)
+	drop_tw.chain().tween_property(icon, "scale", Vector2.ONE, 0.25).set_ease(Tween.EASE_IN)
+	drop_tw.chain().tween_callback(func():
+		ship.activate_triple_shot()
+		_spawn_powerup_text(icon.global_position)
+		# Collection burst
+		icon.modulate = Color(1.0, 1.0, 1.0, 2.0)
+		var burst_tw: Tween = icon.create_tween()
+		burst_tw.set_parallel(true)
+		burst_tw.tween_property(icon, "modulate:a", 0.0, 0.2)
+		burst_tw.tween_property(icon, "scale", Vector2(2.0, 2.0), 0.2)
+		burst_tw.chain().tween_callback(icon.queue_free)
+	)
 
 func _spawn_powerup_text(pos: Vector2) -> void:
 	var popup := Label.new()
@@ -507,7 +546,7 @@ func _spawn_powerup_text(pos: Vector2) -> void:
 	popup.position = pos + Vector2(-25, 5)
 	popup.z_index = 10
 	add_child(popup)
-	var tween := popup.create_tween()
+	var tween: Tween = popup.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(popup, "position:y", pos.y - 20, 0.8)
 	tween.tween_property(popup, "modulate:a", 0.0, 0.8)
@@ -560,12 +599,12 @@ func _wisps_react(reaction: String) -> void:
 		var original_color := Color(0.4, 0.3, 0.7, wisp.color.a)
 		if reaction == "kill":
 			wisp.color = Color(1.0, 0.75, 0.0, 0.35)
-			var tween := wisp.create_tween()
+			var tween: Tween = wisp.create_tween()
 			tween.tween_property(wisp, "color", original_color, 0.4)
 		elif reaction == "damage":
 			wisp.color = Color(0.9, 0.2, 0.2, 0.4)
 			var scatter := Vector2(randf_range(-15, 15), randf_range(-15, 15))
-			var tween := wisp.create_tween()
+			var tween: Tween = wisp.create_tween()
 			tween.set_parallel(true)
 			tween.tween_property(wisp, "position", wisp.position + scatter, 0.15)
 			tween.tween_property(wisp, "color", original_color, 0.5)

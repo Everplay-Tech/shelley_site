@@ -252,6 +252,25 @@ var _wisps: Array = []
 var _exit_rects: Array = []
 var _exit_beacon_timer := 0.0
 
+# ─── Item Sprite Textures (loaded once, fallback to ColorRect if missing) ──
+var _item_textures: Dictionary = {}  # "scroll" → Texture2D or null
+const ITEM_SPRITE_SCALE := 20.0 / 32.0  # 32px sprites → 20px cells
+
+func _load_item_textures() -> void:
+	var sprite_map := {
+		"scroll": "res://sprites/items/scroll.png",
+		"note": "res://sprites/items/note.png",
+		"key": "res://sprites/items/key.png",
+		"push_block": "res://sprites/items/push_block.png",
+		"ghost": "res://sprites/items/ghost.png",
+	}
+	for key in sprite_map:
+		var path: String = sprite_map[key]
+		if ResourceLoader.exists(path):
+			_item_textures[key] = load(path)
+		else:
+			_item_textures[key] = null
+
 # ─── Touch UI ──────────────────────────────────────────────────────────────
 var _touch_btns: Dictionary = {}
 
@@ -265,6 +284,7 @@ func _ready() -> void:
 	_hud = $HUD
 	_web_bridge = $WebBridge
 
+	_load_item_textures()
 	_init_rooms()
 	_select_room_sequence()
 	_build_hud()
@@ -419,29 +439,45 @@ func _spawn_items() -> void:
 		for col in range(ROOM_COLS):
 			var cell: int = _room_data[row][col]
 			if cell == Cell.ITEM_SCROLL:
-				_spawn_item_visual(col, row, SCROLL_COLOR, Vector2(8, 8))
+				_spawn_item_visual(col, row, "scroll", SCROLL_COLOR, Vector2(8, 8))
 				_total_items += 1
 			elif cell == Cell.ITEM_NOTE:
-				_spawn_item_visual(col, row, NOTE_COLOR, Vector2(8, 10))
+				_spawn_item_visual(col, row, "note", NOTE_COLOR, Vector2(8, 10))
 				_total_items += 1
 			elif cell == Cell.KEY:
-				_spawn_item_visual(col, row, KEY_COLOR, Vector2(6, 10))
+				_spawn_item_visual(col, row, "key", KEY_COLOR, Vector2(6, 10))
 
-func _spawn_item_visual(col: int, row: int, color: Color, item_size: Vector2) -> void:
-	var item := ColorRect.new()
-	item.size = item_size
-	var px := col * CELL_SIZE + (CELL_SIZE - item_size.x) / 2.0
-	var py := row * CELL_SIZE + HUD_HEIGHT + (CELL_SIZE - item_size.y) / 2.0
-	item.position = Vector2(px, py)
-	item.color = color
-	item.set_meta("grid_pos", Vector2i(col, row))
-	item.z_index = 2
-	_room_container.add_child(item)
+func _spawn_item_visual(col: int, row: int, sprite_key: String, color: Color, item_size: Vector2) -> void:
+	var cell_px := Vector2(col * CELL_SIZE, row * CELL_SIZE + HUD_HEIGHT)
+	var cell_center := cell_px + Vector2(CELL_SIZE / 2.0, CELL_SIZE / 2.0)
+	var tex: Texture2D = _item_textures.get(sprite_key)
+
+	# Container node for positioning + bob tween
+	var container := Node2D.new()
+	container.position = cell_center
+	container.set_meta("grid_pos", Vector2i(col, row))
+	container.z_index = 2
+	_room_container.add_child(container)
+
+	if tex != null:
+		var spr := Sprite2D.new()
+		spr.texture = tex
+		spr.scale = Vector2(ITEM_SPRITE_SCALE, ITEM_SPRITE_SCALE)
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		container.add_child(spr)
+	else:
+		# Fallback: colored rectangle centered at origin
+		var item := ColorRect.new()
+		item.size = item_size
+		item.position = -item_size / 2.0
+		item.color = color
+		container.add_child(item)
+
 	# Bob animation
-	var base_y: float = item.position.y
-	var tween: Tween = item.create_tween().set_loops()
-	tween.tween_property(item, "position:y", base_y - 2, 0.4)
-	tween.tween_property(item, "position:y", base_y, 0.4)
+	var base_y: float = container.position.y
+	var tween: Tween = container.create_tween().set_loops()
+	tween.tween_property(container, "position:y", base_y - 2, 0.4)
+	tween.tween_property(container, "position:y", base_y, 0.4)
 
 func _remove_item_visual(grid_pos: Vector2i) -> void:
 	for child in _room_container.get_children():
@@ -458,21 +494,32 @@ func _remove_item_visual(grid_pos: Vector2i) -> void:
 
 func _spawn_push_blocks_from_grid() -> void:
 	_push_blocks.clear()
+	var tex: Texture2D = _item_textures.get("push_block")
 	for row in range(ROOM_ROWS):
 		for col in range(ROOM_COLS):
 			if _room_data[row][col] == Cell.PUSH_BLOCK:
-				var block := ColorRect.new()
-				block.size = Vector2(CELL_SIZE - 2, CELL_SIZE - 2)
-				block.position = Vector2(col * CELL_SIZE + 1, row * CELL_SIZE + HUD_HEIGHT + 1)
-				block.color = BLOCK_COLOR
-				block.z_index = 5
-				var inner := ColorRect.new()
-				inner.size = Vector2(CELL_SIZE - 8, CELL_SIZE - 8)
-				inner.position = Vector2(3, 3)
-				inner.color = Color(BLOCK_COLOR.r * 0.75, BLOCK_COLOR.g * 0.75, BLOCK_COLOR.b * 0.75)
-				block.add_child(inner)
-				_entity_container.add_child(block)
-				_push_blocks.append({"node": block, "grid_pos": Vector2i(col, row)})
+				var container := Node2D.new()
+				container.position = Vector2(col * CELL_SIZE + 1, row * CELL_SIZE + HUD_HEIGHT + 1)
+				container.z_index = 5
+				if tex != null:
+					var spr := Sprite2D.new()
+					spr.texture = tex
+					spr.scale = Vector2(ITEM_SPRITE_SCALE, ITEM_SPRITE_SCALE)
+					spr.position = Vector2((CELL_SIZE - 2) / 2.0, (CELL_SIZE - 2) / 2.0)
+					spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+					container.add_child(spr)
+				else:
+					var block := ColorRect.new()
+					block.size = Vector2(CELL_SIZE - 2, CELL_SIZE - 2)
+					block.color = BLOCK_COLOR
+					var inner := ColorRect.new()
+					inner.size = Vector2(CELL_SIZE - 8, CELL_SIZE - 8)
+					inner.position = Vector2(3, 3)
+					inner.color = Color(BLOCK_COLOR.r * 0.75, BLOCK_COLOR.g * 0.75, BLOCK_COLOR.b * 0.75)
+					block.add_child(inner)
+					container.add_child(block)
+				_entity_container.add_child(container)
+				_push_blocks.append({"node": container, "grid_pos": Vector2i(col, row)})
 				_room_data[row][col] = Cell.FLOOR
 
 func _sync_push_block_positions() -> void:
@@ -547,26 +594,45 @@ func _spawn_hazards(room_def: Dictionary) -> void:
 	_hazards.clear()
 	if not room_def.has("hazards"):
 		return
+	var tex: Texture2D = _item_textures.get("ghost")
 	for h_def in room_def["hazards"]:
 		var path_arr: Array = h_def["path"]
 		if path_arr.is_empty():
 			continue
-		var ghost := ColorRect.new()
-		ghost.size = Vector2(12, 12)
-		ghost.color = HAZARD_COLOR
-		ghost.z_index = 8
+		var container := Node2D.new()
+		container.z_index = 8
 		var start: Vector2i = path_arr[0]
-		ghost.position = Vector2(start.x * CELL_SIZE + 4, start.y * CELL_SIZE + HUD_HEIGHT + 4)
-		_entity_container.add_child(ghost)
-		# Glow ring
-		var glow := ColorRect.new()
-		glow.size = Vector2(16, 16)
-		glow.position = Vector2(-2, -2)
-		glow.color = Color(HAZARD_COLOR.r, HAZARD_COLOR.g, HAZARD_COLOR.b, 0.15)
-		glow.z_index = -1
-		ghost.add_child(glow)
+		container.position = Vector2(start.x * CELL_SIZE + 4, start.y * CELL_SIZE + HUD_HEIGHT + 4)
+		_entity_container.add_child(container)
+		if tex != null:
+			var spr := Sprite2D.new()
+			spr.texture = tex
+			# 32px sprite → fit within ~12px ghost area, centered
+			spr.scale = Vector2(12.0 / 32.0, 12.0 / 32.0)
+			spr.position = Vector2(6, 6)  # Center of 12x12 area
+			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			container.add_child(spr)
+			# Glow ring behind sprite
+			var glow := ColorRect.new()
+			glow.size = Vector2(16, 16)
+			glow.position = Vector2(-2, -2)
+			glow.color = Color(HAZARD_COLOR.r, HAZARD_COLOR.g, HAZARD_COLOR.b, 0.15)
+			glow.z_index = -1
+			container.add_child(glow)
+		else:
+			var ghost_rect := ColorRect.new()
+			ghost_rect.size = Vector2(12, 12)
+			ghost_rect.color = HAZARD_COLOR
+			container.add_child(ghost_rect)
+			# Glow ring
+			var glow := ColorRect.new()
+			glow.size = Vector2(16, 16)
+			glow.position = Vector2(-2, -2)
+			glow.color = Color(HAZARD_COLOR.r, HAZARD_COLOR.g, HAZARD_COLOR.b, 0.15)
+			glow.z_index = -1
+			container.add_child(glow)
 		_hazards.append({
-			"node": ghost,
+			"node": container,
 			"path": path_arr,
 			"idx": 0,
 			"forward": true,
@@ -594,8 +660,8 @@ func _update_hazards(delta: float) -> void:
 			var target_px := Vector2(target_cell.x * CELL_SIZE + 4, target_cell.y * CELL_SIZE + HUD_HEIGHT + 4)
 			var tween: Tween = h["node"].create_tween()
 			tween.tween_property(h["node"], "position", target_px, 0.3)
-		# Alpha pulse
-		h["node"].color.a = 0.35 + sin(_elapsed * 3.0) * 0.15
+		# Alpha pulse (modulate works for both Sprite2D and ColorRect children)
+		h["node"].modulate.a = 0.35 + sin(_elapsed * 3.0) * 0.15
 		# Collision
 		var h_cell: Vector2i = h["path"][h["idx"]]
 		if h_cell == _player.grid_pos or h_cell == _player.target_pos:

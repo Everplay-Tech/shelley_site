@@ -10,36 +10,56 @@ var is_magnet := false
 var _caught := false
 
 func _ready() -> void:
-	# Visual — envelope rectangle (placeholder until sprites arrive)
-	var body = ColorRect.new()
-	if is_magnet:
-		body.size = Vector2(14, 10)
-		body.color = Color(0.6, 0.3, 0.8, 0.9)  # Purple magnet
-		body.position = Vector2(-7, -5)
-	else:
-		# Random envelope color variants
-		var colors = [
-			Color(0.95, 0.85, 0.6, 1.0),   # Cream
-			Color(0.85, 0.75, 0.55, 1.0),   # Parchment
-			Color(0.9, 0.9, 0.8, 1.0),      # Off-white
-			Color(0.8, 0.7, 0.5, 1.0),      # Kraft
-		]
-		body.size = Vector2(12, 8)
-		body.color = colors[randi() % colors.size()]
-		body.position = Vector2(-6, -4)
-	add_child(body)
+	# Try loading PixelLab envelope sprites (32x32 pixel art)
+	var sprite_path: String = "res://sprites/envelope/magnet.png" if is_magnet else "res://sprites/envelope/normal.png"
+	var tex: Texture2D = null
+	if ResourceLoader.exists(sprite_path):
+		tex = load(sprite_path) as Texture2D
 
-	# Seal/flap accent
-	var seal = ColorRect.new()
-	if is_magnet:
-		seal.size = Vector2(6, 3)
-		seal.color = Color(0.8, 0.4, 1.0, 0.8)  # Bright purple
-		seal.position = Vector2(-3, -5)
+	if tex:
+		# Sprite loaded — use it instead of ColorRect placeholders
+		var sprite := Sprite2D.new()
+		sprite.texture = tex
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		# Scale 32x32 sprite to match original placeholder sizes
+		# Normal envelope was 12x8 → scale ~0.375 x 0.25, average to uniform ~0.34
+		# Magnet envelope was 14x10 → scale ~0.4375 x 0.3125, average to uniform ~0.38
+		if is_magnet:
+			sprite.scale = Vector2(14.0 / 32.0, 10.0 / 32.0)
+		else:
+			sprite.scale = Vector2(12.0 / 32.0, 8.0 / 32.0)
+		add_child(sprite)
 	else:
-		seal.size = Vector2(5, 3)
-		seal.color = Color(0.8, 0.2, 0.2, 0.7)  # Red wax seal
-		seal.position = Vector2(-2.5, -4)
-	add_child(seal)
+		# Fallback — ColorRect placeholders (no sprite found)
+		var body = ColorRect.new()
+		if is_magnet:
+			body.size = Vector2(14, 10)
+			body.color = Color(0.6, 0.3, 0.8, 0.9)  # Purple magnet
+			body.position = Vector2(-7, -5)
+		else:
+			# Random envelope color variants
+			var colors = [
+				Color(0.95, 0.85, 0.6, 1.0),   # Cream
+				Color(0.85, 0.75, 0.55, 1.0),   # Parchment
+				Color(0.9, 0.9, 0.8, 1.0),      # Off-white
+				Color(0.8, 0.7, 0.5, 1.0),      # Kraft
+			]
+			body.size = Vector2(12, 8)
+			body.color = colors[randi() % colors.size()]
+			body.position = Vector2(-6, -4)
+		add_child(body)
+
+		# Seal/flap accent
+		var seal = ColorRect.new()
+		if is_magnet:
+			seal.size = Vector2(6, 3)
+			seal.color = Color(0.8, 0.4, 1.0, 0.8)  # Bright purple
+			seal.position = Vector2(-3, -5)
+		else:
+			seal.size = Vector2(5, 3)
+			seal.color = Color(0.8, 0.2, 0.2, 0.7)  # Red wax seal
+			seal.position = Vector2(-2.5, -4)
+		add_child(seal)
 
 	# Collision shape
 	var shape = CollisionShape2D.new()
@@ -96,7 +116,7 @@ func _spawn_catch_vfx() -> void:
 		p.global_position = global_position + Vector2(randf_range(-6, 6), randf_range(-6, 6))
 		get_parent().add_child(p)
 		var dir = Vector2(randf_range(-30, 30), randf_range(-50, -10))
-		var tween = p.create_tween()
+		var tween: Tween = p.create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(p, "global_position", p.global_position + dir * 0.3, 0.3)
 		tween.tween_property(p, "modulate:a", 0.0, 0.3)
@@ -110,7 +130,7 @@ func _spawn_catch_vfx() -> void:
 	lbl.add_theme_color_override("font_color", Color(1.0, 0.75, 0.0, 1.0))
 	lbl.global_position = global_position + Vector2(-6, -12)
 	get_parent().add_child(lbl)
-	var tween = lbl.create_tween()
+	var tween: Tween = lbl.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(lbl, "global_position:y", lbl.global_position.y - 20, 0.5)
 	tween.tween_property(lbl, "modulate:a", 0.0, 0.5)
