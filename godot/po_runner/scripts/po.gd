@@ -562,13 +562,14 @@ func _spirit_fist() -> void:
 	_attack_cooldown_timer = ATTACK_COOLDOWN
 	_attack_triggered = true
 	current_action = "Attacking"
+	sprite.play("fireball")
 	_spawn_smoke_arm()
 	# Emit signal so main.gd can spawn the projectile scene
 	var spawn_pos = global_position + Vector2(20, -5)
 	attack_fired.emit("spirit_fist", spawn_pos)
-	# Brief attack animation hold then return to run
+	# Return to run after animation completes (6 frames @ 12fps = 0.5s)
 	var tween = create_tween()
-	tween.tween_interval(0.15)
+	tween.tween_interval(0.35)
 	tween.tween_callback(func():
 		if not is_stumbling and not is_dead and not is_narrative_paused:
 			if is_on_floor() and not is_jumping and not is_sliding:
@@ -581,6 +582,7 @@ func _spirit_fist() -> void:
 func _ghost_whip() -> void:
 	_attack_cooldown_timer = ATTACK_COOLDOWN
 	current_action = "Attacking"
+	sprite.play("cross_punch")
 	_spawn_smoke_arm()
 	# Sweep visual — arc of spectral afterimages
 	_spawn_whip_arc()
@@ -596,9 +598,9 @@ func _ghost_whip() -> void:
 			defeated_count += 1
 	if defeated_count > 0:
 		slide_defeat_flash()  # Reuse golden feedback
-	# Return to run
+	# Return to run after animation completes (6 frames @ 12fps = 0.5s)
 	var tween = create_tween()
-	tween.tween_interval(0.2)
+	tween.tween_interval(0.35)
 	tween.tween_callback(func():
 		if not is_stumbling and not is_dead and not is_narrative_paused:
 			if is_on_floor() and not is_jumping and not is_sliding:

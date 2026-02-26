@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene load_steps=44 format=3]
 
 [ext_resource type="Script" path="res://scripts/po.gd" id="1_po"]
 [ext_resource type="Texture2D" path="res://sprites/po/run/frame_00.png" id="run_0"]
@@ -30,6 +30,18 @@
 [ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_02.png" id="stumble_2"]
 [ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_03.png" id="stumble_3"]
 [ext_resource type="Texture2D" path="res://sprites/po/stumble/frame_04.png" id="stumble_4"]
+[ext_resource type="Texture2D" path="res://sprites/po/cross_punch/frame_000.png" id="xpunch_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/cross_punch/frame_001.png" id="xpunch_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/cross_punch/frame_002.png" id="xpunch_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/cross_punch/frame_003.png" id="xpunch_3"]
+[ext_resource type="Texture2D" path="res://sprites/po/cross_punch/frame_004.png" id="xpunch_4"]
+[ext_resource type="Texture2D" path="res://sprites/po/cross_punch/frame_005.png" id="xpunch_5"]
+[ext_resource type="Texture2D" path="res://sprites/po/fireball/frame_000.png" id="fball_0"]
+[ext_resource type="Texture2D" path="res://sprites/po/fireball/frame_001.png" id="fball_1"]
+[ext_resource type="Texture2D" path="res://sprites/po/fireball/frame_002.png" id="fball_2"]
+[ext_resource type="Texture2D" path="res://sprites/po/fireball/frame_003.png" id="fball_3"]
+[ext_resource type="Texture2D" path="res://sprites/po/fireball/frame_004.png" id="fball_4"]
+[ext_resource type="Texture2D" path="res://sprites/po/fireball/frame_005.png" id="fball_5"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_po"]
 animations = [{
@@ -91,6 +103,30 @@ animations = [{
 "loop": false,
 "name": &"stumble",
 "speed": 8.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("xpunch_0")},
+{"duration": 1.0, "texture": ExtResource("xpunch_1")},
+{"duration": 1.0, "texture": ExtResource("xpunch_2")},
+{"duration": 1.0, "texture": ExtResource("xpunch_3")},
+{"duration": 1.0, "texture": ExtResource("xpunch_4")},
+{"duration": 1.0, "texture": ExtResource("xpunch_5")}
+],
+"loop": false,
+"name": &"cross_punch",
+"speed": 12.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("fball_0")},
+{"duration": 1.0, "texture": ExtResource("fball_1")},
+{"duration": 1.0, "texture": ExtResource("fball_2")},
+{"duration": 1.0, "texture": ExtResource("fball_3")},
+{"duration": 1.0, "texture": ExtResource("fball_4")},
+{"duration": 1.0, "texture": ExtResource("fball_5")}
+],
+"loop": false,
+"name": &"fireball",
+"speed": 12.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_po"]
