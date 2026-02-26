@@ -14,22 +14,25 @@ const guitars = [
     name: "The Djinn",
     woods: "Wenge / Sitka Spruce",
     year: "2025",
-    description: "Dark-toned parlor guitar with supernatural resonance. Inspired by the Djinn World.",
-    status: "In Progress",
+    description: "Dark-toned parlor guitar with supernatural resonance. Scalloped X-bracing voiced for the low end. Inspired by the Djinn World.",
+    status: "Building",
+    accent: "from-purple-500/10",
   },
   {
     name: "Smoke Ring",
     woods: "Mahogany / Cedar",
     year: "2025",
-    description: "Warm, smoky midrange with fingerstyle-friendly action. Built for late-night sessions.",
-    status: "Concept",
+    description: "Warm, smoky midrange with fingerstyle-friendly action. Cedar top for immediate response. Built for late-night sessions.",
+    status: "Design",
+    accent: "from-orange-500/10",
   },
   {
     name: "Gold Tooth",
     woods: "Maple / Engelmann Spruce",
-    year: "2025",
-    description: "Bright, articulate, with a gold-accented rosette. Cuts through any mix.",
+    year: "2026",
+    description: "Bright, articulate, with a gold-accented rosette. Hard maple back and sides for projection that cuts through any mix.",
     status: "Concept",
+    accent: "from-shelley-amber/10",
   },
 ];
 
@@ -56,17 +59,21 @@ export default function Gallery() {
         </p>
       </section>
 
-      {/* ─── MINI-GAME (when available) ─── */}
+      {/* ─── GALLERY RUN ─── */}
       {gameConfig && (
-        <section className="bg-white/5 rounded-3xl p-8 border border-white/10">
-          <div className="flex justify-between items-end mb-6">
+        <section className="bg-gradient-to-b from-purple-500/5 to-transparent rounded-3xl p-8 border border-purple-500/10">
+          <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-xl font-bold">{gameConfig.label}</h3>
-              <p className="text-white/40 text-sm">Mini-game for this section</p>
+              <h3 className="text-xl font-bold text-purple-300">Gallery Run</h3>
+              <p className="text-white/50 text-sm">
+                Pilot the Axis Mundi and defend the gallery from haunted artwork
+              </p>
             </div>
-            <span className="text-xs font-mono text-shelley-amber bg-shelley-amber/10 px-2 py-1 rounded">
-              GODOT 4.3 EMBED
-            </span>
+            <div className="text-right">
+              <span className="text-[10px] font-mono text-white/25 block">
+                Arrows to move &middot; Space to fire
+              </span>
+            </div>
           </div>
           <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
@@ -142,6 +149,41 @@ export default function Gallery() {
         </div>
       </section>
 
+      {/* ─── WHAT MAKES A SHELLEY ─── */}
+      <section>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="h-px flex-1 bg-white/10" />
+          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
+            What Makes a Shelley Guitar
+          </h2>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white/5 rounded-xl border border-white/5 p-5">
+            <h4 className="font-bold text-white/80 mb-2">Hand-Voiced Bracing</h4>
+            <p className="text-white/45 text-sm leading-relaxed">
+              Every brace is scalloped and tap-tuned by ear. No CNC, no templates.
+              The top is shaped to respond to the specific wood&apos;s resonance.
+            </p>
+          </div>
+          <div className="bg-white/5 rounded-xl border border-white/5 p-5">
+            <h4 className="font-bold text-white/80 mb-2">Player-First Design</h4>
+            <p className="text-white/45 text-sm leading-relaxed">
+              Neck profiles carved to the player&apos;s hand. Action set to their style.
+              Every Shelley guitar is built for a specific person, not a shelf.
+            </p>
+          </div>
+          <div className="bg-white/5 rounded-xl border border-white/5 p-5">
+            <h4 className="font-bold text-white/80 mb-2">Thin Finish, Big Sound</h4>
+            <p className="text-white/45 text-sm leading-relaxed">
+              Ultra-thin lacquer or hand-rubbed oil. We never choke a top with thick poly.
+              The finish protects without muting the wood&apos;s natural voice.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ─── GUITAR SHOWCASE ─── */}
       <section>
         <div className="flex items-center gap-3 mb-8">
@@ -156,12 +198,12 @@ export default function Gallery() {
           {guitars.map((guitar) => (
             <div
               key={guitar.name}
-              className="group flex flex-col gap-4 bg-white/5 rounded-2xl border border-white/5 hover:border-shelley-amber/30 transition-colors overflow-hidden"
+              className={`group flex flex-col gap-4 bg-gradient-to-b ${guitar.accent} to-white/5 rounded-2xl border border-white/5 hover:border-shelley-amber/30 transition-colors overflow-hidden`}
             >
               {/* Image placeholder */}
               <div className="aspect-[4/3] bg-white/[0.03] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-2 opacity-15 group-hover:opacity-25 transition-opacity">
-                  <span className="text-3xl">🎸</span>
+                  <span className="text-3xl">&#127928;</span>
                   <span className="text-[9px] font-mono tracking-wider uppercase">
                     Photo Coming Soon
                   </span>
@@ -186,6 +228,16 @@ export default function Gallery() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Commission CTA */}
+        <div className="mt-8 text-center">
+          <a
+            href="/contact"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-shelley-amber/10 text-shelley-amber font-bold text-sm rounded-lg border border-shelley-amber/20 hover:bg-shelley-amber/20 transition-colors"
+          >
+            Commission a Custom Build &rarr;
+          </a>
         </div>
       </section>
     </div>

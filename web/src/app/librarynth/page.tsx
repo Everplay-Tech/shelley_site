@@ -89,23 +89,23 @@ export default function Librarynth() {
         </p>
       </section>
 
-      {/* ─── MINI-GAME (when available) ─── */}
+      {/* ─── LIBRARYNTH QUEST ─── */}
       {gameConfig && (
-        <section className="bg-white/5 rounded-3xl p-8 border border-white/10">
-          <div className="flex justify-between items-end mb-6">
+        <section className="bg-gradient-to-b from-blue-500/5 to-transparent rounded-3xl p-8 border border-blue-500/10">
+          <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-xl font-bold">{gameConfig.label}</h3>
-              <p className="text-white/40 text-sm">Mini-game for this section</p>
+              <h3 className="text-xl font-bold text-blue-300">Librarynth Quest</h3>
+              <p className="text-white/50 text-sm">
+                Guide the Scholar through the magical library maze &mdash; collect scrolls, find keys, unlock doors
+              </p>
             </div>
-            <span className="text-xs font-mono text-shelley-amber bg-shelley-amber/10 px-2 py-1 rounded">
-              GODOT 4.3 EMBED
-            </span>
+            <div className="text-right">
+              <span className="text-[10px] font-mono text-white/25 block">
+                Arrow keys or d-pad to move
+              </span>
+            </div>
           </div>
-          <GodotEmbed
-            gameName={gameConfig.gameName}
-            onEvent={handleGodotEvent}
-            className="max-h-[300px]"
-          />
+          <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
       )}
 

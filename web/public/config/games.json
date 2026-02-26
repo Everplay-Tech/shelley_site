@@ -1,31 +1,31 @@
 {
-  "version": 1,
+  "version": 2,
   "routes": {
     "/workshop": {
       "gameName": "workshop_craft",
       "label": "Entering the Workshop...",
-      "available": false,
+      "available": true,
       "skipAllowed": true,
       "rewardMultiplier": 1.0
     },
     "/gallery": {
       "gameName": "gallery_run",
       "label": "Heading to the Gallery...",
-      "available": false,
+      "available": true,
       "skipAllowed": true,
       "rewardMultiplier": 1.0
     },
     "/librarynth": {
       "gameName": "librarynth_quest",
       "label": "Entering the Librarynth...",
-      "available": false,
+      "available": true,
       "skipAllowed": true,
       "rewardMultiplier": 1.0
     },
     "/contact": {
       "gameName": "contact_dash",
       "label": "Reaching Out...",
-      "available": false,
+      "available": true,
       "skipAllowed": true,
       "rewardMultiplier": 1.0
     }
@@ -37,9 +37,10 @@
       "available": true
     },
     "returning": {
-      "gameName": "po_moped",
-      "label": "Po rides again!",
-      "available": false
+      "gameName": "po_runner",
+      "label": "Po's back!",
+      "available": true,
+      "mode": "ng_plus"
     }
   }
 }

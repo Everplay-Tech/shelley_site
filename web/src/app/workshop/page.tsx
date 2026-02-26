@@ -7,6 +7,36 @@ import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
 import type { GodotEvent } from "@/lib/godot-messages";
 
+/* ─── Current builds ─────────────────────────────────────────────────────── */
+
+const currentBuilds = [
+  {
+    name: "The Djinn",
+    stage: "Bracing & Voicing",
+    progress: 65,
+    woods: "Wenge body, Sitka Spruce top",
+    note: "Dark-toned parlor guitar inspired by the Djinn World. Scalloped X-bracing, voiced for supernatural resonance.",
+  },
+  {
+    name: "Smoke Ring",
+    stage: "Design Phase",
+    progress: 15,
+    woods: "Mahogany body, Cedar top",
+    note: "Warm, smoky midrange. Fingerstyle-friendly action. Built for late-night sessions.",
+  },
+];
+
+/* ─── Toolkit ────────────────────────────────────────────────────────────── */
+
+const tools = [
+  { name: "Hand Planes", desc: "Lie-Nielsen block & smoothing planes for top and brace shaping" },
+  { name: "Chisels", desc: "Japanese bench chisels for mortise work and detailed carving" },
+  { name: "Saws", desc: "Dozuki saws for fret slots, coping saw for headstock and curves" },
+  { name: "Bending Iron", desc: "Heated bending iron for side and cutaway shaping" },
+  { name: "Go-Bar Deck", desc: "Pressure-based gluing system for bracing and top assembly" },
+  { name: "Fret Press", desc: "Arbor press with caul inserts for precise fret seating" },
+];
+
 const steps = [
   {
     id: "01",
@@ -67,17 +97,21 @@ export default function Workshop() {
         </p>
       </section>
 
-      {/* ─── MINI-GAME (when available) ─── */}
+      {/* ─── WORKSHOP CRAFT ─── */}
       {gameConfig && (
-        <section className="bg-white/5 rounded-3xl p-8 border border-white/10">
-          <div className="flex justify-between items-end mb-6">
+        <section className="bg-gradient-to-b from-shelley-wood/10 to-transparent rounded-3xl p-8 border border-shelley-wood/20">
+          <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-xl font-bold">{gameConfig.label}</h3>
-              <p className="text-white/40 text-sm">Mini-game for this section</p>
+              <h3 className="text-xl font-bold text-[#c4956a]">Workshop Craft</h3>
+              <p className="text-white/50 text-sm">
+                Stack wood blocks Tetris-style &mdash; clear lines to prove your craftsmanship
+              </p>
             </div>
-            <span className="text-xs font-mono text-shelley-amber bg-shelley-amber/10 px-2 py-1 rounded">
-              GODOT 4.3 EMBED
-            </span>
+            <div className="text-right">
+              <span className="text-[10px] font-mono text-white/25 block">
+                Arrows to move &middot; Up to rotate &middot; Space to drop
+              </span>
+            </div>
           </div>
           <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
@@ -118,6 +152,74 @@ export default function Workshop() {
               <p className="text-white/30 text-xs leading-relaxed italic">
                 {step.detail}
               </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── CURRENT BUILDS ─── */}
+      <section>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="h-px flex-1 bg-white/10" />
+          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
+            Current Builds
+          </h2>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {currentBuilds.map((build) => (
+            <div
+              key={build.name}
+              className="bg-white/5 rounded-2xl border border-white/5 p-6 hover:border-shelley-amber/20 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-shelley-amber">
+                  {build.name}
+                </h3>
+                <span className="text-[10px] font-mono text-white/40 bg-white/5 px-2 py-0.5 rounded">
+                  {build.stage}
+                </span>
+              </div>
+              <p className="text-xs font-mono text-white/30 mb-3">
+                {build.woods}
+              </p>
+              <p className="text-white/50 text-sm leading-relaxed mb-4">
+                {build.note}
+              </p>
+              {/* Progress bar */}
+              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-shelley-amber/60 to-shelley-amber rounded-full transition-all"
+                  style={{ width: `${build.progress}%` }}
+                />
+              </div>
+              <p className="text-[10px] font-mono text-white/25 mt-1.5 text-right">
+                {build.progress}% complete
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── TOOLKIT ─── */}
+      <section>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="h-px flex-1 bg-white/10" />
+          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
+            The Toolkit
+          </h2>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {tools.map((tool) => (
+            <div
+              key={tool.name}
+              className="bg-white/[0.03] rounded-xl border border-white/5 p-4 hover:border-white/10 transition-colors"
+            >
+              <h4 className="text-sm font-bold text-white/80 mb-1">{tool.name}</h4>
+              <p className="text-white/35 text-xs leading-relaxed">{tool.desc}</p>
             </div>
           ))}
         </div>
