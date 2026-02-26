@@ -1,0 +1,38 @@
+[gd_scene load_steps=8 format=3 uid="uid://gallery_run_main"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/ship.gd" id="2_ship"]
+[ext_resource type="Script" path="res://scripts/web_bridge.gd" id="3_bridge"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ship"]
+size = Vector2(32, 48)
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.07, 0.063, 0.118, 1)
+
+[node name="Ship" type="Area2D" parent="."]
+position = Vector2(320, 330)
+collision_layer = 2
+collision_mask = 24
+script = ExtResource("2_ship")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ship"]
+shape = SubResource("RectangleShape2D_ship")
+
+[node name="BulletContainer" type="Node2D" parent="."]
+
+[node name="EnemyContainer" type="Node2D" parent="."]
+
+[node name="EnemyBulletContainer" type="Node2D" parent="."]
+
+[node name="WispContainer" type="Node2D" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="WebBridge" type="Node" parent="."]
+script = ExtResource("3_bridge")
