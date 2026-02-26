@@ -25,6 +25,9 @@ var _hit := false
 
 func _ready() -> void:
 	add_to_group("world_scrollable")
+	add_to_group("enemies")
+	# Layer 3 (bitmask 4) — for NG+ spirit fist projectile detection
+	collision_layer = collision_layer | 4
 	sprite.play("move")
 
 func _process(delta: float) -> void:
@@ -74,6 +77,12 @@ func _on_body_entered(body: Node2D) -> void:
 		_hit = true
 		body.stumble()
 		enemy_hit_po.emit(enemy_type)
+
+## Public API for NG+ attacks (Spirit Fist / Ghost Whip)
+func take_hit() -> void:
+	if _defeated:
+		return
+	_die()
 
 func _die() -> void:
 	_defeated = true

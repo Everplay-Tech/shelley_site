@@ -6,17 +6,19 @@ import type { GodotCommand } from "@/lib/godot-messages";
 interface GameBoyControlsProps {
   sendCommand: (cmd: GodotCommand) => void;
   isNarrative: boolean;
+  isNgPlus?: boolean;
 }
 
 /**
  * Full Game Boy Color-style controller overlay.
  * D-pad on the left, A/B buttons on the right.
- * Down (slide), A (jump/advance), B (slide) are functional.
+ * Down (slide), A (jump/advance), B (slide), C (attack, NG+ only) are functional.
  * Up/Left/Right are visual — future expansion.
  */
 export default function GameBoyControls({
   sendCommand,
   isNarrative,
+  isNgPlus = false,
 }: GameBoyControlsProps) {
   // ─── D-pad Down = Slide ───
   const onDpadDownStart = useCallback(
@@ -64,6 +66,22 @@ export default function GameBoyControls({
     (e: React.TouchEvent) => {
       e.preventDefault();
       sendCommand({ command: "slide_release" });
+    },
+    [sendCommand]
+  );
+
+  // ─── C Button = Attack (NG+ only) ───
+  const onCStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      sendCommand({ command: "attack1_press" });
+    },
+    [sendCommand]
+  );
+  const onCEnd = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      sendCommand({ command: "attack1_release" });
     },
     [sendCommand]
   );
@@ -119,8 +137,8 @@ export default function GameBoyControls({
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[6px] h-[6px] rounded-full bg-white/8 pointer-events-none" />
         </div>
 
-        {/* ─── A / B BUTTONS ─── */}
-        <div className="relative w-[120px] h-[100px]">
+        {/* ─── A / B / C BUTTONS ─── */}
+        <div className={`relative ${isNgPlus ? "w-[140px] h-[120px]" : "w-[120px] h-[100px]"}`}>
           {/* B button — top-left (slide) */}
           <button
             onTouchStart={onBStart}
@@ -138,12 +156,26 @@ export default function GameBoyControls({
             onTouchStart={onAStart}
             onTouchEnd={onAEnd}
             onTouchCancel={onAEnd}
-            className="pointer-events-auto absolute bottom-0 right-0 w-[52px] h-[52px] rounded-full bg-[#2C2C2C]/80 border-2 border-shelley-amber/30 flex items-center justify-center active:bg-[#3a3a3a] active:border-shelley-amber/60 active:scale-95 transition-all select-none touch-none"
+            className={`pointer-events-auto absolute ${isNgPlus ? "bottom-0 right-[44px]" : "bottom-0 right-0"} w-[52px] h-[52px] rounded-full bg-[#2C2C2C]/80 border-2 border-shelley-amber/30 flex items-center justify-center active:bg-[#3a3a3a] active:border-shelley-amber/60 active:scale-95 transition-all select-none touch-none`}
           >
             <span className="text-shelley-amber text-base font-bold leading-none">
               A
             </span>
           </button>
+
+          {/* C button — NG+ attack (top-right, purple accent) */}
+          {isNgPlus && (
+            <button
+              onTouchStart={onCStart}
+              onTouchEnd={onCEnd}
+              onTouchCancel={onCEnd}
+              className="pointer-events-auto absolute top-0 right-0 w-[48px] h-[48px] rounded-full bg-[#2C2C2C]/80 border-2 border-purple-400/30 flex items-center justify-center active:bg-[#3a3a3a] active:border-purple-400/60 active:scale-95 transition-all select-none touch-none"
+            >
+              <span className="text-purple-400 text-sm font-bold leading-none">
+                C
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </div>

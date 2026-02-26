@@ -11,6 +11,10 @@ var state_timer := 0.0
 var game_started := false
 var _encounter_enemy: Area2D = null  # Active encounter enemy (scroll-stop)
 const STATE_REPORT_INTERVAL := 2.0
+var _ng_plus_mode := false
+
+# Spirit Fist projectile scene (built in code — no .tscn needed)
+const SpiritFistScript = preload("res://scripts/spirit_fist.gd")
 
 # ============================================================
 # SPIRIT WISP SYSTEM — Ambient World Spirits
@@ -62,6 +66,14 @@ func _ready() -> void:
 	web_bridge.host_command_received.connect(_on_host_command)
 	enemy_spawner.enemy_spawned.connect(_on_enemy_spawned)
 	enemy_spawner.obstacle_spawner_ref = obstacle_spawner
+	po.attack_fired.connect(_on_attack_fired)
+
+	# Register attack1 input action (X key) if not already present
+	if not InputMap.has_action("attack1"):
+		InputMap.add_action("attack1")
+		var ev = InputEventKey.new()
+		ev.keycode = KEY_X
+		InputMap.action_add_event("attack1", ev)
 
 	# Birth the spirit world
 	_create_spirit_system()
@@ -90,6 +102,13 @@ func _process(delta: float) -> void:
 
 	if not game_started or is_game_over:
 		return
+
+	# NG+ keyboard attack input (X key)
+	if _ng_plus_mode:
+		if Input.is_action_just_pressed("attack1"):
+			po.attack_press()
+		if Input.is_action_just_released("attack1"):
+			po.attack_release()
 
 	if narrative.is_active or po.is_stumbling:
 		return
@@ -181,6 +200,11 @@ func _on_host_command(command: String, _data: Dictionary) -> void:
 	match command:
 		"start":
 			if not game_started:
+				# Check for NG+ mode
+				var mode = _data.get("mode", "standard")
+				if mode == "ng_plus":
+					_ng_plus_mode = true
+					po.activate_ng_plus()
 				game_started = true
 				po.start_running()
 				ground.resume()
@@ -204,6 +228,22 @@ func _on_host_command(command: String, _data: Dictionary) -> void:
 			Input.action_press("advance")
 		"advance_release":
 			Input.action_release("advance")
+		# NG+ attack virtual input
+		"attack1_press":
+			po.attack_press()
+		"attack1_release":
+			po.attack_release()
+
+func _on_attack_fired(attack_type: String, spawn_pos: Vector2) -> void:
+	if attack_type == "spirit_fist":
+		var fist = Area2D.new()
+		fist.set_script(SpiritFistScript)
+		fist.global_position = spawn_pos
+		fist.scroll_speed = game_speed
+		# Set collision: layer 0 (none), mask layer 3 (enemies)
+		fist.collision_layer = 0
+		fist.collision_mask = 4  # Layer 3 = enemies
+		add_child(fist)
 
 func _on_enemy_spawned(enemy: Area2D) -> void:
 	enemy.enemy_defeated.connect(_on_enemy_defeated)

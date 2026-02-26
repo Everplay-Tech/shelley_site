@@ -14,6 +14,8 @@ export interface RouteGameConfig {
   skipAllowed?: boolean;
   /** Score multiplier for reward calculations */
   rewardMultiplier?: number;
+  /** Game mode passed to Godot start command (e.g. "ng_plus") */
+  mode?: string;
 }
 
 interface GamesConfig {
@@ -37,7 +39,7 @@ const DEFAULT_CONFIG: GamesConfig = {
   },
   landing: {
     firstVisit: { gameName: "po_runner", label: "Meet Po...", available: true },
-    returning: { gameName: "po_moped", label: "Po rides again!", available: true },
+    returning: { gameName: "po_runner", label: "Po's back!", available: true, mode: "ng_plus" },
   },
 };
 

@@ -2,7 +2,7 @@
 
 export interface StartCommand {
   command: "start";
-  data?: { level?: string };
+  data?: { level?: string; mode?: "standard" | "ng_plus" };
 }
 
 export interface PauseCommand {
@@ -35,7 +35,9 @@ export interface VirtualInputCommand {
     | "slide_press"
     | "slide_release"
     | "advance_press"
-    | "advance_release";
+    | "advance_release"
+    | "attack1_press"
+    | "attack1_release";
 }
 
 export type GodotCommand =

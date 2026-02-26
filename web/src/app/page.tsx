@@ -30,14 +30,13 @@ export default function Home() {
     setIsMobile(touch);
   }, []);
 
+  const isNgPlus = gameConfig.mode === "ng_plus";
+
   useEffect(() => {
     // Check both cookie (legacy) and server state
     const returning = hasCookie(ONBOARDING_COOKIE) || progress.onboardingComplete;
     setGameConfig(getLandingGame(returning));
-    if (returning) {
-      setShowGame(false);
-      setScreen("done");
-    }
+    // Returning users now play NG+ instead of skipping
   }, [progress.onboardingComplete]);
 
   const handleGodotEvent = useCallback((event: GodotEvent) => {
@@ -82,8 +81,11 @@ export default function Home() {
 
   const handleStart = useCallback(() => {
     setScreen("playing");
-    embedRef.current?.sendCommand({ command: "start" });
-  }, []);
+    embedRef.current?.sendCommand({
+      command: "start",
+      data: { mode: (gameConfig.mode as "standard" | "ng_plus") ?? "standard" },
+    });
+  }, [gameConfig.mode]);
 
   const handleSkip = useCallback(() => {
     reportGameEvent({ type: "skipped", gameName: "po_runner" });
@@ -124,15 +126,17 @@ export default function Home() {
               <div className="flex flex-col items-center gap-8 px-6 text-center max-w-md">
                 <div>
                   <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-shelley-amber mb-2">
-                    WELCOME!
+                    {isNgPlus ? "PO'S BACK" : "WELCOME!"}
                   </h1>
                   <p className="text-xl sm:text-2xl font-bold text-white/90">
-                    To our LABS!!!
+                    {isNgPlus ? "Stronger. With new powers." : "To our LABS!!!"}
                   </p>
                 </div>
 
                 <p className="text-sm text-white/50 font-mono">
-                  Choose to play or skip intro. Have a nice day
+                  {isNgPlus
+                    ? "New jacket. More health. Smoke arm attacks."
+                    : "Choose to play or skip intro. Have a nice day"}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -184,9 +188,9 @@ export default function Home() {
                       <span className="text-[10px] font-mono text-white/40 tracking-wider">D-PAD</span>
                     </div>
 
-                    {/* A/B visual */}
+                    {/* A/B/C visual */}
                     <div className="flex flex-col items-center gap-2">
-                      <div className="relative w-[72px] h-[60px]">
+                      <div className={`relative ${isNgPlus ? "w-[90px] h-[70px]" : "w-[72px] h-[60px]"}`}>
                         {/* B */}
                         <div className="absolute top-0 left-0 w-[32px] h-[32px] rounded-full bg-[#333] border border-white/15 flex items-center justify-center">
                           <span className="text-white/40 text-xs font-bold">B</span>
@@ -195,6 +199,12 @@ export default function Home() {
                         <div className="absolute bottom-0 right-0 w-[32px] h-[32px] rounded-full bg-[#333] border border-shelley-amber/30 flex items-center justify-center">
                           <span className="text-shelley-amber text-xs font-bold">A</span>
                         </div>
+                        {/* C — NG+ attack button */}
+                        {isNgPlus && (
+                          <div className="absolute top-0 right-0 w-[28px] h-[28px] rounded-full bg-[#333] border border-purple-400/30 flex items-center justify-center">
+                            <span className="text-purple-400 text-[10px] font-bold">C</span>
+                          </div>
+                        )}
                       </div>
                       <span className="text-[10px] font-mono text-white/40 tracking-wider">BUTTONS</span>
                     </div>
@@ -249,12 +259,33 @@ export default function Home() {
                         )}
                       </div>
                     </div>
+
+                    {/* Attack — NG+ only */}
+                    {isNgPlus && (
+                      <>
+                        <div className="w-full h-px bg-white/8 my-1" />
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-full bg-[#333] border border-purple-400/40 flex items-center justify-center shrink-0">
+                            <span className="text-purple-400 text-[10px] font-bold">C</span>
+                          </div>
+                          <div className="flex-1">
+                            <span className="text-white/80 font-mono text-xs font-bold">ATTACK</span>
+                            <span className="text-white/25 font-mono text-[10px] ml-2">tap = fist, hold = whip</span>
+                            {!isMobile && (
+                              <span className="text-white/30 font-mono text-[10px] ml-1">/ X</span>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Tip */}
                   <div className="mt-5 pt-4 border-t border-white/5">
                     <p className="text-[10px] text-white/25 font-mono leading-relaxed">
-                      Jump on enemies to defeat them. Slide through them for bonus points.
+                      {isNgPlus
+                        ? "Stomp or slide enemies. Tap C for Spirit Fist. Hold C for Ghost Whip."
+                        : "Jump on enemies to defeat them. Slide through them for bonus points."}
                     </p>
                   </div>
                 </div>
@@ -286,6 +317,7 @@ export default function Home() {
             <GameBoyControls
               sendCommand={sendCommand}
               isNarrative={isNarrative}
+              isNgPlus={isNgPlus}
             />
           )}
 

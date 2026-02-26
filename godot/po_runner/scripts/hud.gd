@@ -10,14 +10,15 @@ const HEART_FLASH := Color(1.0, 1.0, 1.0, 1.0)     # White flash on damage
 const HEART_HEAL := Color(0.4, 1.0, 0.6, 1.0)      # Green flash on heal
 const HEART_SIZE := Vector2(12, 10)
 const HEART_SPACING := 3.0
-const MAX_HEARTS := 5
+const DEFAULT_MAX_HEARTS := 5
+var max_hearts := DEFAULT_MAX_HEARTS
 
 const WOOD_COLOR := Color(0.29, 0.216, 0.157, 1.0)  # #4a3728
 const AMBER_COLOR := Color(1.0, 0.749, 0.0, 1.0)    # #ffbf00
 const CHARCOAL := Color(0.1, 0.1, 0.1, 1.0)         # #1a1a1a
 
 var _hearts: Array[ColorRect] = []
-var _prev_health := MAX_HEARTS
+var _prev_health := DEFAULT_MAX_HEARTS
 var _game_over_visible := false
 var _trophies: Dictionary = {}  # food_name → {node, count_label, count}
 
@@ -33,14 +34,8 @@ var _trophies: Dictionary = {}  # food_name → {node, count_label, count}
 @onready var danger_vignette: ColorRect = $DangerVignette
 
 func _ready() -> void:
-	# Build hearts
-	for i in range(MAX_HEARTS):
-		var heart = ColorRect.new()
-		heart.custom_minimum_size = HEART_SIZE
-		heart.size = HEART_SIZE
-		heart.color = HEART_FULL
-		heart_container.add_child(heart)
-		_hearts.append(heart)
+	# Build hearts (initial count — may be rebuilt on NG+ activation)
+	_build_hearts(max_hearts)
 
 	# Hide game over panel
 	game_over_panel.visible = false
@@ -61,21 +56,37 @@ func _input(event: InputEvent) -> void:
 
 # ---- Health Hearts ----
 
-func update_hearts(current: int, _max_val: int) -> void:
-	for i in range(MAX_HEARTS):
+func update_hearts(current: int, max_val: int) -> void:
+	# Rebuild if max changed (NG+ activation)
+	if max_val != max_hearts:
+		_build_hearts(max_val)
+		_prev_health = max_val
+	for i in range(max_hearts):
 		if i < current:
-			# Full heart — if this was previously empty, flash green (heal)
 			if i >= _prev_health:
 				_flash_heart(i, HEART_HEAL, HEART_FULL)
 			else:
 				_hearts[i].color = HEART_FULL
 		else:
-			# Empty heart — if this was previously full, flash white (damage)
 			if i < _prev_health:
 				_flash_heart(i, HEART_FLASH, HEART_EMPTY)
 			else:
 				_hearts[i].color = HEART_EMPTY
 	_prev_health = current
+
+func _build_hearts(count: int) -> void:
+	# Clear existing hearts
+	for h in _hearts:
+		h.queue_free()
+	_hearts.clear()
+	max_hearts = count
+	for i in range(max_hearts):
+		var heart = ColorRect.new()
+		heart.custom_minimum_size = HEART_SIZE
+		heart.size = HEART_SIZE
+		heart.color = HEART_FULL
+		heart_container.add_child(heart)
+		_hearts.append(heart)
 
 func _flash_heart(idx: int, flash_color: Color, end_color: Color) -> void:
 	var heart = _hearts[idx]

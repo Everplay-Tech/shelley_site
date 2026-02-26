@@ -2,11 +2,13 @@ extends CharacterBody2D
 ## Po character controller — Sega Genesis feel (Shinobi 3 / Contra Hard Corps).
 ## Auto-runs, player controls jump, slide, and fast-fall.
 ## Tuned for snappy, responsive inputs with Sly Cooper juice layer.
+## NG+ adds Spirit Fist (ranged) and Ghost Whip (melee) attacks via smoke arm VFX.
 
 signal stumbled
 signal pick_collected(value: int, food_name: String)
 signal health_changed(current: int, max_val: int)
 signal died
+signal attack_fired(attack_type: String, position: Vector2)  # For main.gd to spawn projectile
 
 # --- Physics Tuning (Sega Genesis feel) ---
 const GRAVITY := 1200.0           # Higher gravity = snappier falls
@@ -39,11 +41,13 @@ const GHOST_DEFEAT_COLOR := Color(1.0, 0.8, 0.2, 0.7)  # Golden amber for enemy 
 @export var can_double_jump := true
 
 # --- Health ---
-const MAX_HEALTH := 5
+const DEFAULT_HEALTH := 5
+const NG_PLUS_HEALTH := 7
 const INVINCIBILITY_DURATION := 1.5
 const HEAL_FLASH_COLOR := Color(0.4, 1.5, 0.6, 1.0)  # Overbright green
 
-var health := MAX_HEALTH
+var max_health := DEFAULT_HEALTH
+var health := DEFAULT_HEALTH
 var is_dead := false
 var _invincible := false
 var _invincible_timer := 0.0
@@ -56,6 +60,23 @@ var is_narrative_paused := false
 var jumps_remaining := 2
 var current_action := "Idle"
 var game_started := false
+
+# --- NG+ Attack System ---
+var is_ng_plus := false
+const ATTACK_COOLDOWN := 0.6         # Shared cooldown between Spirit Fist / Ghost Whip
+const GHOST_WHIP_HOLD := 0.25        # Hold threshold to trigger whip vs fist
+const GHOST_WHIP_RADIUS := 55.0      # Melee arc radius
+const SPIRIT_FIST_SPEED := 350.0     # Projectile speed
+const SPIRIT_FIST_RANGE := 700.0     # Max travel distance
+const SMOKE_ARM_COLOR := Color(0.5, 0.75, 1.0, 0.7)     # Spectral blue-white
+const SMOKE_ARM_FADE := Color(0.5, 0.75, 1.0, 0.0)
+const WHIP_ARC_COLOR := Color(0.8, 0.5, 1.0, 0.6)       # Spirit purple arc
+const FIST_TRAIL_COLOR := Color(0.5, 0.8, 1.0, 0.5)     # Spectral blue trail
+
+var _attack_cooldown_timer := 0.0
+var _attack_held := false
+var _attack_hold_timer := 0.0
+var _attack_triggered := false  # Prevents double-trigger (whip on hold + fist on release)
 
 # --- Internal timers ---
 var coyote_timer := 0.0
@@ -176,6 +197,16 @@ func _physics_process(delta: float) -> void:
 			_end_slide()
 			if _can_jump():
 				_do_jump()
+
+	# --- NG+ Attack cooldown + hold detection ---
+	if is_ng_plus:
+		if _attack_cooldown_timer > 0:
+			_attack_cooldown_timer -= delta
+		if _attack_held:
+			_attack_hold_timer += delta
+			if _attack_hold_timer >= GHOST_WHIP_HOLD and not _attack_triggered:
+				_attack_triggered = true
+				_ghost_whip()
 
 	# --- Ghost trail during jump/slide ---
 	if is_jumping or is_sliding:
@@ -369,7 +400,7 @@ func stumble(damage: int = 1) -> void:
 	if is_stumbling or is_narrative_paused or _invincible or is_dead:
 		return
 	health -= damage
-	health_changed.emit(health, MAX_HEALTH)
+	health_changed.emit(health, max_health)
 	if health <= 0:
 		health = 0
 		_die()
@@ -438,9 +469,9 @@ func _on_stumble_recover() -> void:
 # --- Pick Collection ---
 func collect_pick(value: int = 1, heals: bool = false, food_name: String = "") -> void:
 	pick_collected.emit(value, food_name)
-	if heals and health < MAX_HEALTH:
-		health = mini(health + 1, MAX_HEALTH)
-		health_changed.emit(health, MAX_HEALTH)
+	if heals and health < max_health:
+		health = mini(health + 1, max_health)
+		health_changed.emit(health, max_health)
 		_heal_flash()
 	else:
 		_pick_flash()
@@ -491,3 +522,143 @@ func exit_narrative() -> void:
 	is_narrative_paused = false
 	sprite.play("run")
 	current_action = "Running"
+
+# ============================================================
+# NG+ SYSTEM — Upgraded Po
+# ============================================================
+
+func activate_ng_plus() -> void:
+	is_ng_plus = true
+	max_health = NG_PLUS_HEALTH
+	health = max_health
+	health_changed.emit(health, max_health)
+	# Sprite swap happens when NG+ sprites are loaded — for now, tint crimson
+	sprite.modulate = Color(1.2, 0.85, 0.85, 1.0)
+
+# --- Attack Input ---
+
+func attack_press() -> void:
+	if not is_ng_plus or not game_started or is_dead or is_stumbling or is_narrative_paused:
+		return
+	if _attack_cooldown_timer > 0:
+		return
+	_attack_held = true
+	_attack_hold_timer = 0.0
+	_attack_triggered = false
+
+func attack_release() -> void:
+	if not _attack_held:
+		return
+	_attack_held = false
+	# If whip already triggered on hold, don't also fire fist
+	if _attack_triggered:
+		return
+	# Tap release → Spirit Fist
+	_spirit_fist()
+
+# --- Spirit Fist (Ranged Projectile) ---
+
+func _spirit_fist() -> void:
+	_attack_cooldown_timer = ATTACK_COOLDOWN
+	_attack_triggered = true
+	current_action = "Attacking"
+	_spawn_smoke_arm()
+	# Emit signal so main.gd can spawn the projectile scene
+	var spawn_pos = global_position + Vector2(20, -5)
+	attack_fired.emit("spirit_fist", spawn_pos)
+	# Brief attack animation hold then return to run
+	var tween = create_tween()
+	tween.tween_interval(0.15)
+	tween.tween_callback(func():
+		if not is_stumbling and not is_dead and not is_narrative_paused:
+			if is_on_floor() and not is_jumping and not is_sliding:
+				sprite.play("run")
+				current_action = "Running"
+	)
+
+# --- Ghost Whip (Melee Arc) ---
+
+func _ghost_whip() -> void:
+	_attack_cooldown_timer = ATTACK_COOLDOWN
+	current_action = "Attacking"
+	_spawn_smoke_arm()
+	# Sweep visual — arc of spectral afterimages
+	_spawn_whip_arc()
+	# Instant melee check — hit all enemies within radius
+	var defeated_count := 0
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		var dist = global_position.distance_to(enemy.global_position)
+		if dist <= GHOST_WHIP_RADIUS:
+			if enemy.has_method("take_hit"):
+				enemy.take_hit()
+			elif enemy.has_method("defeat"):
+				enemy.defeat()
+			defeated_count += 1
+	if defeated_count > 0:
+		slide_defeat_flash()  # Reuse golden feedback
+	# Return to run
+	var tween = create_tween()
+	tween.tween_interval(0.2)
+	tween.tween_callback(func():
+		if not is_stumbling and not is_dead and not is_narrative_paused:
+			if is_on_floor() and not is_jumping and not is_sliding:
+				sprite.play("run")
+				current_action = "Running"
+	)
+
+# --- Smoke Arm VFX (Shared Foundation) ---
+
+func _spawn_smoke_arm() -> void:
+	## 6 spectral smoke particles burst from arm position.
+	## Arm phases in/out of reality — the djinn world bleeding through.
+	var arm_pos = global_position + Vector2(14, -8)
+	# Arm flash — brief spectral rectangle
+	var arm = ColorRect.new()
+	arm.size = Vector2(10, 4)
+	arm.color = SMOKE_ARM_COLOR
+	arm.global_position = arm_pos
+	arm.z_index = z_index + 1
+	get_parent().add_child(arm)
+	var arm_tween = arm.create_tween()
+	arm_tween.tween_property(arm, "modulate:a", 0.0, 0.2)
+	arm_tween.tween_callback(arm.queue_free)
+	# Smoke particles
+	for i in range(6):
+		var p = ColorRect.new()
+		var size = randf_range(2.0, 4.0)
+		p.size = Vector2(size, size)
+		p.color = Color(SMOKE_ARM_COLOR.r, SMOKE_ARM_COLOR.g, SMOKE_ARM_COLOR.b, randf_range(0.3, 0.6))
+		p.global_position = arm_pos + Vector2(randf_range(-4, 8), randf_range(-6, 6))
+		p.z_index = z_index + 1
+		get_parent().add_child(p)
+		var drift = Vector2(randf_range(5, 25), randf_range(-20, -5))
+		var tween = p.create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(p, "global_position", p.global_position + drift * 0.3, 0.2)
+		tween.tween_property(p, "modulate:a", 0.0, 0.2)
+		tween.tween_property(p, "size", Vector2(0.5, 0.5), 0.2)
+		tween.set_parallel(false)
+		tween.tween_callback(p.queue_free)
+
+# --- Ghost Whip Arc Visual ---
+
+func _spawn_whip_arc() -> void:
+	## Curved arc of 5 spectral afterimages sweeping in front of Po.
+	var base_pos = global_position + Vector2(10, -5)
+	for i in range(5):
+		var ghost = ColorRect.new()
+		ghost.size = Vector2(6, 3)
+		ghost.color = WHIP_ARC_COLOR
+		# Arc positions — sweep from top-right to bottom-right
+		var angle = lerp(-0.8, 0.8, float(i) / 4.0)
+		var offset = Vector2(cos(angle) * 30, sin(angle) * 25)
+		ghost.global_position = base_pos + offset
+		ghost.rotation = angle
+		ghost.z_index = z_index + 1
+		get_parent().add_child(ghost)
+		# Staggered appear → fade
+		var tween = ghost.create_tween()
+		tween.tween_interval(i * 0.02)  # Stagger
+		tween.tween_property(ghost, "modulate:a", 0.0, 0.15)
+		tween.parallel().tween_property(ghost, "scale", Vector2(1.5, 0.5), 0.15)
+		tween.tween_callback(ghost.queue_free)
