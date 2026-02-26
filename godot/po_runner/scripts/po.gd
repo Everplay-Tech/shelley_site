@@ -532,8 +532,50 @@ func activate_ng_plus() -> void:
 	max_health = NG_PLUS_HEALTH
 	health = max_health
 	health_changed.emit(health, max_health)
-	# Sprite swap happens when NG+ sprites are loaded — for now, tint crimson
-	sprite.modulate = Color(1.2, 0.85, 0.85, 1.0)
+	# Swap to crimson NG+ sprites if available
+	if ResourceLoader.exists("res://sprites/po_ng_plus/run/frame_000.png"):
+		_swap_ng_plus_sprites()
+	else:
+		# Fallback tint if sprites not found
+		sprite.modulate = Color(1.2, 0.85, 0.85, 1.0)
+
+func _swap_ng_plus_sprites() -> void:
+	var sf := SpriteFrames.new()
+	var base := "res://sprites/po_ng_plus/"
+	# Animation config: [name, folder, frame_count, fps, loop, frame_prefix, frame_digits]
+	var anims := [
+		["run", "run", 6, 10.0, true, "frame_", 3],
+		["idle", "idle", 4, 4.0, true, "frame_", 3],
+		["jump", "jump", 9, 14.0, false, "frame_", 3],
+		["slide", "slide", 5, 10.0, false, "frame_", 3],
+		["stumble", "stumble", 6, 8.0, false, "frame_", 3],
+		["cross_punch", "cross_punch", 6, 12.0, false, "frame_", 3],
+		["fireball", "fireball", 6, 12.0, false, "frame_", 3],
+	]
+	# Remove default animation
+	if sf.has_animation("default"):
+		sf.remove_animation("default")
+	for anim_data in anims:
+		var anim_name: String = anim_data[0]
+		var folder: String = anim_data[1]
+		var frame_count: int = anim_data[2]
+		var fps: float = anim_data[3]
+		var loop: bool = anim_data[4]
+		var prefix: String = anim_data[5]
+		var digits: int = anim_data[6]
+		sf.add_animation(anim_name)
+		sf.set_animation_speed(anim_name, fps)
+		sf.set_animation_loop(anim_name, loop)
+		for i in range(frame_count):
+			var frame_num: String = str(i)
+			while frame_num.length() < digits:
+				frame_num = "0" + frame_num
+			var path: String = base + folder + "/" + prefix + frame_num + ".png"
+			if ResourceLoader.exists(path):
+				var tex: Texture2D = load(path)
+				sf.add_frame(anim_name, tex)
+	sprite.sprite_frames = sf
+	sprite.play("run")
 
 # --- Attack Input ---
 
