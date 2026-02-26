@@ -52,10 +52,15 @@ func _process(delta: float) -> void:
 		dir -= 1.0
 	if Input.is_action_pressed("move_right"):
 		dir += 1.0
-	# Touch input: tap left/right halves for movement
+	# Touch input: left/right edge zones for movement, center for fire
 	if dir == 0.0 and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		# Don't use touch for movement during firing — only if clearly on sides
-		pass
+		var vp := get_viewport()
+		if vp:
+			var mouse_pos := vp.get_mouse_position()
+			if mouse_pos.x < 160.0:
+				dir = -1.0
+			elif mouse_pos.x > 480.0:
+				dir = 1.0
 	position.x += dir * SPEED * delta
 	position.x = clampf(position.x, 24.0, 616.0)
 	# Idle bob
@@ -97,11 +102,12 @@ func _process(delta: float) -> void:
 				_sprite.visible = true
 
 func _check_touch_fire() -> bool:
-	# On mobile, tapping center fires. We use screen center tap as fire.
-	# For simplicity, Space key is primary. Touch fires on any tap.
-	if not Input.is_action_just_pressed("shoot"):
-		for i in range(10):
-			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+	# Touch fire only on center zone taps (160..480), not edge movement zones
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		var vp := get_viewport()
+		if vp:
+			var mouse_pos := vp.get_mouse_position()
+			if mouse_pos.x >= 160.0 and mouse_pos.x <= 480.0:
 				return true
 	return false
 

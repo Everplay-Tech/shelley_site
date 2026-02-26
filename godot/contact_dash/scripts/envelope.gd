@@ -53,6 +53,11 @@ func _process(delta: float) -> void:
 		return
 	position.y += fall_speed * delta
 
+	# Slight stretch as envelope accelerates (Sly Cooper weight feel)
+	var stretch: float = clampf(fall_speed / 250.0, 0.0, 1.0)
+	scale.x = lerpf(1.0, 0.9, stretch)
+	scale.y = lerpf(1.0, 1.15, stretch)
+
 	# Slight horizontal drift for visual interest
 	position.x += sin(position.y * 0.05) * 0.3
 
@@ -69,6 +74,19 @@ func catch_it() -> void:
 	_spawn_catch_vfx()
 
 func _spawn_catch_vfx() -> void:
+	# Overbright flash at envelope position
+	var flash := ColorRect.new()
+	flash.size = Vector2(16, 16)
+	flash.color = Color(3.0, 2.5, 1.0, 0.8)
+	flash.global_position = global_position + Vector2(-8, -8)
+	flash.z_index = 10
+	get_parent().add_child(flash)
+	var flash_tw: Tween = flash.create_tween()
+	flash_tw.set_parallel(true)
+	flash_tw.tween_property(flash, "modulate:a", 0.0, 0.1)
+	flash_tw.tween_property(flash, "scale", Vector2(2.0, 2.0), 0.1)
+	flash_tw.chain().tween_callback(flash.queue_free)
+
 	# Amber burst particles
 	for i in range(4):
 		var p = ColorRect.new()

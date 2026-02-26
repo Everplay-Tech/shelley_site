@@ -250,6 +250,10 @@ var _game_over_label: Label
 
 var _wisps: Array = []
 var _exit_rects: Array = []
+var _exit_beacon_timer := 0.0
+
+# ─── Touch UI ──────────────────────────────────────────────────────────────
+var _touch_btns: Dictionary = {}
 
 # ─── Init ────────────────────────────────────────────────────────────────────
 
@@ -264,6 +268,7 @@ func _ready() -> void:
 	_init_rooms()
 	_select_room_sequence()
 	_build_hud()
+	_build_touch_ui()
 	_spawn_wisps()
 	_spawn_player()
 	_load_room(0)
@@ -602,6 +607,16 @@ func _on_hazard_hit() -> void:
 	_player.hit_by_hazard()
 	_flash_screen_edge()
 	_pulse_wisps(Color(0.8, 0.2, 0.1, 0.7))
+	# Hit freeze (MvC impact)
+	Engine.time_scale = 0.1
+	await get_tree().create_timer(0.04, true, false, true).timeout
+	Engine.time_scale = 1.0
+	# Screen shake
+	var shake_tw: Tween = create_tween()
+	for i in range(5):
+		var intensity: float = 3.0 * (1.0 - float(i) / 5.0)
+		shake_tw.tween_property(self, "position", Vector2(randf_range(-intensity, intensity), randf_range(-intensity * 0.5, intensity * 0.5)), 0.03)
+	shake_tw.tween_property(self, "position", Vector2.ZERO, 0.05)
 
 func _flash_screen_edge() -> void:
 	var flash := ColorRect.new()
@@ -628,6 +643,18 @@ func _on_item_collected(cell_type: int, grid_pos: Vector2i) -> void:
 	_room_data[grid_pos.y][grid_pos.x] = Cell.FLOOR
 	_player.room_data = _room_data
 	_remove_item_visual(grid_pos)
+	# Overbright collection flash
+	var flash := ColorRect.new()
+	flash.size = Vector2(CELL_SIZE, CELL_SIZE)
+	flash.position = Vector2(grid_pos.x * CELL_SIZE, grid_pos.y * CELL_SIZE + HUD_HEIGHT)
+	flash.color = Color(3.0, 2.5, 1.5, 0.7)
+	flash.z_index = 10
+	_room_container.add_child(flash)
+	var ft: Tween = flash.create_tween()
+	ft.set_parallel(true)
+	ft.tween_property(flash, "modulate:a", 0.0, 0.15)
+	ft.tween_property(flash, "scale", Vector2(1.5, 1.5), 0.15)
+	ft.chain().tween_callback(flash.queue_free)
 	_score_label.text = str(_score)
 	_spawn_score_popup(grid_pos, points)
 
@@ -659,6 +686,22 @@ func _on_door_interact(door_pos: Vector2i) -> void:
 			_cell_rects[door_pos.y][door_pos.x].modulate = Color(2, 2, 2)
 			var tween: Tween = _cell_rects[door_pos.y][door_pos.x].create_tween()
 			tween.tween_property(_cell_rects[door_pos.y][door_pos.x], "modulate", Color.WHITE, 0.3)
+			# Golden burst on door unlock
+			var door_world := Vector2(door_pos.x * CELL_SIZE + CELL_SIZE / 2.0, door_pos.y * CELL_SIZE + HUD_HEIGHT + CELL_SIZE / 2.0)
+			for i in range(6):
+				var p := ColorRect.new()
+				p.size = Vector2(3, 3)
+				p.color = Color(1.0, 0.85, 0.2, 0.8)
+				p.global_position = door_world + Vector2(randf_range(-4, 4), randf_range(-4, 4))
+				p.z_index = 8
+				_room_container.add_child(p)
+				var angle := float(i) / 6.0 * TAU
+				var burst := Vector2(cos(angle), sin(angle)) * 20.0
+				var pt: Tween = p.create_tween()
+				pt.set_parallel(true)
+				pt.tween_property(p, "global_position", p.global_position + burst, 0.3)
+				pt.tween_property(p, "modulate:a", 0.0, 0.3)
+				pt.chain().tween_callback(p.queue_free)
 			_player.room_data = _room_data
 			_pulse_wisps(Color(0.7, 0.55, 0.1, 0.5))
 			_key_label.text = "KEY x%d" % _player.keys_held if _player.keys_held > 0 else ""
@@ -675,6 +718,17 @@ func _on_room_exit(exit_pos: Vector2i) -> void:
 		_score += ROOM_CLEAR_POINTS
 		_score_label.text = str(_score)
 		_rooms_label.text = "Room %d/3" % (_current_room_idx + 2)
+		# Room wipe transition
+		var wipe := ColorRect.new()
+		wipe.size = Vector2(640, 360)
+		wipe.position = Vector2(-640, 0)
+		wipe.color = Color(0.0, 0.0, 0.0, 0.8)
+		wipe.z_index = 50
+		add_child(wipe)
+		var wipe_tw: Tween = wipe.create_tween()
+		wipe_tw.tween_property(wipe, "position:x", 0.0, 0.1)
+		wipe_tw.tween_property(wipe, "position:x", 640.0, 0.1)
+		wipe_tw.tween_callback(wipe.queue_free)
 		_load_room(_current_room_idx + 1)
 
 func _on_exit_reached() -> void:
@@ -778,6 +832,56 @@ func _build_hud() -> void:
 	tween.tween_property(title, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(title.queue_free)
 
+# ─── Touch UI ────────────────────────────────────────────────────────────────
+
+func _build_touch_ui() -> void:
+	var dpad_center := Vector2(70, 305)
+	var btn_size := Vector2(32, 32)
+	var gap := 36.0
+	var dirs := {"up": Vector2(0, -gap), "down": Vector2(0, gap), "left": Vector2(-gap, 0), "right": Vector2(gap, 0)}
+	for dir_name in dirs:
+		var btn := ColorRect.new()
+		btn.name = "Touch_%s" % dir_name
+		btn.size = btn_size
+		btn.position = dpad_center + dirs[dir_name] - btn_size / 2.0
+		btn.color = Color(1.0, 1.0, 1.0, 0.08)
+		btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_hud.add_child(btn)
+		_touch_btns[dir_name] = btn
+		# Chevron arrow
+		var arrow := ColorRect.new()
+		arrow.size = Vector2(3, 10)
+		arrow.color = Color(1.0, 1.0, 1.0, 0.25)
+		arrow.position = Vector2(14, 11)
+		match dir_name:
+			"up": arrow.rotation = 0.0; arrow.position = Vector2(14, 6)
+			"down": arrow.rotation = PI; arrow.position = Vector2(18, 26)
+			"left": arrow.rotation = -PI/2; arrow.position = Vector2(6, 18)
+			"right": arrow.rotation = PI/2; arrow.position = Vector2(26, 14)
+		btn.add_child(arrow)
+	# Center dot
+	var center := ColorRect.new()
+	center.size = Vector2(8, 8)
+	center.position = dpad_center - Vector2(4, 4)
+	center.color = Color(1.0, 1.0, 1.0, 0.05)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(center)
+
+func _update_touch_dpad() -> void:
+	if _touch_btns.is_empty(): return
+	var pressing := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	var mouse_pos := Vector2(320, 180)
+	if pressing:
+		var vp := get_viewport()
+		if vp: mouse_pos = vp.get_mouse_position()
+	for dir_name in _touch_btns:
+		var btn: ColorRect = _touch_btns[dir_name]
+		if pressing:
+			var btn_rect := Rect2(btn.position, btn.size)
+			btn.color.a = 0.25 if btn_rect.has_point(mouse_pos) else 0.08
+		else:
+			btn.color.a = 0.08
+
 # ─── Spirit Wisps ────────────────────────────────────────────────────────────
 
 func _spawn_wisps() -> void:
@@ -823,6 +927,29 @@ func _pulse_wisps(color: Color) -> void:
 		var tween: Tween = node.create_tween()
 		tween.tween_property(node, "color", orig, 0.5)
 
+# ─── Exit Beacon ─────────────────────────────────────────────────────────────
+
+func _update_exit_beacon(delta: float) -> void:
+	_exit_beacon_timer += delta
+	if _exit_beacon_timer < 0.3:
+		return
+	_exit_beacon_timer = 0.0
+	for rect in _exit_rects:
+		if not is_instance_valid(rect):
+			continue
+		var particle := ColorRect.new()
+		var s: float = randf_range(1.5, 3.0)
+		particle.size = Vector2(s, s)
+		particle.position = rect.position + Vector2(randf_range(2, CELL_SIZE - 2), float(CELL_SIZE))
+		particle.color = Color(1.0, 0.8, 0.2, randf_range(0.4, 0.7))
+		particle.z_index = 9
+		_vfx_container.add_child(particle)
+		var beacon_tw: Tween = particle.create_tween()
+		beacon_tw.set_parallel(true)
+		beacon_tw.tween_property(particle, "position:y", particle.position.y - randf_range(12.0, 22.0), 0.6)
+		beacon_tw.tween_property(particle, "modulate:a", 0.0, 0.6)
+		beacon_tw.chain().tween_callback(particle.queue_free)
+
 # ─── Game Loop ───────────────────────────────────────────────────────────────
 
 func _process(delta: float) -> void:
@@ -849,6 +976,8 @@ func _process(delta: float) -> void:
 
 	_update_hazards(delta)
 	_update_wisps(delta)
+	_update_touch_dpad()
+	_update_exit_beacon(delta)
 
 	if _elapsed >= GAME_DURATION:
 		_end_game("TIME'S UP!")

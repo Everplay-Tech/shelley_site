@@ -70,6 +70,11 @@ var _clearing_rows: Array = []
 var _clear_anim_timer := 0.0
 const CLEAR_ANIM_DURATION := 0.25
 
+# VFX state
+var _elapsed := 0.0
+var _grid_borders: Array = []  # [top, bottom, left, right] ColorRects
+var _next_preview_glow: ColorRect = null
+
 # ─── Node refs ───────────────────────────────────────────────────────────────
 var _grid_container: Node2D
 var _piece_container: Node2D
@@ -158,6 +163,7 @@ func _build_grid_visuals() -> void:
 		_grid_container.add_child(vline)
 
 	# Border frame
+	_grid_borders.clear()
 	var border_thickness := 2.0
 	# Top
 	var bt := ColorRect.new()
@@ -165,24 +171,28 @@ func _build_grid_visuals() -> void:
 	bt.size = Vector2(GRID_WIDTH + border_thickness * 2, border_thickness)
 	bt.color = BORDER_COLOR
 	_grid_container.add_child(bt)
+	_grid_borders.append(bt)
 	# Bottom
 	var bb := ColorRect.new()
 	bb.position = Vector2(GRID_OFFSET_X - border_thickness, GRID_OFFSET_Y + GRID_HEIGHT)
 	bb.size = Vector2(GRID_WIDTH + border_thickness * 2, border_thickness)
 	bb.color = BORDER_COLOR
 	_grid_container.add_child(bb)
+	_grid_borders.append(bb)
 	# Left
 	var bl := ColorRect.new()
 	bl.position = Vector2(GRID_OFFSET_X - border_thickness, GRID_OFFSET_Y)
 	bl.size = Vector2(border_thickness, GRID_HEIGHT)
 	bl.color = BORDER_COLOR
 	_grid_container.add_child(bl)
+	_grid_borders.append(bl)
 	# Right
 	var br := ColorRect.new()
 	br.position = Vector2(GRID_OFFSET_X + GRID_WIDTH, GRID_OFFSET_Y)
 	br.size = Vector2(border_thickness, GRID_HEIGHT)
 	br.color = BORDER_COLOR
 	_grid_container.add_child(br)
+	_grid_borders.append(br)
 
 	# Cell rects (initially invisible, shown when locked)
 	_grid_rects.clear()
@@ -281,6 +291,70 @@ func _build_hud() -> void:
 	title.add_theme_color_override("font_color", Color(0.55, 0.4, 0.2))
 	_hud.add_child(title)
 
+	_build_touch_ui()
+
+func _build_touch_ui() -> void:
+	# Left arrow — left margin
+	var left_btn := ColorRect.new()
+	left_btn.name = "TouchLeft"
+	left_btn.size = Vector2(48, 40)
+	left_btn.position = Vector2(8, 290)
+	left_btn.color = Color(1.0, 1.0, 1.0, 0.08)
+	left_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(left_btn)
+	var lc := ColorRect.new(); lc.size = Vector2(3, 12); lc.position = Vector2(18, 14); lc.color = Color(1,1,1,0.25); lc.rotation = 0.5; left_btn.add_child(lc)
+	var lc2 := ColorRect.new(); lc2.size = Vector2(3, 12); lc2.position = Vector2(18, 26); lc2.color = Color(1,1,1,0.25); lc2.rotation = -0.5; left_btn.add_child(lc2)
+
+	# Right arrow — left margin offset
+	var right_btn := ColorRect.new()
+	right_btn.name = "TouchRight"
+	right_btn.size = Vector2(48, 40)
+	right_btn.position = Vector2(68, 290)
+	right_btn.color = Color(1.0, 1.0, 1.0, 0.08)
+	right_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(right_btn)
+	var rc := ColorRect.new(); rc.size = Vector2(3, 12); rc.position = Vector2(26, 14); rc.color = Color(1,1,1,0.25); rc.rotation = -0.5; right_btn.add_child(rc)
+	var rc2 := ColorRect.new(); rc2.size = Vector2(3, 12); rc2.position = Vector2(26, 26); rc2.color = Color(1,1,1,0.25); rc2.rotation = 0.5; right_btn.add_child(rc2)
+
+	# Rotate button — right margin top
+	var rot_btn := ColorRect.new()
+	rot_btn.name = "TouchRotate"
+	rot_btn.size = Vector2(56, 36)
+	rot_btn.position = Vector2(556, 60)
+	rot_btn.color = Color(0.5, 0.8, 1.0, 0.08)
+	rot_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(rot_btn)
+	var rot_lbl := Label.new()
+	rot_lbl.text = "ROT"
+	rot_lbl.add_theme_font_size_override("font_size", 9)
+	rot_lbl.add_theme_color_override("font_color", Color(0.5, 0.8, 1.0, 0.25))
+	rot_lbl.position = Vector2(14, 10)
+	rot_btn.add_child(rot_lbl)
+
+	# Drop button — bottom center
+	var drop_btn := ColorRect.new()
+	drop_btn.name = "TouchDrop"
+	drop_btn.size = Vector2(100, 32)
+	drop_btn.position = Vector2(270, 300)
+	drop_btn.color = Color(1.0, 0.75, 0.0, 0.06)
+	drop_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(drop_btn)
+	var drop_lbl := Label.new()
+	drop_lbl.text = "DROP"
+	drop_lbl.add_theme_font_size_override("font_size", 9)
+	drop_lbl.add_theme_color_override("font_color", Color(1.0, 0.75, 0.0, 0.2))
+	drop_lbl.position = Vector2(32, 8)
+	drop_btn.add_child(drop_lbl)
+
+	# Next piece preview glow (behind preview area)
+	_next_preview_glow = ColorRect.new()
+	_next_preview_glow.name = "NextPreviewGlow"
+	_next_preview_glow.size = Vector2(60, 50)
+	_next_preview_glow.position = Vector2(GRID_OFFSET_X + GRID_WIDTH + 16, 110)
+	_next_preview_glow.color = Color(0.85, 0.65, 0.2, 0.04)
+	_next_preview_glow.z_index = -1
+	_hud.add_child(_next_preview_glow)
+
 # ─── Bag Randomizer ──────────────────────────────────────────────────────────
 
 func _fill_bag() -> void:
@@ -371,6 +445,24 @@ func _hard_drop() -> void:
 	while _try_move(0, 1):
 		drop_count += 1
 	_score += drop_count * 2  # Hard drop bonus
+
+	# Speed trail VFX on hard drop
+	if drop_count > 0:
+		var drop_cells := _active_piece.get_cells()
+		for cell in drop_cells:
+			var c: Vector2i = cell
+			if c.y < 0:
+				continue
+			var trail := ColorRect.new()
+			trail.size = Vector2(CELL_SIZE - 2, CELL_SIZE * 3)
+			trail.position = Vector2(GRID_OFFSET_X + c.x * CELL_SIZE + 1, GRID_OFFSET_Y + (c.y - 3) * CELL_SIZE)
+			trail.color = Color(1.0, 0.85, 0.5, 0.15)
+			trail.z_index = 5
+			add_child(trail)
+			var tt: Tween = trail.create_tween()
+			tt.tween_property(trail, "modulate:a", 0.0, 0.15)
+			tt.tween_callback(trail.queue_free)
+
 	_lock_piece()
 
 func _lock_piece() -> void:
@@ -457,6 +549,20 @@ func _check_lines() -> void:
 	for row in _clearing_rows:
 		for col in range(COLS):
 			_spawn_wood_chips(col, row)
+
+	# Screen shake scales with lines cleared
+	var cleared_count: int = _clearing_rows.size()
+	var shake_mag: float = 1.0 + cleared_count * 0.8
+	var shake_tw: Tween = create_tween()
+	for i in range(5):
+		var intensity: float = shake_mag * (1.0 - float(i) / 5.0)
+		shake_tw.tween_property(self, "position", Vector2(randf_range(-intensity, intensity), randf_range(-intensity * 0.5, intensity * 0.5)), 0.03)
+	shake_tw.tween_property(self, "position", Vector2.ZERO, 0.05)
+	# Hit freeze for multi-line clears (MvC style)
+	if cleared_count >= 2:
+		Engine.time_scale = 0.15
+		await get_tree().create_timer(0.04, true, false, true).timeout
+		Engine.time_scale = 1.0
 
 func _finish_line_clear() -> void:
 	# Remove rows from grid data + shift down
@@ -702,7 +808,14 @@ func _process(delta: float) -> void:
 		return
 
 	_game_timer += delta
+	_elapsed += delta
 	_update_wisps(delta)
+	_update_touch_highlights()
+
+	# Next preview glow pulse
+	if _next_preview_glow and is_instance_valid(_next_preview_glow):
+		var glow_pulse: float = 0.04 + sin(_elapsed * 2.5) * 0.02
+		_next_preview_glow.color.a = glow_pulse
 
 	# Timer bar
 	var time_left: float = maxf(0.0, GAME_DURATION - _game_timer)
@@ -713,6 +826,18 @@ func _process(delta: float) -> void:
 		_timer_bar.color = Color(0.8, 0.2, 0.1)
 	elif timer_ratio < 0.5:
 		_timer_bar.color = Color(0.8, 0.5, 0.15)
+
+	# Grid border pulse when timer < 25%
+	var progress: float = 1.0 - timer_ratio
+	if progress > 0.75:
+		var pulse: float = sin(_elapsed * 6.0)
+		for border in _grid_borders:
+			if is_instance_valid(border):
+				border.color = Color(0.7, 0.2, 0.1, 0.6) if pulse > 0.0 else BORDER_COLOR
+	else:
+		for border in _grid_borders:
+			if is_instance_valid(border):
+				border.color = BORDER_COLOR
 
 	# Time up?
 	if _game_timer >= GAME_DURATION:
@@ -828,16 +953,53 @@ func _handle_touch() -> void:
 			var end_pos := get_viewport().get_mouse_position()
 			var diff := end_pos - _touch_start_pos
 			if absf(diff.x) < 20 and absf(diff.y) < 20:
-				# Tap
-				if _touch_start_pos.y < 120:
-					# Top area = rotate
-					_try_rotate()
-				elif _touch_start_pos.x < 320:
-					# Left half = move left
+				# Tap — match visible button zones
+				var tp := _touch_start_pos
+				if _point_in_btn("TouchLeft", tp):
 					_try_move(-1, 0)
-				else:
-					# Right half = move right
+				elif _point_in_btn("TouchRight", tp):
 					_try_move(1, 0)
+				elif _point_in_btn("TouchRotate", tp):
+					_try_rotate()
+				elif _point_in_btn("TouchDrop", tp):
+					_hard_drop()
+				else:
+					# Fallback: legacy zone taps for grid area
+					if tp.y < 120:
+						_try_rotate()
+					elif tp.x < 320:
+						_try_move(-1, 0)
+					else:
+						_try_move(1, 0)
+
+func _point_in_btn(btn_name: String, point: Vector2) -> bool:
+	var btn := _hud.get_node_or_null(btn_name)
+	if btn == null:
+		return false
+	return Rect2(btn.position, btn.size).has_point(point)
+
+func _update_touch_highlights() -> void:
+	var btns := {"TouchLeft": false, "TouchRight": false, "TouchRotate": false, "TouchDrop": false}
+	var pressing := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	if pressing:
+		var vp := get_viewport()
+		if vp:
+			var mp := vp.get_mouse_position()
+			for btn_name in btns:
+				var btn := _hud.get_node_or_null(btn_name)
+				if btn:
+					var rect := Rect2(btn.position, btn.size)
+					if rect.has_point(mp):
+						btns[btn_name] = true
+	for btn_name in btns:
+		var btn := _hud.get_node_or_null(btn_name)
+		if btn:
+			if btns[btn_name]:
+				btn.color.a = 0.2
+			elif "Drop" in btn_name:
+				btn.color.a = 0.06
+			else:
+				btn.color.a = 0.08
 
 # ─── Game End ────────────────────────────────────────────────────────────────
 

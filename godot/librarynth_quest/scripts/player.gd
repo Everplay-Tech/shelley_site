@@ -56,6 +56,15 @@ var _key_dot: ColorRect
 var _dir_indicator: ColorRect
 var _bob_time := 0.0
 
+# Sprite visuals (Scholar character)
+var _has_sprites := false
+var _sprite: Sprite2D
+var _idle_textures: Dictionary = {}
+var _walk_textures: Dictionary = {}
+var _walk_frame_idx := 0
+var _walk_frame_timer := 0.0
+const WALK_FRAME_RATE := 0.07
+
 # Push block positions — set by main.gd
 var push_block_positions: Array = []
 
@@ -63,11 +72,35 @@ func _ready() -> void:
 	_build_visuals()
 
 func _build_visuals() -> void:
-	# Body: cyan/blue scholar robe
+	# Try to load Scholar sprites
+	var base_path := "res://sprites/scholar/"
+	if ResourceLoader.exists(base_path + "rotations/south.png"):
+		_has_sprites = true
+		_sprite = Sprite2D.new()
+		_sprite.texture = load(base_path + "rotations/south.png")
+		_sprite.scale = Vector2(0.5, 0.5)
+		_sprite.position = Vector2(10, 10)  # Center in 20px cell
+		_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		add_child(_sprite)
+		# Load idle direction textures
+		for dir_name in ["south", "north", "east", "west"]:
+			var path: String = base_path + "rotations/" + dir_name + ".png"
+			if ResourceLoader.exists(path):
+				_idle_textures[dir_name] = load(path)
+		# Load walk frames per direction
+		for dir_name in ["south", "north", "east", "west"]:
+			_walk_textures[dir_name] = []
+			for i in range(6):
+				var path: String = base_path + "animations/walking/" + dir_name + "/frame_%03d.png" % i
+				if ResourceLoader.exists(path):
+					_walk_textures[dir_name].append(load(path))
+	# Placeholder body (hidden if sprites loaded)
 	_body = ColorRect.new()
 	_body.size = Vector2(16, 16)
 	_body.position = Vector2(2, 2)
 	_body.color = Color(0.25, 0.4, 0.7, 1.0)
+	if _has_sprites:
+		_body.visible = false
 	add_child(_body)
 	# Inner robe detail
 	_inner = ColorRect.new()
@@ -81,24 +114,36 @@ func _build_visuals() -> void:
 	_dir_indicator.position = Vector2(6, -2)  # Above by default (facing up)
 	_dir_indicator.color = Color(0.5, 0.7, 1.0, 0.8)
 	_body.add_child(_dir_indicator)
-	# Key indicator (hidden initially)
+	# Key indicator (visible on top of sprite too)
 	_key_dot = ColorRect.new()
 	_key_dot.size = Vector2(4, 4)
-	_key_dot.position = Vector2(-5, 6)
+	if _has_sprites:
+		_key_dot.position = Vector2(14, 2)  # Top-right of cell
+		_key_dot.z_index = 2
+		add_child(_key_dot)
+	else:
+		_key_dot.position = Vector2(-5, 6)
+		_body.add_child(_key_dot)
 	_key_dot.color = Color(1.0, 0.85, 0.0, 1.0)
 	_key_dot.visible = false
-	_body.add_child(_key_dot)
 
 func _process(delta: float) -> void:
 	if _invincible:
 		_invincible_timer -= delta
 		_blink_timer += delta
-		_body.visible = int(_blink_timer * 12.0) % 2 == 0
+		var vis: bool = int(_blink_timer * 12.0) % 2 == 0
+		if _has_sprites:
+			_sprite.visible = vis
+		else:
+			_body.visible = vis
 		if _invincible_timer <= 0.0:
 			_invincible = false
 			_invincible_timer = 0.0
 			_blink_timer = 0.0
-			_body.visible = true
+			if _has_sprites:
+				_sprite.visible = true
+			else:
+				_body.visible = true
 
 	if _is_moving:
 		_move_progress += delta / MOVE_DURATION
@@ -110,8 +155,14 @@ func _process(delta: float) -> void:
 	else:
 		_handle_input(delta)
 		_bob_time += delta
-		_body.position.y = 2.0 + sin(_bob_time * 3.0) * 1.0
+		if _has_sprites:
+			_sprite.position.y = 10.0 + sin(_bob_time * 3.0) * 1.0
+		else:
+			_body.position.y = 2.0 + sin(_bob_time * 3.0) * 1.0
 
+	# Update sprite direction + walk animation
+	if _has_sprites:
+		_update_sprite(delta)
 	_update_direction_indicator()
 
 func _handle_input(delta: float) -> void:
@@ -200,6 +251,18 @@ func _start_move(new_pos: Vector2i) -> void:
 	_move_progress = 0.0
 	_move_from = position
 	_move_to = _grid_to_pixel(new_pos)
+	# Ghost afterimage at previous position (Sly Cooper trail)
+	var ghost := ColorRect.new()
+	ghost.size = Vector2(16, 16)
+	ghost.position = _move_from + Vector2(2, 2)
+	ghost.color = Color(0.3, 0.5, 0.9, 0.3)
+	ghost.z_index = -1
+	get_parent().add_child(ghost)
+	var gt: Tween = ghost.create_tween()
+	gt.set_parallel(true)
+	gt.tween_property(ghost, "modulate:a", 0.0, 0.2)
+	gt.tween_property(ghost, "size", Vector2(12, 12), 0.2)
+	gt.chain().tween_callback(ghost.queue_free)
 
 func _grid_to_pixel(gpos: Vector2i) -> Vector2:
 	return Vector2(gpos.x * CELL_SIZE, gpos.y * CELL_SIZE + HUD_HEIGHT)
@@ -216,6 +279,28 @@ func hit_by_hazard() -> void:
 	_invincible = true
 	_invincible_timer = HIT_INVINCIBILITY
 	_blink_timer = 0.0
+
+func _facing_to_name() -> String:
+	match _facing:
+		Vector2i(0, -1): return "north"
+		Vector2i(0, 1): return "south"
+		Vector2i(-1, 0): return "west"
+		Vector2i(1, 0): return "east"
+	return "south"
+
+func _update_sprite(delta: float) -> void:
+	var dir_name := _facing_to_name()
+	if _is_moving and _walk_textures.has(dir_name) and _walk_textures[dir_name].size() > 0:
+		_walk_frame_timer += delta
+		if _walk_frame_timer >= WALK_FRAME_RATE:
+			_walk_frame_timer = 0.0
+			_walk_frame_idx = (_walk_frame_idx + 1) % _walk_textures[dir_name].size()
+		_sprite.texture = _walk_textures[dir_name][_walk_frame_idx]
+	else:
+		if _idle_textures.has(dir_name):
+			_sprite.texture = _idle_textures[dir_name]
+		_walk_frame_idx = 0
+		_walk_frame_timer = 0.0
 
 func _update_direction_indicator() -> void:
 	match _facing:

@@ -99,6 +99,20 @@ func _process(delta: float) -> void:
 	# Update wisps
 	_update_wisps(delta)
 
+	_update_touch_highlights()
+
+func _update_touch_highlights() -> void:
+	var left_btn := hud.get_node_or_null("TouchLeft")
+	var right_btn := hud.get_node_or_null("TouchRight")
+	if not left_btn: return
+	var pressing := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	var mouse_x := 320.0
+	if pressing:
+		var vp := get_viewport()
+		if vp: mouse_x = vp.get_mouse_position().x
+	left_btn.color.a = 0.2 if pressing and mouse_x < 320.0 else 0.08
+	right_btn.color.a = 0.2 if pressing and mouse_x >= 320.0 else 0.08
+
 func _spawn_envelope(progress: float) -> void:
 	var envelope = Area2D.new()
 	envelope.set_script(preload("res://scripts/envelope.gd"))
@@ -139,6 +153,20 @@ func _on_envelope_caught(envelope: Area2D) -> void:
 	# Wisps pulse toward Hpar
 	_wisps_react("catch")
 
+	# Overbright catch flash at Hpar position
+	var flash := ColorRect.new()
+	flash.size = Vector2(20, 20)
+	flash.position = Vector2(-10, -10)
+	flash.color = Color(3.0, 2.5, 1.0, 0.6)
+	flash.z_index = 10
+	flash.global_position = hpar.global_position + Vector2(-10, -10)
+	add_child(flash)
+	var ft: Tween = flash.create_tween()
+	ft.set_parallel(true)
+	ft.tween_property(flash, "modulate:a", 0.0, 0.12)
+	ft.tween_property(flash, "scale", Vector2(0.1, 0.1), 0.12)
+	ft.chain().tween_callback(flash.queue_free)
+
 func _on_envelope_missed(envelope: Area2D) -> void:
 	_misses += 1
 
@@ -153,6 +181,13 @@ func _on_envelope_missed(envelope: Area2D) -> void:
 
 	# Red edge flash
 	_flash_edge_red()
+
+	# Hit freeze on miss (MvC impact pause)
+	Engine.time_scale = 0.1
+	await get_tree().create_timer(0.04, true, false, true).timeout
+	Engine.time_scale = 1.0
+	# Screen shake
+	_screen_shake(2.5)
 
 	# Wisps scatter
 	_wisps_react("miss")
@@ -169,6 +204,23 @@ func _activate_magnet() -> void:
 	glow.position = Vector2(-MAGNET_RADIUS, -MAGNET_RADIUS)
 	glow.color = Color(0.5, 0.2, 0.8, 0.12)
 	hpar.add_child(glow)
+
+	# Spirit burst — ring of purple particles
+	for i in range(6):
+		var p := ColorRect.new()
+		p.size = Vector2(3, 3)
+		p.color = Color(0.6, 0.3, 0.9, 0.7)
+		p.global_position = hpar.global_position
+		p.z_index = 5
+		add_child(p)
+		var angle := float(i) / 6.0 * TAU
+		var burst := Vector2(cos(angle), sin(angle)) * 40.0
+		var pt: Tween = p.create_tween()
+		pt.set_parallel(true)
+		pt.tween_property(p, "global_position", p.global_position + burst, 0.25)
+		pt.tween_property(p, "modulate:a", 0.0, 0.25)
+		pt.tween_property(p, "scale", Vector2(0.3, 0.3), 0.25)
+		pt.chain().tween_callback(p.queue_free)
 
 func _disable_magnet() -> void:
 	var glow = hpar.get_node_or_null("MagnetGlow")
@@ -270,6 +322,41 @@ func _build_hud() -> void:
 	_timer_bar.position = Vector2(20, 348)
 	_timer_bar.color = WOOD
 	hud.add_child(_timer_bar)
+
+	_build_touch_ui()
+
+func _build_touch_ui() -> void:
+	# Left arrow — bottom-left
+	var left_btn := ColorRect.new()
+	left_btn.name = "TouchLeft"
+	left_btn.size = Vector2(64, 48)
+	left_btn.position = Vector2(16, 280)
+	left_btn.color = Color(1.0, 1.0, 1.0, 0.08)
+	left_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(left_btn)
+	# Left chevron (two angled bars forming <)
+	var lc1 := ColorRect.new(); lc1.size = Vector2(3, 14); lc1.position = Vector2(24, 12); lc1.color = Color(1,1,1,0.25); lc1.rotation = 0.5; left_btn.add_child(lc1)
+	var lc2 := ColorRect.new(); lc2.size = Vector2(3, 14); lc2.position = Vector2(24, 28); lc2.color = Color(1,1,1,0.25); lc2.rotation = -0.5; left_btn.add_child(lc2)
+
+	# Right arrow — bottom-right
+	var right_btn := ColorRect.new()
+	right_btn.name = "TouchRight"
+	right_btn.size = Vector2(64, 48)
+	right_btn.position = Vector2(560, 280)
+	right_btn.color = Color(1.0, 1.0, 1.0, 0.08)
+	right_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(right_btn)
+	# Right chevron
+	var rc1 := ColorRect.new(); rc1.size = Vector2(3, 14); rc1.position = Vector2(36, 12); rc1.color = Color(1,1,1,0.25); rc1.rotation = -0.5; right_btn.add_child(rc1)
+	var rc2 := ColorRect.new(); rc2.size = Vector2(3, 14); rc2.position = Vector2(36, 28); rc2.color = Color(1,1,1,0.25); rc2.rotation = 0.5; right_btn.add_child(rc2)
+
+func _screen_shake(magnitude: float) -> void:
+	var tween: Tween = create_tween()
+	for i in range(5):
+		var intensity: float = magnitude * (1.0 - float(i) / 5.0)
+		var offset := Vector2(randf_range(-intensity, intensity), randf_range(-intensity * 0.5, intensity * 0.5))
+		tween.tween_property(self, "position", offset, 0.03)
+	tween.tween_property(self, "position", Vector2.ZERO, 0.05)
 
 # ---- Spirit Wisps ----
 

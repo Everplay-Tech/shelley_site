@@ -103,6 +103,7 @@ func _process(delta: float) -> void:
 		_end_game("SHIP DOWN!")
 	# Update wisps
 	_update_wisps(delta)
+	_update_touch_highlights()
 
 # ─── Formation System ─────────────────────────────────────────────────────────
 
@@ -211,6 +212,18 @@ func _spawn_bullet(angle_deg: float) -> void:
 	bullet.rotation = deg_to_rad(angle_deg)
 	bullet.add_to_group("player_bullets")
 	bullet_container.add_child(bullet)
+	# Muzzle flash
+	var flash := ColorRect.new()
+	flash.size = Vector2(8, 8)
+	flash.position = ship.position + Vector2(-4, -28)
+	flash.color = Color(2.0, 1.8, 1.0, 0.9)
+	flash.z_index = 10
+	add_child(flash)
+	var flash_tw: Tween = flash.create_tween()
+	flash_tw.set_parallel(true)
+	flash_tw.tween_property(flash, "modulate:a", 0.0, 0.08)
+	flash_tw.tween_property(flash, "scale", Vector2(0.2, 0.2), 0.08)
+	flash_tw.chain().tween_callback(flash.queue_free)
 
 func _on_enemy_attack(enemy: Area2D) -> void:
 	if _game_over:
@@ -243,6 +256,12 @@ func _on_enemy_defeated(enemy: Area2D) -> void:
 		_spawn_powerup_text(enemy.global_position)
 	# Wisps react
 	_wisps_react("kill")
+	# Hit freeze on enemy death (MvC impact)
+	if enemy.enemy_type >= 1:  # Wraiths and Critics get freeze
+		Engine.time_scale = 0.1
+		await get_tree().create_timer(0.03, true, false, true).timeout
+		Engine.time_scale = 1.0
+	_screen_shake(1.5 + enemy.enemy_type * 0.5)
 	# Track alive count
 	_enemies_alive -= 1
 	# Null out in formation
@@ -255,6 +274,15 @@ func _on_enemy_defeated(enemy: Area2D) -> void:
 				break
 	# Check wave clear
 	if _enemies_alive <= 0:
+		# Wave clear flash
+		var wave_flash := ColorRect.new()
+		wave_flash.size = Vector2(640, 360)
+		wave_flash.color = Color(1.0, 0.85, 0.3, 0.15)
+		wave_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(wave_flash)
+		var wf_tw: Tween = wave_flash.create_tween()
+		wf_tw.tween_property(wave_flash, "modulate:a", 0.0, 0.4)
+		wf_tw.tween_callback(wave_flash.queue_free)
 		_wave_pause = true
 		_wave_pause_timer = 0.0
 
@@ -280,6 +308,24 @@ func _on_ship_hit() -> void:
 	_wisps_react("damage")
 	# Screen shake
 	_screen_shake(3.0)
+	# Hit freeze on damage
+	Engine.time_scale = 0.08
+	await get_tree().create_timer(0.04, true, false, true).timeout
+	Engine.time_scale = 1.0
+	# Red burst particles
+	for i in range(8):
+		var p := ColorRect.new()
+		p.size = Vector2(randf_range(2, 4), randf_range(2, 4))
+		p.color = Color(1.0, 0.3, 0.2, 0.8)
+		p.global_position = ship.global_position + Vector2(randf_range(-10, 10), randf_range(-10, 10))
+		p.z_index = 10
+		add_child(p)
+		var dir := Vector2(randf_range(-60, 60), randf_range(-60, 60))
+		var pt: Tween = p.create_tween()
+		pt.set_parallel(true)
+		pt.tween_property(p, "global_position", p.global_position + dir * 0.3, 0.3)
+		pt.tween_property(p, "modulate:a", 0.0, 0.3)
+		pt.chain().tween_callback(p.queue_free)
 	if _player_hp <= 0:
 		_end_game("SHIP DOWN!")
 
@@ -326,6 +372,7 @@ func _build_hud() -> void:
 	_timer_bar.position = Vector2(20, 348)
 	_timer_bar.color = WOOD
 	hud.add_child(_timer_bar)
+	_build_touch_ui()
 
 func _update_hearts() -> void:
 	for i in range(_hearts.size()):
@@ -343,6 +390,60 @@ func _update_wave_label() -> void:
 	_wave_label.modulate = Color(1, 1, 1, 1)
 	var tween := _wave_label.create_tween()
 	tween.tween_property(_wave_label, "modulate:a", 0.4, 1.0)
+
+func _build_touch_ui() -> void:
+	# Left arrow — bottom-left
+	var left_btn := ColorRect.new()
+	left_btn.name = "TouchLeft"
+	left_btn.size = Vector2(56, 48)
+	left_btn.position = Vector2(16, 280)
+	left_btn.color = Color(1.0, 1.0, 1.0, 0.08)
+	left_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(left_btn)
+	# Left chevron
+	var lc1 := ColorRect.new(); lc1.size = Vector2(3, 16); lc1.position = Vector2(18, 16); lc1.color = Color(1,1,1,0.25); lc1.rotation = 0.5; left_btn.add_child(lc1)
+	var lc2 := ColorRect.new(); lc2.size = Vector2(3, 16); lc2.position = Vector2(18, 32); lc2.color = Color(1,1,1,0.25); lc2.rotation = -0.5; left_btn.add_child(lc2)
+
+	# Right arrow — bottom-right
+	var right_btn := ColorRect.new()
+	right_btn.name = "TouchRight"
+	right_btn.size = Vector2(56, 48)
+	right_btn.position = Vector2(568, 280)
+	right_btn.color = Color(1.0, 1.0, 1.0, 0.08)
+	right_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(right_btn)
+	# Right chevron
+	var rc1 := ColorRect.new(); rc1.size = Vector2(3, 16); rc1.position = Vector2(34, 16); rc1.color = Color(1,1,1,0.25); rc1.rotation = -0.5; right_btn.add_child(rc1)
+	var rc2 := ColorRect.new(); rc2.size = Vector2(3, 16); rc2.position = Vector2(34, 32); rc2.color = Color(1,1,1,0.25); rc2.rotation = 0.5; right_btn.add_child(rc2)
+
+	# Fire button — bottom-center
+	var fire_btn := ColorRect.new()
+	fire_btn.name = "TouchFire"
+	fire_btn.size = Vector2(96, 48)
+	fire_btn.position = Vector2(272, 280)
+	fire_btn.color = Color(1.0, 0.75, 0.0, 0.06)
+	fire_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(fire_btn)
+	var fire_lbl := Label.new()
+	fire_lbl.text = "FIRE"
+	fire_lbl.add_theme_font_size_override("font_size", 10)
+	fire_lbl.add_theme_color_override("font_color", Color(1.0, 0.75, 0.0, 0.2))
+	fire_lbl.position = Vector2(30, 16)
+	fire_btn.add_child(fire_lbl)
+
+func _update_touch_highlights() -> void:
+	var left_btn := hud.get_node_or_null("TouchLeft")
+	var right_btn := hud.get_node_or_null("TouchRight")
+	var fire_btn := hud.get_node_or_null("TouchFire")
+	if not left_btn: return
+	var pressing := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	var mouse_x := 320.0
+	if pressing:
+		var vp := get_viewport()
+		if vp: mouse_x = vp.get_mouse_position().x
+	left_btn.color.a = 0.2 if pressing and mouse_x < 160.0 else 0.08
+	right_btn.color.a = 0.2 if pressing and mouse_x > 480.0 else 0.08
+	fire_btn.color.a = 0.15 if pressing and mouse_x >= 160.0 and mouse_x <= 480.0 else 0.06
 
 # ─── Game Over ────────────────────────────────────────────────────────────────
 
@@ -413,16 +514,13 @@ func _spawn_powerup_text(pos: Vector2) -> void:
 	tween.chain().tween_callback(popup.queue_free)
 
 func _screen_shake(magnitude: float) -> void:
-	var cam := $Background as ColorRect
-	if not cam:
-		return
 	var orig := Vector2.ZERO
+	var tween: Tween = create_tween()
 	for i in range(6):
-		var offset := Vector2(randf_range(-magnitude, magnitude), randf_range(-magnitude, magnitude))
-		var tween := create_tween()
+		var intensity: float = magnitude * (1.0 - float(i) / 6.0)
+		var offset := Vector2(randf_range(-intensity, intensity), randf_range(-intensity * 0.5, intensity * 0.5))
 		tween.tween_property(self, "position", offset, 0.03)
-	var tween := create_tween()
-	tween.tween_property(self, "position", Vector2.ZERO, 0.1).set_delay(0.2)
+	tween.tween_property(self, "position", Vector2.ZERO, 0.05)
 
 # ─── Spirit Wisps ─────────────────────────────────────────────────────────────
 
