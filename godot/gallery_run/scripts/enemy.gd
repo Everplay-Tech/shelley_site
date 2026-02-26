@@ -1,30 +1,31 @@
 extends Area2D
-## Enemy unit — sits in formation, can attack, can be destroyed.
+## Enemy unit — Axis Mundi sea creatures in formation.
+## Eye Spawn (baby kraken), Tigerfish (tiger-mermaid), Eye Kraken (eldritch).
 
 signal defeated(enemy: Area2D)
 signal attack_fired(enemy: Area2D)
 
-enum EnemyType { FRAME, WRAITH, CRITIC }
+enum EnemyType { EYE_SPAWN, TIGERFISH, EYE_KRAKEN }
 
 const COLORS := {
-	EnemyType.FRAME: Color(0.6, 0.5, 0.3, 1.0),    # Gold frame
-	EnemyType.WRAITH: Color(0.5, 0.2, 0.7, 1.0),    # Purple paint
-	EnemyType.CRITIC: Color(0.8, 0.2, 0.2, 1.0),     # Red formal
+	EnemyType.EYE_SPAWN: Color(0.2, 0.6, 0.5, 1.0),    # Teal-green
+	EnemyType.TIGERFISH: Color(0.85, 0.5, 0.15, 1.0),   # Orange-tiger
+	EnemyType.EYE_KRAKEN: Color(0.4, 0.15, 0.5, 1.0),   # Dark purple
 }
 
 const HP_TABLE := {
-	EnemyType.FRAME: 1,
-	EnemyType.WRAITH: 2,
-	EnemyType.CRITIC: 3,
+	EnemyType.EYE_SPAWN: 1,
+	EnemyType.TIGERFISH: 2,
+	EnemyType.EYE_KRAKEN: 3,
 }
 
 const POINTS_TABLE := {
-	EnemyType.FRAME: 10,
-	EnemyType.WRAITH: 25,
-	EnemyType.CRITIC: 50,
+	EnemyType.EYE_SPAWN: 10,
+	EnemyType.TIGERFISH: 25,
+	EnemyType.EYE_KRAKEN: 50,
 }
 
-var enemy_type: EnemyType = EnemyType.FRAME
+var enemy_type: EnemyType = EnemyType.EYE_SPAWN
 var hp := 1
 var points := 10
 var grid_pos := Vector2i.ZERO  # Position in formation grid
@@ -36,12 +37,15 @@ var _attack_timer := 0.0
 var _attack_interval := 3.0
 var _is_dead := false
 
-# Critic zigzag
+# Eye Kraken zigzag
 var _zigzag_active := false
 var _zigzag_offset := 0.0
 var _zigzag_speed := 60.0
 var _zigzag_dir := 1.0
 var _zigzag_timer := 0.0
+
+# Eye pulse animation
+var _eye_pulse_time := 0.0
 
 func setup(type: EnemyType, grid: Vector2i) -> void:
 	enemy_type = type
@@ -50,7 +54,8 @@ func setup(type: EnemyType, grid: Vector2i) -> void:
 	points = POINTS_TABLE[type]
 	_attack_interval = randf_range(2.5, 4.0)
 	_attack_timer = randf_range(0.0, _attack_interval)
-	if type == EnemyType.CRITIC:
+	_eye_pulse_time = randf() * TAU  # Random phase offset
+	if type == EnemyType.EYE_KRAKEN:
 		_zigzag_active = true
 		_zigzag_speed = randf_range(40.0, 80.0)
 
@@ -66,9 +71,9 @@ func _ready() -> void:
 	# Try to load sprite
 	var type_name: String
 	match enemy_type:
-		EnemyType.FRAME: type_name = "frame"
-		EnemyType.WRAITH: type_name = "wraith"
-		EnemyType.CRITIC: type_name = "critic"
+		EnemyType.EYE_SPAWN: type_name = "eye_spawn"
+		EnemyType.TIGERFISH: type_name = "tigerfish"
+		EnemyType.EYE_KRAKEN: type_name = "eye_kraken"
 	var tex_path := "res://sprites/enemies/%s.png" % type_name
 	if ResourceLoader.exists(tex_path):
 		_sprite = Sprite2D.new()
@@ -82,7 +87,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _is_dead:
 		return
-	# Zigzag for critics
+	# Eye pulse for all types (subtle)
+	_eye_pulse_time += delta * 3.0
+	# Zigzag for Eye Kraken
 	if _zigzag_active:
 		_zigzag_timer += delta
 		if _zigzag_timer > 0.4:
@@ -90,8 +97,8 @@ func _process(delta: float) -> void:
 			_zigzag_dir *= -1.0
 		_zigzag_offset += _zigzag_dir * _zigzag_speed * delta
 		_zigzag_offset = clampf(_zigzag_offset, -20.0, 20.0)
-	# Attack timer (only front row enemies with attack ability)
-	if can_attack and (enemy_type == EnemyType.WRAITH or enemy_type == EnemyType.CRITIC):
+	# Attack timer (Tigerfish and Eye Kraken can attack)
+	if can_attack and (enemy_type == EnemyType.TIGERFISH or enemy_type == EnemyType.EYE_KRAKEN):
 		_attack_timer += delta
 		if _attack_timer >= _attack_interval:
 			_attack_timer = 0.0
@@ -105,7 +112,7 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	# Hit by player bullet
 	if area.is_in_group("player_bullets"):
-		area.queue_free()  # Destroy the bullet
+		area.queue_free()
 		take_hit()
 
 func take_hit() -> void:
@@ -113,7 +120,6 @@ func take_hit() -> void:
 	if hp <= 0:
 		die()
 	else:
-		# Flash white on hit
 		_flash_white()
 
 func _flash_white() -> void:
@@ -132,7 +138,6 @@ func _flash_white() -> void:
 func die() -> void:
 	_is_dead = true
 	defeated.emit(self)
-	# Death VFX: burst particles
 	_spawn_death_burst()
 	queue_free()
 
@@ -158,45 +163,110 @@ func _add_placeholder() -> void:
 	_placeholder = Node2D.new()
 	add_child(_placeholder)
 	var color: Color = COLORS[enemy_type]
-	# Body
+	match enemy_type:
+		EnemyType.EYE_SPAWN:
+			_build_eye_spawn(color)
+		EnemyType.TIGERFISH:
+			_build_tigerfish(color)
+		EnemyType.EYE_KRAKEN:
+			_build_eye_kraken(color)
+
+func _build_eye_spawn(color: Color) -> void:
+	# Round-ish body
 	var body := ColorRect.new()
-	body.size = Vector2(20, 20)
-	body.position = Vector2(-10, -10)
+	body.size = Vector2(14, 14)
+	body.position = Vector2(-7, -7)
 	body.color = color
 	_placeholder.add_child(body)
-	# Eyes
+	# Single large eye
+	var eye := ColorRect.new()
+	eye.size = Vector2(8, 8)
+	eye.position = Vector2(-4, -4)
+	eye.color = Color.WHITE
+	_placeholder.add_child(eye)
+	var pupil := ColorRect.new()
+	pupil.size = Vector2(4, 4)
+	pupil.position = Vector2(-2, -2)
+	pupil.color = Color.BLACK
+	_placeholder.add_child(pupil)
+	# 4 short tentacles
+	for i in range(4):
+		var tent := ColorRect.new()
+		tent.size = Vector2(3, 6)
+		var angle: float = (TAU / 4.0) * i + TAU / 8.0
+		tent.position = Vector2(cos(angle) * 9 - 1.5, sin(angle) * 9 - 3)
+		tent.color = Color(color.r * 0.8, color.g * 0.8, color.b * 0.8)
+		_placeholder.add_child(tent)
+
+func _build_tigerfish(color: Color) -> void:
+	# Tiger body (front half)
+	var body := ColorRect.new()
+	body.size = Vector2(20, 16)
+	body.position = Vector2(-10, -8)
+	body.color = color
+	_placeholder.add_child(body)
+	# Stripes
+	for i in range(3):
+		var stripe := ColorRect.new()
+		stripe.size = Vector2(3, 12)
+		stripe.position = Vector2(-6 + i * 6, -6)
+		stripe.color = Color(0.15, 0.08, 0.02)  # Dark stripe
+		_placeholder.add_child(stripe)
+	# Fish tail
+	var tail := ColorRect.new()
+	tail.size = Vector2(10, 10)
+	tail.position = Vector2(6, -5)
+	tail.color = Color(0.3, 0.5, 0.6)  # Scale blue-gray
+	_placeholder.add_child(tail)
+	# Eyes (fierce)
 	for i in range(2):
 		var eye := ColorRect.new()
-		eye.size = Vector2(4, 4)
-		eye.position = Vector2(-6 + i * 8, -4)
-		eye.color = Color.WHITE
+		eye.size = Vector2(4, 3)
+		eye.position = Vector2(-8 + i * 8, -5)
+		eye.color = Color(1.0, 0.9, 0.2)  # Yellow fierce
+		_placeholder.add_child(eye)
+	# Fangs
+	for i in range(2):
+		var fang := ColorRect.new()
+		fang.size = Vector2(2, 4)
+		fang.position = Vector2(-4 + i * 5, 4)
+		fang.color = Color.WHITE
+		_placeholder.add_child(fang)
+
+func _build_eye_kraken(color: Color) -> void:
+	# Central mass
+	var body := ColorRect.new()
+	body.size = Vector2(18, 18)
+	body.position = Vector2(-9, -9)
+	body.color = color
+	_placeholder.add_child(body)
+	# 3 eyes (clustered)
+	var eye_positions := [Vector2(-4, -4), Vector2(2, -4), Vector2(-1, 1)]
+	for epos in eye_positions:
+		var eye := ColorRect.new()
+		eye.size = Vector2(5, 5)
+		eye.position = epos
+		eye.color = Color(0.9, 0.85, 0.7)  # Pale eye
 		_placeholder.add_child(eye)
 		var pupil := ColorRect.new()
-		pupil.size = Vector2(2, 2)
-		pupil.position = Vector2(-5 + i * 8, -3)
-		pupil.color = Color.BLACK
+		pupil.size = Vector2(3, 3)
+		pupil.position = epos + Vector2(1, 1)
+		pupil.color = Color(0.1, 0.0, 0.15)  # Deep purple pupil
 		_placeholder.add_child(pupil)
-	# Type indicator
-	match enemy_type:
-		EnemyType.FRAME:
-			# Frame border
-			var border := ColorRect.new()
-			border.size = Vector2(24, 24)
-			border.position = Vector2(-12, -12)
-			border.color = Color(color.r, color.g, color.b, 0.3)
-			_placeholder.add_child(border)
-			border.z_index = -1
-		EnemyType.WRAITH:
-			# Swirl accent
-			var accent := ColorRect.new()
-			accent.size = Vector2(6, 3)
-			accent.position = Vector2(-3, 6)
-			accent.color = Color(0.3, 0.8, 0.2)  # Green paint
-			_placeholder.add_child(accent)
-		EnemyType.CRITIC:
-			# Top hat
-			var hat := ColorRect.new()
-			hat.size = Vector2(10, 5)
-			hat.position = Vector2(-5, -15)
-			hat.color = Color(0.15, 0.15, 0.15)
-			_placeholder.add_child(hat)
+	# 8 tentacles radiating outward
+	for i in range(8):
+		var tent := ColorRect.new()
+		tent.size = Vector2(3, 7)
+		var angle: float = (TAU / 8.0) * i
+		tent.position = Vector2(cos(angle) * 11 - 1.5, sin(angle) * 11 - 3.5)
+		tent.rotation = angle
+		tent.color = Color(color.r * 0.7, color.g * 0.5, color.b * 0.7)
+		_placeholder.add_child(tent)
+	# Suction cup dots on a few tentacles
+	for i in range(4):
+		var dot := ColorRect.new()
+		dot.size = Vector2(2, 2)
+		var angle: float = (TAU / 4.0) * i + 0.3
+		dot.position = Vector2(cos(angle) * 14 - 1, sin(angle) * 14 - 1)
+		dot.color = Color(0.6, 0.4, 0.7, 0.6)
+		_placeholder.add_child(dot)
