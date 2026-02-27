@@ -1,9 +1,11 @@
 extends CanvasLayer
-## HUD — spirit phone bar (health), distance, score, trophy tracker, game over panel.
+## HUD — spirit phone bar (health), distance, score, trophy tracker, artifact tracker, game over panel.
 ## Po is immortal — when his spirit energy runs out, he has to call his mom.
+## Artifact system: 6 slots for the Forbidden Six — Exodia/Vecna-style collectible set.
 ## Brand colors: wood=#4a3728, amber=#ffbf00, charcoal=#1a1a1a.
 
 signal restart_requested
+signal all_pieces_collected
 
 # ---- Spirit Bar Colors ----
 const BAR_FULL := Color(0.4, 0.85, 1.0, 0.9)       # Spectral cyan at full
@@ -31,6 +33,20 @@ const WOOD_COLOR := Color(0.29, 0.216, 0.157, 1.0)  # #4a3728
 const AMBER_COLOR := Color(1.0, 0.749, 0.0, 1.0)    # #ffbf00
 const CHARCOAL := Color(0.1, 0.1, 0.1, 1.0)         # #1a1a1a
 
+# ---- Artifact Tracker (Forbidden Six) ----
+const ARTIFACT_TOTAL := 6
+const ARTIFACT_SLOT_SIZE := 10.0
+const ARTIFACT_GAP := 3.0
+const ARTIFACT_EMPTY_COLOR := Color(0.15, 0.12, 0.08, 0.3)
+const ARTIFACT_FILL_COLOR := Color(1.0, 0.749, 0.0, 0.9)      # Golden amber
+const ARTIFACT_PULSE_COLOR := Color(1.0, 0.9, 0.6, 1.0)       # Bright pulse
+const ARTIFACT_GLOW_COLOR := Color(1.0, 0.85, 0.4, 0.4)       # Ambient glow around filled
+var _artifact_count := 0
+var _artifact_slots: Array[ColorRect] = []
+var _artifact_glows: Array[ColorRect] = []
+var _artifact_label: Label
+var _artifact_bg: ColorRect
+
 var _game_over_visible := false
 var _trophies: Dictionary = {}  # food_name → {node, count_label, count}
 
@@ -52,6 +68,9 @@ func _ready() -> void:
 
 	# Build spirit bar (replaces hearts)
 	_build_spirit_bar(max_health)
+
+	# Build artifact tracker (Forbidden Six slots)
+	_build_artifact_tracker()
 
 	# Hide game over panel
 	game_over_panel.visible = false
@@ -219,6 +238,131 @@ func _trophy_color(food_name: String) -> Color:
 		"blt": return Color(0.8, 0.3, 0.2, 1.0)
 		"smoothie": return Color(0.5, 0.8, 0.4, 1.0)
 		_: return AMBER_COLOR
+
+# ---- Artifact Tracker (Forbidden Six) ----
+
+func _build_artifact_tracker() -> void:
+	var vp_w = get_viewport().get_visible_rect().size.x
+	var total_w = ARTIFACT_TOTAL * ARTIFACT_SLOT_SIZE + (ARTIFACT_TOTAL - 1) * ARTIFACT_GAP
+	var start_x = vp_w - total_w - 10  # 10px right margin
+
+	# Label
+	_artifact_label = Label.new()
+	_artifact_label.text = "???"
+	_artifact_label.position = Vector2(start_x, 4)
+	_artifact_label.add_theme_font_size_override("font_size", 6)
+	_artifact_label.add_theme_color_override("font_color", Color(0.6, 0.5, 0.3, 0.4))
+	add_child(_artifact_label)
+
+	# Background
+	_artifact_bg = ColorRect.new()
+	_artifact_bg.size = Vector2(total_w + 6, ARTIFACT_SLOT_SIZE + 6)
+	_artifact_bg.position = Vector2(start_x - 3, 13)
+	_artifact_bg.color = Color(0.05, 0.05, 0.05, 0.5)
+	add_child(_artifact_bg)
+
+	# Slots
+	for i in range(ARTIFACT_TOTAL):
+		# Glow layer (behind slot, larger, invisible until filled)
+		var glow = ColorRect.new()
+		glow.size = Vector2(ARTIFACT_SLOT_SIZE + 4, ARTIFACT_SLOT_SIZE + 4)
+		glow.position = Vector2(start_x + i * (ARTIFACT_SLOT_SIZE + ARTIFACT_GAP) - 2, 14)
+		glow.color = ARTIFACT_GLOW_COLOR
+		glow.modulate.a = 0.0
+		add_child(glow)
+		_artifact_glows.append(glow)
+
+		# Slot
+		var slot = ColorRect.new()
+		slot.size = Vector2(ARTIFACT_SLOT_SIZE, ARTIFACT_SLOT_SIZE)
+		slot.position = Vector2(start_x + i * (ARTIFACT_SLOT_SIZE + ARTIFACT_GAP), 16)
+		slot.color = ARTIFACT_EMPTY_COLOR
+		add_child(slot)
+		_artifact_slots.append(slot)
+
+func collect_artifact() -> void:
+	## Called by main.gd when a boss drops and Po collects an artifact piece.
+	if _artifact_count >= ARTIFACT_TOTAL:
+		return
+
+	var idx = _artifact_count
+	_artifact_count += 1
+
+	# Fill the slot with dramatic animation
+	var slot = _artifact_slots[idx]
+	var glow = _artifact_glows[idx]
+
+	# Flash white → golden amber
+	slot.color = Color(3.0, 2.5, 1.5, 1.0)  # Overbright flash
+	var tween: Tween = create_tween()
+	tween.tween_property(slot, "color", ARTIFACT_FILL_COLOR, 0.3)
+
+	# Scale pop
+	var orig_size = slot.size
+	slot.size = orig_size * 1.8
+	slot.position -= (orig_size * 0.4)
+	tween.parallel().tween_property(slot, "size", orig_size, 0.25)
+	tween.parallel().tween_property(slot, "position", slot.position + (orig_size * 0.4), 0.25)
+
+	# Glow fade in
+	glow.modulate.a = 0.8
+	var glow_tween: Tween = create_tween()
+	glow_tween.tween_property(glow, "modulate:a", 0.3, 0.5)
+
+	# Update label
+	_artifact_label.text = "%d / %d" % [_artifact_count, ARTIFACT_TOTAL]
+	_artifact_label.add_theme_color_override("font_color", Color(0.8, 0.65, 0.3, 0.7))
+
+	# Cumulative effects based on piece count
+	_update_artifact_ambience()
+
+	# Check for completion
+	if _artifact_count >= ARTIFACT_TOTAL:
+		_on_all_artifacts_collected()
+
+func _update_artifact_ambience() -> void:
+	## Escalating visual effects as more pieces are collected.
+	match _artifact_count:
+		3:
+			# All filled slots start gentle pulse
+			for i in range(_artifact_count):
+				_start_slot_pulse(_artifact_slots[i], 2.0)
+		5:
+			# Intense pulse — reality shaking
+			for i in range(_artifact_count):
+				_start_slot_pulse(_artifact_slots[i], 0.8)
+			# Glows intensify
+			for i in range(_artifact_count):
+				_artifact_glows[i].modulate.a = 0.5
+
+func _start_slot_pulse(slot: ColorRect, period: float) -> void:
+	var pulse: Tween = create_tween().set_loops()
+	pulse.tween_property(slot, "color", ARTIFACT_PULSE_COLOR, period * 0.5)
+	pulse.tween_property(slot, "color", ARTIFACT_FILL_COLOR, period * 0.5)
+
+func _on_all_artifacts_collected() -> void:
+	## All 6 pieces collected — trigger the morph sequence.
+	# All slots pulse rapidly
+	for slot in _artifact_slots:
+		var rapid: Tween = create_tween().set_loops(5)
+		rapid.tween_property(slot, "color", Color(3.0, 2.5, 1.0, 1.0), 0.08)
+		rapid.tween_property(slot, "color", ARTIFACT_FILL_COLOR, 0.08)
+
+	# All glows max out
+	for glow in _artifact_glows:
+		glow.modulate.a = 0.9
+
+	# Label flash
+	_artifact_label.text = "COMPLETE"
+	_artifact_label.add_theme_color_override("font_color", AMBER_COLOR)
+
+	# Emit signal after brief dramatic pause
+	var timer: Tween = create_tween()
+	timer.tween_interval(1.0)
+	timer.tween_callback(func(): all_pieces_collected.emit())
+
+func get_artifact_count() -> int:
+	return _artifact_count
 
 # ---- Game Over Panel ----
 

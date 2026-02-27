@@ -81,3 +81,15 @@ func send_game_over(final_score: int, final_distance: int) -> void:
 		"type": "game_over",
 		"data": {"score": final_score, "distance": final_distance}
 	})
+
+func send_piece_collected(piece_index: int, total: int) -> void:
+	send_event({
+		"type": "piece_collected",
+		"data": {"piece": piece_index, "total": total}
+	})
+
+func send_morph_start() -> void:
+	send_event({"type": "morph_to_platformer"})
+
+func send_morph_complete() -> void:
+	send_event({"type": "morph_complete"})

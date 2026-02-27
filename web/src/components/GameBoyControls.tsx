@@ -12,14 +12,46 @@ interface GameBoyControlsProps {
 /**
  * Full Game Boy Color-style controller overlay.
  * D-pad on the left, A/B buttons on the right.
- * Down (slide), A (jump/advance), B (slide), C (attack, NG+ only) are functional.
- * Up/Left/Right are visual — future expansion.
+ * Down (slide), Left/Right (move), A (jump/advance), B (slide), C (attack, NG+ only).
+ * Up is visual only. Left/Right activate during boss encounters and post-morph.
  */
 export default function GameBoyControls({
   sendCommand,
   isNarrative,
   isNgPlus = false,
 }: GameBoyControlsProps) {
+  // ─── D-pad Left = Move Left ───
+  const onDpadLeftStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      sendCommand({ command: "move_left_press" });
+    },
+    [sendCommand]
+  );
+  const onDpadLeftEnd = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      sendCommand({ command: "move_left_release" });
+    },
+    [sendCommand]
+  );
+
+  // ─── D-pad Right = Move Right ───
+  const onDpadRightStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      sendCommand({ command: "move_right_press" });
+    },
+    [sendCommand]
+  );
+  const onDpadRightEnd = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      sendCommand({ command: "move_right_release" });
+    },
+    [sendCommand]
+  );
+
   // ─── D-pad Down = Slide ───
   const onDpadDownStart = useCallback(
     (e: React.TouchEvent) => {
@@ -109,19 +141,25 @@ export default function GameBoyControls({
             <span className="text-sm font-bold">▲</span>
           </div>
 
-          {/* Left — visual only */}
-          <div
-            className={`absolute top-1/2 left-[4px] -translate-y-1/2 w-[33px] h-[38px] ${dpadInert}`}
+          {/* Left — FUNCTIONAL (move left) */}
+          <button
+            onTouchStart={onDpadLeftStart}
+            onTouchEnd={onDpadLeftEnd}
+            onTouchCancel={onDpadLeftEnd}
+            className={`absolute top-1/2 left-[4px] -translate-y-1/2 w-[33px] h-[38px] ${dpadActive}`}
           >
             <span className="text-sm font-bold">◀</span>
-          </div>
+          </button>
 
-          {/* Right — visual only */}
-          <div
-            className={`absolute top-1/2 right-[4px] -translate-y-1/2 w-[33px] h-[38px] ${dpadInert}`}
+          {/* Right — FUNCTIONAL (move right) */}
+          <button
+            onTouchStart={onDpadRightStart}
+            onTouchEnd={onDpadRightEnd}
+            onTouchCancel={onDpadRightEnd}
+            className={`absolute top-1/2 right-[4px] -translate-y-1/2 w-[33px] h-[38px] ${dpadActive}`}
           >
             <span className="text-sm font-bold">▶</span>
-          </div>
+          </button>
 
           {/* Down — FUNCTIONAL (slide) */}
           <button

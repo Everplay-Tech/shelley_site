@@ -78,6 +78,10 @@ shape = SubResource("RectangleShape2D_floor")
 z_index = 10
 position = Vector2(100, 288)
 
+[node name="GameCamera" type="Camera2D" parent="."]
+enabled = false
+position = Vector2(320, 180)
+
 [node name="ObstacleSpawner" type="Node2D" parent="."]
 position = Vector2(0, 308)
 script = ExtResource("5_spawner")

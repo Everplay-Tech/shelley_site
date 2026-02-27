@@ -61,6 +61,13 @@ var jumps_remaining := 2
 var current_action := "Idle"
 var game_started := false
 
+# --- Platformer Mode ---
+var platformer_mode := false       # Permanent (post-morph, all 6 collected)
+var temp_platformer := false        # Temporary (during boss encounters)
+const PLATFORM_RUN_SPEED := 120.0  # Horizontal movement speed
+const PLATFORM_ACCEL := 800.0      # How fast Po reaches full speed
+const PLATFORM_FRICTION := 600.0   # How fast Po decelerates
+
 # --- NG+ Attack System ---
 var is_ng_plus := false
 const ATTACK_COOLDOWN := 0.6         # Shared cooldown between Spirit Fist / Ghost Whip
@@ -230,11 +237,37 @@ func _physics_process(delta: float) -> void:
 			_spawn_run_dust()
 
 	was_on_floor = on_floor
-	velocity.x = RUN_SPEED
-	move_and_slide()
-	# Lock horizontal position — world scrolls, Po stays put.
-	# Without this, obstacle collisions push Po backward.
-	position.x = 100
+
+	# --- Movement mode: auto-runner vs platformer ---
+	var has_horizontal = platformer_mode or temp_platformer
+	if has_horizontal:
+		# Platformer horizontal movement (earned through Forbidden Six / boss fights)
+		var dir = Input.get_axis("move_left", "move_right")
+		if dir != 0:
+			velocity.x = move_toward(velocity.x, dir * PLATFORM_RUN_SPEED, PLATFORM_ACCEL * delta)
+			sprite.flip_h = dir < 0
+			if on_floor and not is_sliding and not is_jumping:
+				if sprite.animation != "run":
+					sprite.play("run")
+				current_action = "Running"
+		else:
+			velocity.x = move_toward(velocity.x, 0, PLATFORM_FRICTION * delta)
+			if on_floor and not is_jumping and not is_sliding and not is_stumbling:
+				if abs(velocity.x) < 5.0:
+					if sprite.animation != "idle":
+						sprite.play("idle")
+					current_action = "Idle"
+		move_and_slide()
+		if not platformer_mode:
+			# Temp mode (encounter): clamp to screen bounds
+			position.x = clamp(position.x, 20, 620)
+	else:
+		# Auto-runner: world scrolls, Po stays locked
+		velocity.x = RUN_SPEED
+		move_and_slide()
+		# Lock horizontal position — world scrolls, Po stays put.
+		# Without this, obstacle collisions push Po backward.
+		position.x = 100
 
 func _can_jump() -> bool:
 	if jumps_remaining <= 0:
@@ -520,8 +553,35 @@ func enter_narrative() -> void:
 
 func exit_narrative() -> void:
 	is_narrative_paused = false
-	sprite.play("run")
-	current_action = "Running"
+	if platformer_mode:
+		sprite.play("idle")
+		current_action = "Idle"
+	else:
+		sprite.play("run")
+		current_action = "Running"
+
+# ============================================================
+# PLATFORMER MODE — Earned through the Forbidden Six
+# ============================================================
+
+func activate_temp_platformer() -> void:
+	## Temporary horizontal movement during boss encounters.
+	temp_platformer = true
+
+func deactivate_temp_platformer() -> void:
+	## Back to auto-runner lock after encounter ends.
+	temp_platformer = false
+	velocity.x = 0
+	position.x = 100  # Re-lock to runner position
+
+func activate_platformer_mode() -> void:
+	## Permanent platformer mode — all 6 artifacts collected, reality breaks.
+	platformer_mode = true
+	temp_platformer = false  # Permanent overrides temp
+	# Golden reality-break flash
+	sprite.modulate = Color(2.0, 1.5, 1.0, 1.0)
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.5)
 
 # ============================================================
 # NG+ SYSTEM — Upgraded Po

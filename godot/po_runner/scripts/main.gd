@@ -52,6 +52,11 @@ static var _should_auto_start := false
 @onready var enemy_spawner: Node2D = $EnemySpawner
 @onready var ground: ParallaxBackground = $Ground
 @onready var hud: CanvasLayer = $HUD
+@onready var camera: Camera2D = $GameCamera
+
+# Platformer area (instanced on morph)
+const PlatformerAreaScript = preload("res://scripts/platformer_area.gd")
+var _platformer_area: Node2D = null
 
 func _ready() -> void:
 	# Connect signals
@@ -74,6 +79,30 @@ func _ready() -> void:
 		var ev = InputEventKey.new()
 		ev.keycode = KEY_X
 		InputMap.action_add_event("attack1", ev)
+
+	# Register platformer movement actions (Left/Right arrows + A/D keys)
+	if not InputMap.has_action("move_left"):
+		InputMap.add_action("move_left")
+		var ev_left = InputEventKey.new()
+		ev_left.keycode = KEY_LEFT
+		InputMap.action_add_event("move_left", ev_left)
+		var ev_a = InputEventKey.new()
+		ev_a.keycode = KEY_A
+		InputMap.action_add_event("move_left", ev_a)
+	if not InputMap.has_action("move_right"):
+		InputMap.add_action("move_right")
+		var ev_right = InputEventKey.new()
+		ev_right.keycode = KEY_RIGHT
+		InputMap.action_add_event("move_right", ev_right)
+		var ev_d = InputEventKey.new()
+		ev_d.keycode = KEY_D
+		InputMap.action_add_event("move_right", ev_d)
+
+	# Connect HUD artifact completion signal
+	hud.all_pieces_collected.connect(_on_all_pieces_collected)
+
+	# Connect narrative morph signal
+	narrative.morph_to_platformer.connect(_on_morph_to_platformer)
 
 	# Birth the spirit world
 	_create_spirit_system()
@@ -134,6 +163,10 @@ func _process(delta: float) -> void:
 	if state_timer >= STATE_REPORT_INTERVAL:
 		state_timer = 0.0
 		web_bridge.send_player_state(po.current_action, score, po.current_action)
+
+	# Camera follows Po in permanent platformer mode
+	if po.platformer_mode and camera.enabled:
+		_update_platformer_camera(delta)
 
 func _on_pick_collected(value: int, food_name: String) -> void:
 	score += value
@@ -233,6 +266,15 @@ func _on_host_command(command: String, _data: Dictionary) -> void:
 			po.attack_press()
 		"attack1_release":
 			po.attack_release()
+		# Platformer movement virtual input (mobile D-pad)
+		"move_left_press":
+			Input.action_press("move_left")
+		"move_left_release":
+			Input.action_release("move_left")
+		"move_right_press":
+			Input.action_press("move_right")
+		"move_right_release":
+			Input.action_release("move_right")
 
 func _on_attack_fired(attack_type: String, spawn_pos: Vector2) -> void:
 	if attack_type == "spirit_fist":
@@ -262,10 +304,199 @@ func _on_enemy_defeated(enemy_type: String, pos: Vector2) -> void:
 	for s in _spirits:
 		s["pulse_timer"] = 0.5
 
+	# Boss encounters (scroll-stop enemies) drop artifact pieces
+	if _encounter_enemy != null and hud.get_artifact_count() < hud.ARTIFACT_TOTAL:
+		_spawn_artifact_drop(pos)
+
 func _on_enemy_hit_po(_enemy_type: String) -> void:
 	# Enemy hit is handled by the enemy's body_entered → po.stumble()
 	# Spirits scatter same as obstacle stumble
 	_scatter_spirits()
+
+# ============================================================
+# ARTIFACT SYSTEM — The Forbidden Six
+# ============================================================
+# Boss encounters drop artifact pieces. 6 pieces = morph to platformer.
+# Each piece has dramatic VFX: rises from corpse, flies to HUD.
+# Quick dialogue lines play without pausing the game.
+
+const ARTIFACT_QUICK_LINES := [
+	"What IS this thing?",
+	"Two. They fit together somehow.",
+	"Three. I'm starting to see a pattern...",
+	"FOUR. Something's building. I can feel it.",
+	"Five. One more. The world is SHAKING.",
+	"",  # 6th piece triggers morph — no quick line
+]
+
+# Cumulative Po aura colors per piece count
+const AURA_COLORS := [
+	Color(1.0, 0.85, 0.4, 0.0),   # 0: no aura
+	Color(1.0, 0.85, 0.4, 0.08),  # 1: faint golden
+	Color(1.0, 0.85, 0.4, 0.12),  # 2
+	Color(1.0, 0.8, 0.3, 0.18),   # 3: spectral particles start
+	Color(1.0, 0.75, 0.3, 0.22),  # 4
+	Color(1.0, 0.7, 0.2, 0.3),    # 5: reality glitch
+	Color(1.0, 0.65, 0.1, 0.4),   # 6: max — triggers morph
+]
+
+var _morph_active := false
+
+func _spawn_artifact_drop(boss_pos: Vector2) -> void:
+	## Dramatic artifact piece drop: rises from boss, flies to HUD.
+	var piece_idx = hud.get_artifact_count()  # 0-based (before this collection)
+
+	# Create the piece visually
+	var piece = ColorRect.new()
+	piece.size = Vector2(8, 8)
+	piece.color = Color(1.0, 0.85, 0.4, 1.0)  # Golden amber
+	piece.global_position = boss_pos + Vector2(-4, -4)
+	piece.z_index = 20  # Above everything
+	add_child(piece)
+
+	# Glow around piece
+	var glow = ColorRect.new()
+	glow.size = Vector2(14, 14)
+	glow.color = Color(1.0, 0.85, 0.4, 0.3)
+	glow.global_position = boss_pos + Vector2(-7, -7)
+	glow.z_index = 19
+	add_child(glow)
+
+	# Animation: rise, pulse, then shoot to HUD
+	var tween: Tween = create_tween()
+	# Phase 1: Rise slowly from corpse (0.5s)
+	tween.tween_property(piece, "global_position:y", boss_pos.y - 30, 0.5).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(glow, "global_position:y", boss_pos.y - 33, 0.5).set_ease(Tween.EASE_OUT)
+	# Phase 2: Pulse bright (0.3s)
+	tween.tween_property(piece, "color", Color(3.0, 2.5, 1.5, 1.0), 0.15)
+	tween.tween_property(piece, "color", Color(1.0, 0.85, 0.4, 1.0), 0.15)
+	# Phase 3: Fly to HUD (top-right corner) (0.4s)
+	var vp_size = get_viewport().get_visible_rect().size
+	var hud_target = Vector2(vp_size.x - 60 + piece_idx * 13, 18)
+	tween.tween_property(piece, "global_position", hud_target, 0.4).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+	tween.parallel().tween_property(glow, "global_position", hud_target - Vector2(3, 3), 0.4).set_ease(Tween.EASE_IN)
+	# Phase 4: Disappear (HUD takes over)
+	tween.tween_property(piece, "modulate:a", 0.0, 0.1)
+	tween.parallel().tween_property(glow, "modulate:a", 0.0, 0.1)
+	tween.tween_callback(func():
+		piece.queue_free()
+		glow.queue_free()
+		# Now register in HUD
+		hud.collect_artifact()
+		# Apply aura to Po
+		_update_po_aura()
+		# Show quick dialogue line (without pausing)
+		if piece_idx < ARTIFACT_QUICK_LINES.size() and ARTIFACT_QUICK_LINES[piece_idx] != "":
+			narrative.show_quick_line(ARTIFACT_QUICK_LINES[piece_idx])
+		# Report to website
+		web_bridge.send_piece_collected(piece_idx + 1, hud.ARTIFACT_TOTAL)
+	)
+
+func _update_po_aura() -> void:
+	## Apply cumulative golden aura effect to Po based on artifact count.
+	var count = hud.get_artifact_count()
+	if count <= 0 or count > 6:
+		return
+	# Subtle golden tint escalation
+	var tint = Color.WHITE.lerp(Color(1.1, 1.0, 0.9, 1.0), count / 6.0)
+	var tween = create_tween()
+	tween.tween_property(po.sprite, "modulate", tint, 0.3)
+
+func _on_all_pieces_collected() -> void:
+	## HUD confirmed 6/6 — trigger the morph narrative beat.
+	if _morph_active:
+		return
+	_morph_active = true
+	# The narrative beat "the_break" handles the morph — trigger it
+	narrative.trigger_morph_beat()
+
+func _on_morph_to_platformer() -> void:
+	## Called when narrative's "the_break" beat ends with morph signal.
+	## This is THE moment — Po breaks free.
+
+	# Stop the auto-runner permanently
+	game_speed = 0
+	ground.pause()
+	obstacle_spawner.pause_spawning()
+	pick_spawner.pause_spawning()
+	enemy_spawner.pause_spawning()
+	_freeze_world_objects()
+
+	# Activate permanent platformer mode
+	po.activate_platformer_mode()
+
+	# Instance the platformer exploration area
+	_spawn_platformer_area()
+
+	# Enable camera with smooth follow
+	_activate_platformer_camera()
+
+	# Spirit wisps celebrate — burst outward then resettle in warm gold
+	_scatter_spirits()
+	var resettle = create_tween()
+	resettle.tween_interval(0.8)
+	resettle.tween_callback(func():
+		_spirit_mode = "ambient"
+		_spirit_target_color = Color(1.0, 0.85, 0.5, 0.14)  # Warm gold ambient
+	)
+
+	# Report to website
+	web_bridge.send_morph_start()
+	var complete_timer = create_tween()
+	complete_timer.tween_interval(1.5)
+	complete_timer.tween_callback(func():
+		web_bridge.send_morph_complete()
+	)
+
+# ============================================================
+# PLATFORMER CAMERA — Smooth follow for free movement
+# ============================================================
+
+func _activate_platformer_camera() -> void:
+	## Enable Camera2D and set it at Po's current view.
+	camera.global_position = Vector2(
+		max(320.0, po.global_position.x),
+		180.0
+	)
+	camera.enabled = true
+
+func _update_platformer_camera(delta: float) -> void:
+	## Smooth-follow Po with look-ahead based on velocity direction.
+	var look_ahead := 0.0
+	if po.velocity.x > 10:
+		look_ahead = 55.0
+	elif po.velocity.x < -10:
+		look_ahead = -55.0
+	var target_x = po.global_position.x + look_ahead
+	var target_y = 180.0  # Fixed vertical (ground-level framing)
+	camera.global_position.x = lerp(camera.global_position.x, target_x, delta * 3.0)
+	camera.global_position.y = lerp(camera.global_position.y, target_y, delta * 3.0)
+	# Clamp to level bounds so camera doesn't show empty void
+	camera.global_position.x = clamp(camera.global_position.x, 100.0, 1100.0)
+
+# ============================================================
+# PLATFORMER AREA — Victory lap exploration zone
+# ============================================================
+
+func _spawn_platformer_area() -> void:
+	## Instance the platformer area (platforms, orbs, door).
+	if _platformer_area != null:
+		return
+	_platformer_area = Node2D.new()
+	_platformer_area.set_script(PlatformerAreaScript)
+	add_child(_platformer_area)
+	# Connect signals
+	_platformer_area.orb_collected.connect(_on_platformer_orb)
+	_platformer_area.door_reached.connect(_on_platformer_door)
+
+func _on_platformer_orb(count: int, total: int) -> void:
+	score += 1
+	hud.update_score(score)
+	_attract_spirits()
+
+func _on_platformer_door() -> void:
+	## Po reached the door — trigger the explore_complete narrative beat.
+	narrative.notify_area_entered("door")
 
 # ============================================================
 # ENCOUNTER SYSTEM — Scroll-Stop Face-Offs
@@ -284,11 +515,16 @@ func _on_enemy_request_scroll_stop(enemy: Area2D) -> void:
 	pick_spawner.pause_spawning()
 	enemy_spawner.pause_spawning()
 	_freeze_world_objects()
+	# Unlock temporary horizontal movement for the fight
+	po.activate_temp_platformer()
 
 func _on_enemy_request_scroll_resume() -> void:
 	if _encounter_enemy == null:
 		return  # No active encounter — nothing to resume
 	_encounter_enemy = null
+	if not po.platformer_mode:
+		# Only re-lock if we haven't permanently morphed
+		po.deactivate_temp_platformer()
 	ground.resume()
 	obstacle_spawner.resume_spawning()
 	pick_spawner.resume_spawning()

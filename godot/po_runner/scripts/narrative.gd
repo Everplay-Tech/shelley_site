@@ -1,16 +1,29 @@
 extends Node
 ## Manages narrative beats — triggers pauses at distance milestones,
 ## shows speech bubbles, advances on input.
+## Extended: quick lines (no pause), morph trigger, post-morph beats,
+## area-entered triggers, timer-based triggers.
 
 signal narrative_started(beat_id: String)
 signal narrative_ended(beat_id: String)
 signal onboarding_complete
+signal morph_to_platformer
 
 var beats: Array = []
 var current_beat_index := 0
 var is_active := false
 var current_line_index := 0
 var all_beats_done := false
+
+# Post-morph state
+var _morph_complete := false
+var _post_morph_timer := 0.0
+var _post_morph_beats_started := false
+
+# Quick line state (no-pause speech bubble)
+var _quick_line_active := false
+var _quick_line_timer := 0.0
+const QUICK_LINE_DURATION := 2.5
 
 @onready var speech_bubble: Control = %SpeechBubble
 @onready var speech_label: RichTextLabel = %SpeechLabel
@@ -29,6 +42,18 @@ func _load_beats() -> void:
 	else:
 		push_warning("Could not load narrative_beats.json")
 
+func _process(delta: float) -> void:
+	# Quick line auto-dismiss
+	if _quick_line_active:
+		_quick_line_timer -= delta
+		if _quick_line_timer <= 0:
+			_dismiss_quick_line()
+
+	# Post-morph timer beats
+	if _morph_complete and not is_active:
+		_post_morph_timer += delta
+		_check_post_morph_beats()
+
 func check_distance(distance: float) -> void:
 	if all_beats_done or is_active:
 		return
@@ -36,8 +61,54 @@ func check_distance(distance: float) -> void:
 		return
 
 	var beat = beats[current_beat_index]
+	var trigger_type = beat.get("trigger_type", "distance")
+
+	# Only process distance-triggered beats here
+	if trigger_type != "distance":
+		return
 	if distance >= beat.get("trigger_distance", 99999):
 		_start_beat(beat)
+
+func trigger_morph_beat() -> void:
+	## Called by main.gd when all 6 artifacts collected.
+	## Finds and triggers the "the_break" beat regardless of current index.
+	for i in range(beats.size()):
+		if beats[i].get("id", "") == "the_break":
+			current_beat_index = i
+			_start_beat(beats[i])
+			return
+	push_warning("Could not find 'the_break' beat in narrative_beats.json")
+
+func notify_morph_complete() -> void:
+	## Called after the morph transition is done — enables post-morph beats.
+	_morph_complete = true
+	_post_morph_timer = 0.0
+
+func notify_area_entered(area_name: String) -> void:
+	## Called when Po enters a named area (e.g., "door") — triggers matching beats.
+	if is_active or all_beats_done:
+		return
+	for i in range(current_beat_index, beats.size()):
+		var beat = beats[i]
+		if beat.get("trigger_type", "") == "area_entered" and beat.get("trigger_area", "") == area_name:
+			current_beat_index = i
+			_start_beat(beat)
+			return
+
+func _check_post_morph_beats() -> void:
+	## Check for timer-based post-morph beats.
+	for i in range(current_beat_index, beats.size()):
+		var beat = beats[i]
+		if beat.get("trigger_type", "") == "post_morph_timer":
+			var delay = beat.get("trigger_delay", 999)
+			if _post_morph_timer >= delay:
+				current_beat_index = i
+				_start_beat(beat)
+				return
+
+# ============================================================
+# STANDARD BEATS — Pause game, show dialogue, advance on input
+# ============================================================
 
 func _start_beat(beat: Dictionary) -> void:
 	is_active = true
@@ -69,6 +140,10 @@ func _typewrite(text: String) -> void:
 func _input(event: InputEvent) -> void:
 	if not is_active:
 		return
+	# Quick line — dismiss on any input
+	if _quick_line_active:
+		_dismiss_quick_line()
+		return
 	# Touch support — tap to advance dialogue
 	if event is InputEventScreenTouch and not event.pressed:
 		_advance_text()
@@ -96,8 +171,33 @@ func _end_beat(beat: Dictionary) -> void:
 	narrative_ended.emit(beat_id)
 
 	# Check for special signals
-	if beat.get("signal", "") == "onboarding_complete":
-		onboarding_complete.emit()
-		all_beats_done = true
+	var sig = beat.get("signal", "")
+	match sig:
+		"onboarding_complete":
+			onboarding_complete.emit()
+			all_beats_done = true
+		"morph_to_platformer":
+			morph_to_platformer.emit()
+			# Don't mark all_beats_done — post-morph beats still pending
+			notify_morph_complete()
 
 	current_beat_index += 1
+
+# ============================================================
+# QUICK LINES — No-pause speech bubble for artifact collection
+# ============================================================
+
+func show_quick_line(text: String) -> void:
+	## Shows a brief speech bubble without pausing the game.
+	## Auto-dismisses after QUICK_LINE_DURATION seconds.
+	if is_active:
+		return  # Don't interrupt a real narrative beat
+	_quick_line_active = true
+	_quick_line_timer = QUICK_LINE_DURATION
+	speech_bubble.visible = true
+	speech_label.text = text
+	speech_label.visible_characters = text.length()  # No typewriter for quick lines
+
+func _dismiss_quick_line() -> void:
+	_quick_line_active = false
+	speech_bubble.visible = false

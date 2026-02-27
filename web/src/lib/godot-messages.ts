@@ -37,7 +37,11 @@ export interface VirtualInputCommand {
     | "advance_press"
     | "advance_release"
     | "attack1_press"
-    | "attack1_release";
+    | "attack1_release"
+    | "move_left_press"
+    | "move_left_release"
+    | "move_right_press"
+    | "move_right_release";
 }
 
 export type GodotCommand =
@@ -114,6 +118,19 @@ export interface GameSessionEvent {
   };
 }
 
+export interface PieceCollectedEvent {
+  type: "piece_collected";
+  data: { piece: number; total: number };
+}
+
+export interface MorphToPlatformerEvent {
+  type: "morph_to_platformer";
+}
+
+export interface MorphCompleteEvent {
+  type: "morph_complete";
+}
+
 export type GodotEvent =
   | NavigateEvent
   | MiniGameCompleteEvent
@@ -125,7 +142,10 @@ export type GodotEvent =
   | OnboardingCompleteEvent
   | ScoreUpdateEvent
   | GameOverEvent
-  | GameSessionEvent;
+  | GameSessionEvent
+  | PieceCollectedEvent
+  | MorphToPlatformerEvent
+  | MorphCompleteEvent;
 
 export type GodotEventType = GodotEvent["type"];
 
@@ -143,6 +163,9 @@ const VALID_EVENT_TYPES: ReadonlySet<string> = new Set([
   "score_update",
   "game_over",
   "game_session",
+  "piece_collected",
+  "morph_to_platformer",
+  "morph_complete",
 ]);
 
 export function isGodotEvent(data: unknown): data is GodotEvent {

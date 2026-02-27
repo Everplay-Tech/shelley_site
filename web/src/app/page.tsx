@@ -168,8 +168,8 @@ export default function Home() {
                           <div className="absolute w-[66px] h-[24px] bg-[#333] rounded-[2px]" />
                         </div>
                         <div className="absolute top-[4px] left-1/2 -translate-x-1/2 text-white/20 text-[10px]">&#9650;</div>
-                        <div className="absolute top-1/2 left-[6px] -translate-y-1/2 text-white/20 text-[10px]">&#9664;</div>
-                        <div className="absolute top-1/2 right-[6px] -translate-y-1/2 text-white/20 text-[10px]">&#9654;</div>
+                        <div className="absolute top-1/2 left-[6px] -translate-y-1/2 text-shelley-amber text-[10px]">&#9664;</div>
+                        <div className="absolute top-1/2 right-[6px] -translate-y-1/2 text-shelley-amber text-[10px]">&#9654;</div>
                         <div className="absolute bottom-[4px] left-1/2 -translate-x-1/2 text-shelley-amber text-[10px]">&#9660;</div>
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-white/10" />
                       </div>
@@ -235,6 +235,24 @@ export default function Home() {
                       <div className="flex-1">
                         <span className="font-pixel text-[8px] text-white/70 tracking-wider">TALK</span>
                         <span className="text-white/20 font-mono text-[10px] ml-2">during dialogue</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1 shrink-0">
+                        <div className="w-7 h-7 rounded-sm bg-[#333] border border-shelley-amber/20 flex items-center justify-center">
+                          <span className="text-shelley-amber text-[10px]">&#9664;</span>
+                        </div>
+                        <div className="w-7 h-7 rounded-sm bg-[#333] border border-shelley-amber/20 flex items-center justify-center">
+                          <span className="text-shelley-amber text-[10px]">&#9654;</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <span className="font-pixel text-[8px] text-white/70 tracking-wider">MOVE</span>
+                        <span className="text-white/20 font-mono text-[10px] ml-2">during fights &amp; after morph</span>
+                        {!isMobile && (
+                          <span className="text-white/25 font-mono text-[10px] ml-2">A/D / &#8592;&#8594;</span>
+                        )}
                       </div>
                     </div>
 

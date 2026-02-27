@@ -1,59 +1,92 @@
 [
   {
     "id": "intro",
+    "trigger_type": "distance",
     "trigger_distance": 200,
     "lines": [
       "Oh hey! You're actually controlling me? Cool cool cool.",
-      "Name's Po. I'm... well, I'm not entirely sure WHAT I am.",
-      "Memory's a bit fuzzy. I know I'm a ghost. Skeleton type.",
-      "Also I'm apparently running through a bamboo forest? At night?",
-      "Look, just help me jump over stuff and we'll figure this out together."
+      "Name's Po. Skeleton ghost. Fur-trimmed hoodie enthusiast.",
+      "Memory's fuzzy. I know I'm dead. Pretty sure about that one.",
+      "I'm running through a bamboo forest at night. Classic me.",
+      "Just help me jump over stuff. We'll figure the rest out together."
     ]
   },
   {
     "id": "workshop",
-    "trigger_distance": 600,
+    "trigger_type": "distance",
+    "trigger_distance": 500,
     "lines": [
-      "You know what's weird? I keep finding these glowing orbs.",
-      "They feel warm. Like music trapped in a marble.",
-      "Wait... is that sawdust I smell? And lacquer?",
-      "Oh man. I think we're near a luthier's workshop.",
-      "Don't know what a luthier is? Makes guitars, fam. Keep up."
+      "Hold up. You smell that? Sawdust and lacquer.",
+      "And that THING the big cat dropped... what is it?",
+      "It's warm. Humming. Like it wants to be part of something bigger.",
+      "I think we're near a luthier's workshop. That's a guitar maker, fam.",
+      "...Someone scattered these pieces on purpose. Keep moving."
     ]
   },
   {
     "id": "gallery",
-    "trigger_distance": 1200,
+    "trigger_type": "distance",
+    "trigger_distance": 900,
     "lines": [
-      "OK this is getting spooky. Well, SPOOKIER.",
-      "These bamboo stalks have carvings on them...",
-      "They look like musical instruments. Old ones. Beautiful ones.",
-      "Some say I'm a Holy Ghost. They clearly have no idea.",
-      "This is about the closest I get to being holy — running through haunted bamboo.",
-      "*gestures at ghost tail* See? Ghost. Not holy. Just... misplaced."
+      "OK two of these things now. They're... resonating with each other.",
+      "These bamboo stalks have carvings on them... musical instruments.",
+      "Old ones. Beautiful ones. Carved with serious intention.",
+      "I'm starting to think these pieces ARE the forest somehow.",
+      "Like the whole world is built from whatever these things are.",
+      "*gestures at ghost tail* And I'm just the ghost stumbling through it."
     ]
   },
   {
     "id": "invitation",
-    "trigger_distance": 1800,
+    "trigger_type": "distance",
+    "trigger_distance": 1600,
     "lines": [
-      "HEY! You're still here! Most people bail by now.",
-      "I like you. You've got persistence. Or no life. Either way.",
-      "Listen, there's a place up ahead — Shelley Guitar.",
-      "Custom builds, wild designs, handcrafted everything.",
-      "They invited me to check it out. Probably because I'm dead cool.",
-      "...Get it? Dead? Because I'm a skeleton? I'll stop."
+      "FOUR pieces. Four out of... I don't even know how many.",
+      "But I can FEEL them now. They're pulling me forward.",
+      "There's a place up ahead — Shelley Guitar. Custom builds, wild designs.",
+      "These pieces — they're connected to whoever built this place.",
+      "Every time those big freaks show up, I get to MOVE for a second.",
+      "Like the fight breaks the rules. Like the cage has cracks."
     ]
   },
   {
-    "id": "complete",
-    "trigger_distance": 2000,
+    "id": "the_break",
+    "trigger_type": "piece_collected",
+    "trigger_count": 6,
     "lines": [
-      "Alright! We made it through the Djinn World!",
-      "Thanks for running with me. Literally.",
-      "Go explore the site — check out the builds, the story, everything.",
-      "And if you see any of those glowing orbs lying around... they're MINE.",
-      "Po out. *ghost tail dissolve*"
+      "Wait. WAIT. What's happening?",
+      "The world... it stopped. The scrolling. The endless running.",
+      "SIX pieces. That's all six.",
+      "...",
+      "I CAN GO LEFT?! I CAN GO LEFT!!!",
+      "This whole time I was an auto-runner character?! A SIDE-SCROLLER NPC?!",
+      "Do you know how DEHUMANIZING that is?! Well. De-ghosting. Same energy.",
+      "OK OK OK. New plan. We EXPLORE. Left, right, up, wherever.",
+      "Let's see what Captain Magus actually built out here."
+    ],
+    "signal": "morph_to_platformer"
+  },
+  {
+    "id": "first_steps",
+    "trigger_type": "post_morph_timer",
+    "trigger_delay": 30,
+    "lines": [
+      "This is wild. Actual freedom of movement.",
+      "There's a platform up there... and is that a DOOR?",
+      "Captain Magus built this whole place. The architect. The mad scientist.",
+      "I bet there's way more to find if we keep looking."
+    ]
+  },
+  {
+    "id": "explore_complete",
+    "trigger_type": "area_entered",
+    "trigger_area": "door",
+    "lines": [
+      "Alright! We cracked this place open.",
+      "There's a whole site out there — builds, stories, music, everything.",
+      "Go explore. I'll be around. I'm literally embedded in this website.",
+      "And if you see any glowing orbs lying around... they're MINE.",
+      "Po out. *morphs into the footer*"
     ],
     "signal": "onboarding_complete"
   }
