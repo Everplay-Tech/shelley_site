@@ -3,6 +3,8 @@
 import { useCallback } from "react";
 import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
+import PixelSectionHeader from "@/components/PixelSectionHeader";
+import PixelCard from "@/components/PixelCard";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
 import type { GodotEvent } from "@/lib/godot-messages";
@@ -41,36 +43,32 @@ const steps = [
   {
     id: "01",
     title: "Wood Selection",
-    icon: "\uD83C\uDF33",
     description:
-      "Every guitar starts with the right wood. We source tonewoods based on the player's sound goals — bright and cutting, warm and round, or something in between. Spruce, cedar, mahogany, maple, rosewood, wenge — each species has a voice.",
+      "Every guitar starts with the right wood. We source tonewoods based on the player's sound goals — bright and cutting, warm and round, or something in between.",
     detail:
       "We look at grain orientation, density, tap tone, and moisture content. No two blanks are identical, and that's the point.",
   },
   {
     id: "02",
     title: "Shaping",
-    icon: "\uD83D\uDD28",
     description:
-      "Hand-carved to precise dimensions. The body profile, neck shape, and bracing pattern all influence how the guitar feels and sounds. We carve for the player's hands — not a template.",
+      "Hand-carved to precise dimensions. The body profile, neck shape, and bracing pattern all influence how the guitar feels and sounds.",
     detail:
       "Neck profiles range from slim C-shapes for speed players to chunky D-shapes for grip. Bracing is scalloped and voiced by ear.",
   },
   {
     id: "03",
     title: "Finishing",
-    icon: "\u2728",
     description:
-      "The finish isn't just cosmetic — it protects the wood and affects resonance. Thin lacquer lets the top breathe. Oil finishes feel natural to the touch. We match the finish to the build's personality.",
+      "The finish isn't just cosmetic — it protects the wood and affects resonance. Thin lacquer lets the top breathe. Oil finishes feel natural.",
     detail:
       "We avoid thick polyester finishes that choke vibration. Every coat is hand-applied and sanded between layers.",
   },
   {
     id: "04",
     title: "Setup & Voicing",
-    icon: "\uD83C\uDFB5",
     description:
-      "Action height, intonation, nut slots, saddle compensation, truss rod relief — the setup is where a guitar goes from \"built\" to \"alive.\" We play-test every instrument before it leaves.",
+      "Action height, intonation, nut slots, saddle compensation, truss rod relief — the setup is where a guitar goes from \"built\" to \"alive.\"",
     detail:
       "Final voicing happens here too — adjusting bracing tension, saddle material, and string gauge to dial in the character.",
   },
@@ -88,10 +86,10 @@ export default function Workshop() {
     <div className="flex flex-col gap-16">
       {/* ─── HERO ─── */}
       <section className="text-center py-8">
-        <h1 className="text-5xl sm:text-6xl font-black tracking-tight mb-4">
-          The <span className="text-shelley-amber">Workshop</span>
+        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
+          THE <span className="text-shelley-amber">WORKSHOP</span>
         </h1>
-        <p className="text-lg text-white/50 max-w-xl mx-auto">
+        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
           Where wood meets steel and passion becomes music. Every Shelley guitar
           is built by hand, start to finish.
         </p>
@@ -99,19 +97,17 @@ export default function Workshop() {
 
       {/* ─── WORKSHOP CRAFT ─── */}
       {gameConfig && (
-        <section className="bg-gradient-to-b from-shelley-wood/10 to-transparent rounded-3xl p-8 border border-shelley-wood/20">
+        <section className="pixel-panel p-5 sm:p-8">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-xl font-bold text-[#c4956a]">Workshop Craft</h3>
-              <p className="text-white/50 text-sm">
+              <h3 className="font-pixel text-[10px] text-[#c4956a] crt-glow tracking-wider">WORKSHOP CRAFT</h3>
+              <p className="text-white/40 text-xs mt-1">
                 Stack wood blocks Tetris-style &mdash; clear lines to prove your craftsmanship
               </p>
             </div>
-            <div className="text-right">
-              <span className="text-[10px] font-mono text-white/25 block">
-                Arrows to move &middot; Up to rotate &middot; Space to drop
-              </span>
-            </div>
+            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
+              ARROWS &middot; UP ROT &middot; SPACE DROP
+            </span>
           </div>
           <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
@@ -119,125 +115,92 @@ export default function Workshop() {
 
       {/* ─── PROCESS STEPS ─── */}
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px flex-1 bg-white/10" />
-          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
-            The Process
-          </h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        <PixelSectionHeader>The Process</PixelSectionHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {steps.map((step) => (
-            <div
-              key={step.id}
-              className="bg-white/5 rounded-2xl border border-white/5 p-6 hover:border-shelley-amber/20 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">{step.icon}</span>
-                <div>
-                  <span className="text-xs font-mono text-shelley-amber/60">
-                    STEP {step.id}
-                  </span>
-                  <h3 className="text-lg font-bold uppercase tracking-wide text-white/90">
-                    {step.title}
-                  </h3>
-                </div>
+            <PixelCard key={step.id}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="font-pixel text-[10px] text-shelley-amber/70">
+                  {step.id}
+                </span>
+                <h3 className="font-pixel text-[9px] uppercase tracking-wider text-white/80">
+                  {step.title}
+                </h3>
               </div>
-
-              <p className="text-white/60 text-sm leading-relaxed mb-3">
+              <p className="text-white/50 text-sm leading-relaxed mb-2">
                 {step.description}
               </p>
-
-              <p className="text-white/30 text-xs leading-relaxed italic">
+              <p className="text-white/25 text-xs leading-relaxed italic">
                 {step.detail}
               </p>
-            </div>
+            </PixelCard>
           ))}
         </div>
       </section>
 
       {/* ─── CURRENT BUILDS ─── */}
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px flex-1 bg-white/10" />
-          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
-            Current Builds
-          </h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        <PixelSectionHeader>Current Builds</PixelSectionHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {currentBuilds.map((build) => (
-            <div
-              key={build.name}
-              className="bg-white/5 rounded-2xl border border-white/5 p-6 hover:border-shelley-amber/20 transition-colors"
-            >
+            <PixelCard key={build.name} variant="raised">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-bold text-shelley-amber">
-                  {build.name}
+                <h3 className="font-pixel text-[10px] text-shelley-amber tracking-wider">
+                  {build.name.toUpperCase()}
                 </h3>
-                <span className="text-[10px] font-mono text-white/40 bg-white/5 px-2 py-0.5 rounded">
-                  {build.stage}
+                <span className="font-pixel text-[7px] text-white/30 pixel-panel-inset px-2 py-1">
+                  {build.stage.toUpperCase()}
                 </span>
               </div>
-              <p className="text-xs font-mono text-white/30 mb-3">
+              <p className="font-pixel text-[7px] text-white/25 mb-3 tracking-wider">
                 {build.woods}
               </p>
-              <p className="text-white/50 text-sm leading-relaxed mb-4">
+              <p className="text-white/45 text-sm leading-relaxed mb-4">
                 {build.note}
               </p>
-              {/* Progress bar */}
-              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+              {/* Pixel progress bar */}
+              <div className="pixel-progress-track">
                 <div
-                  className="h-full bg-gradient-to-r from-shelley-amber/60 to-shelley-amber rounded-full transition-all"
+                  className="pixel-progress-fill"
                   style={{ width: `${build.progress}%` }}
                 />
               </div>
-              <p className="text-[10px] font-mono text-white/25 mt-1.5 text-right">
-                {build.progress}% complete
+              <p className="font-pixel text-[7px] text-white/20 mt-1.5 text-right">
+                {build.progress}%
               </p>
-            </div>
+            </PixelCard>
           ))}
         </div>
       </section>
 
       {/* ─── TOOLKIT ─── */}
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px flex-1 bg-white/10" />
-          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
-            The Toolkit
-          </h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        <PixelSectionHeader>The Toolkit</PixelSectionHeader>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {tools.map((tool) => (
-            <div
-              key={tool.name}
-              className="bg-white/[0.03] rounded-xl border border-white/5 p-4 hover:border-white/10 transition-colors"
-            >
-              <h4 className="text-sm font-bold text-white/80 mb-1">{tool.name}</h4>
-              <p className="text-white/35 text-xs leading-relaxed">{tool.desc}</p>
-            </div>
+            <PixelCard key={tool.name} variant="inset" hover={false} className="p-4">
+              <h4 className="font-pixel text-[8px] text-white/70 mb-1.5 tracking-wider">
+                {tool.name.toUpperCase()}
+              </h4>
+              <p className="text-white/30 text-xs leading-relaxed">{tool.desc}</p>
+            </PixelCard>
           ))}
         </div>
       </section>
 
       {/* ─── PHILOSOPHY CALLOUT ─── */}
-      <section className="bg-white/[0.03] rounded-2xl border border-white/5 p-8 text-center">
-        <p className="text-white/40 text-sm max-w-lg mx-auto leading-relaxed mb-4">
+      <PixelCard variant="inset" hover={false} className="text-center py-8">
+        <p className="text-white/35 text-sm max-w-lg mx-auto leading-relaxed mb-4">
           &ldquo;A guitar is a machine for turning vibration into emotion. We
           treat every build with that weight.&rdquo;
         </p>
-        <a
-          href="/librarynth"
-          className="text-shelley-amber text-xs font-mono hover:underline"
-        >
-          Read more in the Librarynth &rarr;
+        <a href="/librarynth" className="pixel-btn-ghost">
+          READ MORE IN THE LIBRARYNTH &rarr;
         </a>
-      </section>
+      </PixelCard>
     </div>
   );
 }

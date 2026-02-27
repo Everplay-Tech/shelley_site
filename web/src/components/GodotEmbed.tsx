@@ -28,23 +28,35 @@ const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
     return (
       <div
         className={`relative bg-shelley-charcoal overflow-hidden ${
-          fullScreen ? "w-full h-full" : "w-full aspect-video rounded-lg"
+          fullScreen ? "w-full h-full" : "w-full aspect-video scanlines"
         } ${className ?? ""}`}
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-shelley-amber" />
-              <span className="text-white/40 text-sm font-mono">Loading {gameName}...</span>
+            <div className="flex flex-col items-center gap-3">
+              <span className="font-pixel text-[9px] text-shelley-amber animate-pulse crt-glow tracking-wider">
+                LOADING
+              </span>
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 h-1.5 bg-shelley-amber animate-pulse"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10">
-            <div className="text-center">
-              <p className="text-red-400 mb-2">{error}</p>
-              <p className="text-white/40 text-sm">
+            <div className="text-center px-4">
+              <p className="font-pixel text-[8px] text-red-400 tracking-wider mb-2">
+                {error.toUpperCase()}
+              </p>
+              <p className="text-white/30 text-xs">
                 Game files will appear here once exported from Godot.
               </p>
             </div>
@@ -55,7 +67,7 @@ const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
           ref={iframeRef}
           src={`/games/${gameName}/index.html`}
           title={`${gameName} game`}
-          className="w-full h-full border-none"
+          className="w-full h-full border-none relative z-0"
           onLoad={() => setIsLoading(false)}
           onError={() => {
             setIsLoading(false);

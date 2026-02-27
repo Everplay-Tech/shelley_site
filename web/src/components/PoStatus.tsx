@@ -46,20 +46,28 @@ const PoStatus: React.FC = () => {
   });
 
   return (
-    <div className="bg-shelley-charcoal/50 backdrop-blur-sm border border-white/10 p-4 rounded-lg text-sm">
-      <h3 className="text-shelley-amber font-bold mb-2 uppercase tracking-wider flex items-center gap-2">
-        Po&apos;s Status
-        {poState.isNarrating && (
-          <span className="inline-block w-2 h-2 rounded-full bg-shelley-amber animate-pulse" />
-        )}
-      </h3>
-      <div className="grid grid-cols-2 gap-2 text-white/80">
-        <span>Mood:</span>
-        <span className="text-white">{poState.mood}</span>
-        <span>Score:</span>
-        <span className="text-white">{poState.score}</span>
-        <span>Action:</span>
-        <span className="text-white">{poState.action}</span>
+    <div className="pixel-panel px-2.5 py-1.5 flex items-center gap-2.5">
+      {/* Po idle sprite */}
+      <div
+        className="sprite-anim animate-sprite-idle w-6 h-6 sm:w-8 sm:h-8 shrink-0"
+        style={{
+          backgroundImage: 'url(/sprites/po/idle_sheet.png)',
+          backgroundSize: '96px 24px',
+        }}
+      />
+      {/* Status */}
+      <div className="flex flex-col gap-0">
+        <div className="flex items-center gap-1.5">
+          <span className="font-pixel text-[7px] text-shelley-amber crt-glow">PO</span>
+          {poState.isNarrating && (
+            <span className="font-pixel text-[7px] text-shelley-amber animate-blink-cursor">...</span>
+          )}
+        </div>
+        <div className="font-pixel text-[6px] text-white/30 flex items-center gap-1.5">
+          <span>{poState.mood.toUpperCase()}</span>
+          <span className="text-white/10">|</span>
+          <span className="text-shelley-amber/50">{poState.score}</span>
+        </div>
       </div>
     </div>
   );

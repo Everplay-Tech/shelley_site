@@ -54,13 +54,12 @@ const MiniGameTransition: React.FC = () => {
     <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
       <div className="w-full max-w-4xl px-4">
         <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
-        <div className="mt-4 flex justify-between items-center text-white">
-          <p className="font-mono text-sm text-white/60">{activeGame.label}</p>
-          <button
-            onClick={handleSkip}
-            className="px-4 py-2 bg-shelley-amber text-shelley-charcoal font-bold rounded hover:bg-yellow-400 transition-colors"
-          >
-            Skip (Esc)
+        <div className="mt-4 flex justify-between items-center">
+          <p className="font-pixel text-[7px] text-white/40 tracking-wider">
+            {activeGame.label?.toUpperCase() ?? "LOADING..."}
+          </p>
+          <button onClick={handleSkip} className="pixel-btn-ghost">
+            SKIP (ESC)
           </button>
         </div>
       </div>

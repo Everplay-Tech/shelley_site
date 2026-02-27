@@ -3,6 +3,7 @@
 import { useState, useCallback, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
+import PixelCard from "@/components/PixelCard";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
 import type { GodotEvent } from "@/lib/godot-messages";
@@ -28,7 +29,6 @@ export default function Contact() {
     e.preventDefault();
     if (cooldown || formState === "sending") return;
 
-    // Client-side validation
     if (!name.trim()) {
       setErrorMsg("Name is required");
       setFormState("error");
@@ -68,7 +68,6 @@ export default function Contact() {
       setEmail("");
       setMessage("");
 
-      // Cooldown — prevent spam re-submits
       setCooldown(true);
       setTimeout(() => setCooldown(false), 30000);
     } catch {
@@ -81,10 +80,10 @@ export default function Contact() {
     <div className="flex flex-col gap-16">
       {/* ─── HERO ─── */}
       <section className="text-center py-8">
-        <h1 className="text-5xl sm:text-6xl font-black tracking-tight mb-4">
-          Get in <span className="text-shelley-amber">Touch</span>
+        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
+          GET IN <span className="text-shelley-amber">TOUCH</span>
         </h1>
-        <p className="text-lg text-white/50 max-w-xl mx-auto">
+        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
           Custom build inquiry, collaboration idea, or just want to talk guitars?
           We&apos;re listening.
         </p>
@@ -92,92 +91,88 @@ export default function Contact() {
 
       {/* ─── CONTACT DASH ─── */}
       {gameConfig && (
-        <section className="bg-gradient-to-b from-shelley-amber/5 to-transparent rounded-3xl p-8 border border-shelley-amber/10">
+        <section className="pixel-panel p-5 sm:p-8">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-xl font-bold text-shelley-amber">Contact Dash</h3>
-              <p className="text-white/50 text-sm">
+              <h3 className="font-pixel text-[10px] text-shelley-amber crt-glow tracking-wider">CONTACT DASH</h3>
+              <p className="text-white/40 text-xs mt-1">
                 Help Hpar the ronin catch your messages before they hit the ground
               </p>
             </div>
-            <div className="text-right">
-              <span className="text-[10px] font-mono text-white/25 block">
-                Arrow keys or tap screen halves
-              </span>
-            </div>
+            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
+              ARROWS OR TAP
+            </span>
           </div>
           <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* ─── CONTACT FORM ─── */}
-        <div className="bg-white/5 p-8 rounded-2xl border border-white/5">
+        <PixelCard hover={false}>
           {formState === "success" ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="text-4xl mb-4">&#x2709;&#xFE0F;</div>
-              <h3 className="text-xl font-bold text-shelley-amber mb-2">
-                Message Sent
+              <h3 className="font-pixel text-xs text-shelley-amber crt-glow mb-2 tracking-wider">
+                MESSAGE SENT
               </h3>
-              <p className="text-white/50 text-sm max-w-xs">
+              <p className="text-white/45 text-sm max-w-xs">
                 We got it. We&apos;ll get back to you soon. In the meantime,
                 check out the workshop or play some more.
               </p>
               <button
                 onClick={() => setFormState("idle")}
-                className="mt-6 text-xs font-mono text-white/30 hover:text-white/60 transition-colors"
+                className="pixel-btn-ghost mt-6"
               >
-                Send another message
+                SEND ANOTHER
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <h3 className="text-lg font-bold text-white/80 mb-1">
-                Send a Message
+              <h3 className="font-pixel text-[10px] text-white/70 tracking-wider">
+                SEND A MESSAGE
               </h3>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-mono text-white/40 uppercase tracking-wider">
-                  Name
+                <label className="font-pixel text-[7px] text-white/30 tracking-wider">
+                  NAME
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-shelley-amber transition-colors text-white placeholder:text-white/20"
+                  className="pixel-input"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-mono text-white/40 uppercase tracking-wider">
-                  Email
+                <label className="font-pixel text-[7px] text-white/30 tracking-wider">
+                  EMAIL
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-shelley-amber transition-colors text-white placeholder:text-white/20"
+                  className="pixel-input"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-mono text-white/40 uppercase tracking-wider">
-                  Message
+                <label className="font-pixel text-[7px] text-white/30 tracking-wider">
+                  MESSAGE
                 </label>
                 <textarea
                   rows={5}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="What's on your mind?"
-                  className="bg-white/5 border border-white/10 rounded-lg p-3 outline-none focus:border-shelley-amber transition-colors text-white placeholder:text-white/20 resize-none"
+                  className="pixel-input resize-none"
                 />
               </div>
 
-              {/* Error message */}
               {formState === "error" && errorMsg && (
-                <p className="text-red-400 text-xs font-mono">
+                <p className="font-pixel text-[7px] text-red-400 tracking-wider">
                   {errorMsg}
                 </p>
               )}
@@ -185,22 +180,22 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={formState === "sending" || cooldown}
-                className="mt-2 bg-shelley-amber text-shelley-charcoal font-bold py-3.5 rounded-lg hover:bg-yellow-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="pixel-btn mt-2 disabled:opacity-40 disabled:cursor-not-allowed text-center"
               >
                 {formState === "sending"
-                  ? "Sending..."
+                  ? "SENDING..."
                   : cooldown
-                    ? "Message Sent \u2713"
-                    : "Send Message"}
+                    ? "SENT \u2713"
+                    : "SEND MESSAGE"}
               </button>
             </form>
           )}
-        </div>
+        </PixelCard>
 
         {/* ─── CONNECT ─── */}
-        <div className="flex flex-col gap-6">
-          <h3 className="text-lg font-bold text-white/80">
-            Other Ways to Connect
+        <div className="flex flex-col gap-4">
+          <h3 className="font-pixel text-[10px] text-white/60 tracking-wider">
+            OTHER CHANNELS
           </h3>
 
           {/* Instagram */}
@@ -208,7 +203,7 @@ export default function Contact() {
             href="https://www.instagram.com/shelleyguitars/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-4 bg-white/5 p-5 rounded-xl border border-white/5 hover:border-pink-500/30 transition-colors group"
+            className="flex items-center gap-4 pixel-panel p-4 hover:border-pink-500/30 transition-colors group"
           >
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -216,47 +211,46 @@ export default function Contact() {
               </svg>
             </div>
             <div>
-              <p className="font-bold text-white/80 group-hover:text-white transition-colors">
-                @shelleyguitars
+              <p className="font-pixel text-[8px] text-white/70 group-hover:text-white transition-colors tracking-wider">
+                @SHELLEYGUITARS
               </p>
-              <p className="text-white/40 text-xs">Daily builds &amp; process on Instagram</p>
+              <p className="text-white/35 text-xs">Daily builds &amp; process on Instagram</p>
             </div>
           </a>
 
           {/* Discord */}
-          <div className="flex items-center gap-4 bg-white/5 p-5 rounded-xl border border-dashed border-white/10">
+          <div className="flex items-center gap-4 pixel-panel-inset p-4">
             <div className="w-10 h-10 rounded-full bg-[#5865F2]/20 flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z" />
               </svg>
             </div>
             <div>
-              <p className="font-bold text-white/50">Discord</p>
-              <p className="text-white/25 text-xs">Community server coming soon</p>
+              <p className="font-pixel text-[8px] text-white/40 tracking-wider">DISCORD</p>
+              <p className="text-white/20 text-xs">Community server coming soon</p>
             </div>
           </div>
 
           {/* YouTube */}
-          <div className="flex items-center gap-4 bg-white/5 p-5 rounded-xl border border-dashed border-white/10">
+          <div className="flex items-center gap-4 pixel-panel-inset p-4">
             <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-red-400" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
               </svg>
             </div>
             <div>
-              <p className="font-bold text-white/50">YouTube</p>
-              <p className="text-white/25 text-xs">Build logs &amp; music — coming soon</p>
+              <p className="font-pixel text-[8px] text-white/40 tracking-wider">YOUTUBE</p>
+              <p className="text-white/20 text-xs">Build logs &amp; music — coming soon</p>
             </div>
           </div>
 
-          {/* General note */}
-          <div className="mt-4 p-4 bg-white/[0.02] rounded-lg border border-white/5">
-            <p className="text-white/25 text-xs leading-relaxed">
+          {/* Note */}
+          <PixelCard variant="inset" hover={false} className="p-3 mt-2">
+            <p className="text-white/20 text-xs leading-relaxed">
               Messages go straight to our team on Discord. We typically respond
-              within 24 hours. For urgent builds, mention your timeline in the
-              message.
+              within 24 hours. For urgent builds, mention your timeline.
             </p>
-          </div>
+          </PixelCard>
         </div>
       </div>
     </div>

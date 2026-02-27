@@ -3,11 +3,13 @@
 import { useCallback } from "react";
 import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
+import PixelSectionHeader from "@/components/PixelSectionHeader";
+import PixelCard from "@/components/PixelCard";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
 import type { GodotEvent } from "@/lib/godot-messages";
 
-/* ─── Guitar showcase data (swap for real builds as photos come in) ─────── */
+/* ─── Guitar showcase data ───────────────────────────────────────────────── */
 
 const guitars = [
   {
@@ -16,7 +18,6 @@ const guitars = [
     year: "2025",
     description: "Dark-toned parlor guitar with supernatural resonance. Scalloped X-bracing voiced for the low end. Inspired by the Djinn World.",
     status: "Building",
-    accent: "from-purple-500/10",
   },
   {
     name: "Smoke Ring",
@@ -24,7 +25,6 @@ const guitars = [
     year: "2025",
     description: "Warm, smoky midrange with fingerstyle-friendly action. Cedar top for immediate response. Built for late-night sessions.",
     status: "Design",
-    accent: "from-orange-500/10",
   },
   {
     name: "Gold Tooth",
@@ -32,7 +32,6 @@ const guitars = [
     year: "2026",
     description: "Bright, articulate, with a gold-accented rosette. Hard maple back and sides for projection that cuts through any mix.",
     status: "Concept",
-    accent: "from-shelley-amber/10",
   },
 ];
 
@@ -50,10 +49,10 @@ export default function Gallery() {
     <div className="flex flex-col gap-16">
       {/* ─── HERO ─── */}
       <section className="text-center py-8">
-        <h1 className="text-5xl sm:text-6xl font-black tracking-tight mb-4">
-          The <span className="text-shelley-amber">Gallery</span>
+        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
+          THE <span className="text-shelley-amber">GALLERY</span>
         </h1>
-        <p className="text-lg text-white/50 max-w-xl mx-auto">
+        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
           Handcrafted instruments, daily builds, and the creative process —
           straight from the workshop.
         </p>
@@ -61,19 +60,17 @@ export default function Gallery() {
 
       {/* ─── GALLERY RUN ─── */}
       {gameConfig && (
-        <section className="bg-gradient-to-b from-purple-500/5 to-transparent rounded-3xl p-8 border border-purple-500/10">
+        <section className="pixel-panel p-5 sm:p-8">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="text-xl font-bold text-purple-300">Gallery Run</h3>
-              <p className="text-white/50 text-sm">
+              <h3 className="font-pixel text-[10px] text-purple-300 crt-glow-purple tracking-wider">GALLERY RUN</h3>
+              <p className="text-white/40 text-xs mt-1">
                 Pilot the Axis Mundi and defend the gallery from haunted artwork
               </p>
             </div>
-            <div className="text-right">
-              <span className="text-[10px] font-mono text-white/25 block">
-                Arrows to move &middot; Space to fire
-              </span>
-            </div>
+            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
+              ARROWS &middot; SPACE FIRE
+            </span>
           </div>
           <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
@@ -81,31 +78,25 @@ export default function Gallery() {
 
       {/* ─── INSTAGRAM FEED ─── */}
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px flex-1 bg-white/10" />
-          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
-            From the Workshop — @shelleyguitars
-          </h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        <PixelSectionHeader color="purple">@shelleyguitars</PixelSectionHeader>
 
-        <div className="bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-shelley-amber/5 rounded-2xl border border-white/10 p-8">
+        <PixelCard variant="raised" hover={false}>
           <div className="flex flex-col sm:flex-row items-center gap-6">
             {/* Instagram profile card */}
             <div className="flex items-center gap-4 shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-[2px]">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-[2px]">
                 <div className="w-full h-full rounded-full bg-shelley-charcoal flex items-center justify-center">
-                  <span className="text-2xl">🎸</span>
+                  <span className="text-xl">&#127928;</span>
                 </div>
               </div>
               <div>
-                <h3 className="font-bold text-lg">@shelleyguitars</h3>
-                <p className="text-white/40 text-sm">Daily builds &amp; process</p>
+                <h3 className="font-pixel text-[9px] text-white/80 tracking-wider">@SHELLEYGUITARS</h3>
+                <p className="text-white/35 text-xs">Daily builds &amp; process</p>
               </div>
             </div>
 
             <div className="flex-1 text-center sm:text-left">
-              <p className="text-white/50 text-sm leading-relaxed mb-4">
+              <p className="text-white/45 text-sm leading-relaxed mb-4">
                 Follow along as we build, break, and rebuild. New posts daily —
                 wood selection, shaping, finishing, and the occasional
                 philosophical tangent about the nature of sound.
@@ -114,129 +105,101 @@ export default function Gallery() {
                 href="https://www.instagram.com/shelleyguitars/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 text-white font-bold text-sm rounded-lg hover:opacity-90 transition-opacity"
+                className="pixel-btn"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                </svg>
-                Follow on Instagram
+                FOLLOW ON INSTAGRAM
               </a>
             </div>
           </div>
 
-          {/* Placeholder grid for embedded posts (Phase 2: auto-pull via Graph API) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-8">
+          {/* Placeholder grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <a
                 key={i}
                 href="https://www.instagram.com/shelleyguitars/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group aspect-square bg-white/5 rounded-lg border border-white/5 hover:border-pink-500/30 transition-all flex items-center justify-center overflow-hidden"
+                className="group aspect-square pixel-panel-inset flex items-center justify-center"
               >
-                <div className="flex flex-col items-center gap-1 opacity-20 group-hover:opacity-40 transition-opacity">
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                  </svg>
-                  <span className="text-[9px] font-mono tracking-wider">VIEW POST</span>
+                <div className="flex flex-col items-center gap-1 opacity-15 group-hover:opacity-30 transition-opacity">
+                  <span className="font-pixel text-[7px] text-white/40">VIEW</span>
                 </div>
               </a>
             ))}
           </div>
-          <p className="text-center text-white/20 text-xs font-mono mt-4">
-            Live feed coming soon — once Instagram Graph API is connected, these will auto-update
+          <p className="text-center font-pixel text-[7px] text-white/15 mt-3 tracking-wider">
+            LIVE FEED COMING SOON
           </p>
-        </div>
+        </PixelCard>
       </section>
 
       {/* ─── WHAT MAKES A SHELLEY ─── */}
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px flex-1 bg-white/10" />
-          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
-            What Makes a Shelley Guitar
-          </h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        <PixelSectionHeader>What Makes a Shelley Guitar</PixelSectionHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/5 rounded-xl border border-white/5 p-5">
-            <h4 className="font-bold text-white/80 mb-2">Hand-Voiced Bracing</h4>
-            <p className="text-white/45 text-sm leading-relaxed">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <PixelCard>
+            <h4 className="font-pixel text-[8px] text-white/70 mb-2 tracking-wider">HAND-VOICED BRACING</h4>
+            <p className="text-white/40 text-sm leading-relaxed">
               Every brace is scalloped and tap-tuned by ear. No CNC, no templates.
               The top is shaped to respond to the specific wood&apos;s resonance.
             </p>
-          </div>
-          <div className="bg-white/5 rounded-xl border border-white/5 p-5">
-            <h4 className="font-bold text-white/80 mb-2">Player-First Design</h4>
-            <p className="text-white/45 text-sm leading-relaxed">
+          </PixelCard>
+          <PixelCard>
+            <h4 className="font-pixel text-[8px] text-white/70 mb-2 tracking-wider">PLAYER-FIRST DESIGN</h4>
+            <p className="text-white/40 text-sm leading-relaxed">
               Neck profiles carved to the player&apos;s hand. Action set to their style.
               Every Shelley guitar is built for a specific person, not a shelf.
             </p>
-          </div>
-          <div className="bg-white/5 rounded-xl border border-white/5 p-5">
-            <h4 className="font-bold text-white/80 mb-2">Thin Finish, Big Sound</h4>
-            <p className="text-white/45 text-sm leading-relaxed">
+          </PixelCard>
+          <PixelCard>
+            <h4 className="font-pixel text-[8px] text-white/70 mb-2 tracking-wider">THIN FINISH, BIG SOUND</h4>
+            <p className="text-white/40 text-sm leading-relaxed">
               Ultra-thin lacquer or hand-rubbed oil. We never choke a top with thick poly.
               The finish protects without muting the wood&apos;s natural voice.
             </p>
-          </div>
+          </PixelCard>
         </div>
       </section>
 
       {/* ─── GUITAR SHOWCASE ─── */}
       <section>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="h-px flex-1 bg-white/10" />
-          <h2 className="text-xs font-mono text-white/40 tracking-[0.3em] uppercase">
-            Guitar Builds
-          </h2>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        <PixelSectionHeader>Guitar Builds</PixelSectionHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {guitars.map((guitar) => (
-            <div
-              key={guitar.name}
-              className={`group flex flex-col gap-4 bg-gradient-to-b ${guitar.accent} to-white/5 rounded-2xl border border-white/5 hover:border-shelley-amber/30 transition-colors overflow-hidden`}
-            >
+            <PixelCard key={guitar.name} variant="raised">
               {/* Image placeholder */}
-              <div className="aspect-[4/3] bg-white/[0.03] flex items-center justify-center">
-                <div className="flex flex-col items-center gap-2 opacity-15 group-hover:opacity-25 transition-opacity">
-                  <span className="text-3xl">&#127928;</span>
-                  <span className="text-[9px] font-mono tracking-wider uppercase">
-                    Photo Coming Soon
-                  </span>
+              <div className="aspect-[4/3] pixel-panel-inset flex items-center justify-center mb-4 -mx-5 -mt-5">
+                <div className="flex flex-col items-center gap-2 opacity-12">
+                  <span className="text-2xl">&#127928;</span>
+                  <span className="font-pixel text-[7px] tracking-wider">PHOTO SOON</span>
                 </div>
               </div>
 
-              <div className="px-5 pb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-lg text-white/90">
-                    {guitar.name}
-                  </h3>
-                  <span className="text-[10px] font-mono text-shelley-amber/60 bg-shelley-amber/10 px-2 py-0.5 rounded">
-                    {guitar.status}
-                  </span>
-                </div>
-                <p className="text-xs font-mono text-white/30 mb-3">
-                  {guitar.woods} &middot; {guitar.year}
-                </p>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  {guitar.description}
-                </p>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-pixel text-[10px] text-white/85 tracking-wider">
+                  {guitar.name.toUpperCase()}
+                </h3>
+                <span className="font-pixel text-[7px] text-shelley-amber/60 pixel-panel-inset px-2 py-0.5">
+                  {guitar.status.toUpperCase()}
+                </span>
               </div>
-            </div>
+              <p className="font-pixel text-[7px] text-white/25 mb-3 tracking-wider">
+                {guitar.woods} &middot; {guitar.year}
+              </p>
+              <p className="text-white/45 text-sm leading-relaxed">
+                {guitar.description}
+              </p>
+            </PixelCard>
           ))}
         </div>
 
         {/* Commission CTA */}
         <div className="mt-8 text-center">
-          <a
-            href="/contact"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-shelley-amber/10 text-shelley-amber font-bold text-sm rounded-lg border border-shelley-amber/20 hover:bg-shelley-amber/20 transition-colors"
-          >
-            Commission a Custom Build &rarr;
+          <a href="/contact" className="pixel-btn">
+            COMMISSION A CUSTOM BUILD &rarr;
           </a>
         </div>
       </section>
