@@ -26,11 +26,19 @@ export default function Home() {
   const [rewardCode, setRewardCode] = useState<string | null>(null);
   const [rewardDismissing, setRewardDismissing] = useState(false);
   const embedRef = useRef<GodotEmbedHandle>(null);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const touch =
       navigator.maxTouchPoints > 0 || "ontouchstart" in window;
     setIsMobile(touch);
+  }, []);
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+    };
   }, []);
 
   const isNgPlus = gameConfig.mode === "ng_plus";
@@ -42,10 +50,11 @@ export default function Home() {
 
   const dismissReward = useCallback(() => {
     setRewardDismissing(true);
-    setTimeout(() => {
+    const t = setTimeout(() => {
       setShowReward(false);
       setRewardDismissing(false);
     }, 500);
+    timersRef.current.push(t);
   }, []);
 
   const handleGodotEvent = useCallback((event: GodotEvent) => {
@@ -96,10 +105,12 @@ export default function Home() {
         });
         setCookie(ONBOARDING_COOKIE, "1");
         setScreen("done");
-        setTimeout(() => {
+        const t1 = setTimeout(() => {
           setFadeOut(true);
-          setTimeout(() => setShowGame(false), 800);
+          const t2 = setTimeout(() => setShowGame(false), 800);
+          timersRef.current.push(t2);
         }, 2000);
+        timersRef.current.push(t1);
         break;
       case "player_state":
         if ("data" in event) {

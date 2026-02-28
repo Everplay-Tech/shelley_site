@@ -4,6 +4,9 @@ import { jwtVerify } from "jose";
 import { query } from "@/lib/db";
 
 const AUTH_COOKIE = "shelley_auth";
+if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
+  console.error("[rewards] CRITICAL: JWT_SECRET is not set in production!");
+}
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET ?? "shelley-dev-secret-change-in-prod"
 );
@@ -73,52 +76,57 @@ export async function GET() {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  // Get account's earned rewards
-  const account = await query<AccountRow>(
-    "SELECT rewards_earned FROM accounts WHERE id = $1",
-    [accountId]
-  );
-  if (account.rows.length === 0) {
-    return NextResponse.json({ error: "Account not found" }, { status: 404 });
-  }
-
-  // Get progress (may span multiple sessions linked to this account)
-  const progress = await query<ProgressRow>(
-    `SELECT
-      COALESCE(SUM(games_completed), 0) as games_completed,
-      COALESCE(SUM(total_picks), 0) as total_picks,
-      COALESCE(MAX(po_relationship), 0) as po_relationship,
-      COALESCE(MAX(pieces_collected), 0) as pieces_collected
-    FROM game_progress WHERE account_id = $1`,
-    [accountId]
-  );
-
-  const p = progress.rows[0];
-  const earned = account.rows[0].rewards_earned ?? [];
-
-  // Check for newly earned rewards
-  const newlyEarned: string[] = [];
-  for (const tier of REWARD_TIERS) {
-    if (!earned.includes(tier.id) && tier.condition(p)) {
-      newlyEarned.push(tier.id);
-    }
-  }
-
-  // Persist newly earned rewards
-  if (newlyEarned.length > 0) {
-    const allEarned = [...earned, ...newlyEarned];
-    await query(
-      "UPDATE accounts SET rewards_earned = $1 WHERE id = $2",
-      [allEarned, accountId]
+  try {
+    // Get account's earned rewards
+    const account = await query<AccountRow>(
+      "SELECT rewards_earned FROM accounts WHERE id = $1",
+      [accountId]
     );
-  }
+    if (account.rows.length === 0) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
 
-  return NextResponse.json({
-    rewards: REWARD_TIERS.map((tier) => ({
-      ...tier,
-      condition: undefined, // Don't expose condition functions
-      earned: earned.includes(tier.id) || newlyEarned.includes(tier.id),
-      newlyEarned: newlyEarned.includes(tier.id),
-    })),
-  });
+    // Get progress (may span multiple sessions linked to this account)
+    const progress = await query<ProgressRow>(
+      `SELECT
+        COALESCE(SUM(games_completed), 0) as games_completed,
+        COALESCE(SUM(total_picks), 0) as total_picks,
+        COALESCE(MAX(po_relationship), 0) as po_relationship,
+        COALESCE(MAX(pieces_collected), 0) as pieces_collected
+      FROM game_progress WHERE account_id = $1`,
+      [accountId]
+    );
+
+    const p = progress.rows[0];
+    const earned = account.rows[0].rewards_earned ?? [];
+
+    // Check for newly earned rewards
+    const newlyEarned: string[] = [];
+    for (const tier of REWARD_TIERS) {
+      if (!earned.includes(tier.id) && tier.condition(p)) {
+        newlyEarned.push(tier.id);
+      }
+    }
+
+    // Persist newly earned rewards
+    if (newlyEarned.length > 0) {
+      const allEarned = [...earned, ...newlyEarned];
+      await query(
+        "UPDATE accounts SET rewards_earned = $1 WHERE id = $2",
+        [allEarned, accountId]
+      );
+    }
+
+    return NextResponse.json({
+      rewards: REWARD_TIERS.map((tier) => ({
+        ...tier,
+        condition: undefined, // Don't expose condition functions
+        earned: earned.includes(tier.id) || newlyEarned.includes(tier.id),
+        newlyEarned: newlyEarned.includes(tier.id),
+      })),
+    });
+  } catch (err) {
+    console.error("[rewards] Database error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

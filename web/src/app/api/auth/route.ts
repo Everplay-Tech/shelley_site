@@ -6,6 +6,9 @@ import { query } from "@/lib/db";
 
 const SESSION_COOKIE = "shelley_session";
 const AUTH_COOKIE = "shelley_auth";
+if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
+  console.error("[auth] CRITICAL: JWT_SECRET is not set in production!");
+}
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET ?? "shelley-dev-secret-change-in-prod"
 );
