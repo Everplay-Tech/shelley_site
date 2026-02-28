@@ -4,8 +4,11 @@ import { useState, useCallback, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
 import PixelCard from "@/components/PixelCard";
+import ZoneHeader from "@/components/ZoneHeader";
+import AmbientParticles from "@/components/AmbientParticles";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
+import { ZONES } from "@/lib/zone-config";
 import type { GodotEvent } from "@/lib/godot-messages";
 
 type FormState = "idle" | "sending" | "success" | "error";
@@ -77,24 +80,18 @@ export default function Contact() {
   };
 
   return (
-    <div className="flex flex-col gap-16">
-      {/* ─── HERO ─── */}
-      <section className="text-center py-8">
-        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
-          GET IN <span className="text-shelley-amber">TOUCH</span>
-        </h1>
-        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
-          Custom build inquiry, collaboration idea, or just want to talk guitars?
-          We&apos;re listening.
-        </p>
-      </section>
+    <div className="relative flex flex-col gap-16">
+      <AmbientParticles type="signals" count={6} />
+
+      {/* ─── ZONE HEADER ─── */}
+      <ZoneHeader zone={ZONES.contact} />
 
       {/* ─── CONTACT DASH ─── */}
       {gameConfig && (
         <section className="pixel-panel p-5 sm:p-8">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h3 className="font-pixel text-[10px] text-shelley-amber crt-glow tracking-wider">CONTACT DASH</h3>
+              <h3 className="font-pixel text-[10px] text-shelley-spirit-green crt-glow-green tracking-wider">CONTACT DASH</h3>
               <p className="text-white/40 text-xs mt-1">
                 Help Hpar the ronin catch your messages before they hit the ground
               </p>
@@ -109,93 +106,95 @@ export default function Contact() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* ─── CONTACT FORM ─── */}
-        <PixelCard hover={false}>
-          {formState === "success" ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <h3 className="font-pixel text-xs text-shelley-amber crt-glow mb-2 tracking-wider">
-                MESSAGE SENT
-              </h3>
-              <p className="text-white/45 text-sm max-w-xs">
-                We got it. We&apos;ll get back to you soon. In the meantime,
-                check out the workshop or play some more.
-              </p>
-              <button
-                onClick={() => setFormState("idle")}
-                className="pixel-btn-ghost mt-6"
-              >
-                SEND ANOTHER
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <h3 className="font-pixel text-[10px] text-white/70 tracking-wider">
-                SEND A MESSAGE
-              </h3>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="font-pixel text-[7px] text-white/30 tracking-wider">
-                  NAME
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                  className="pixel-input"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="font-pixel text-[7px] text-white/30 tracking-wider">
-                  EMAIL
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pixel-input"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="font-pixel text-[7px] text-white/30 tracking-wider">
-                  MESSAGE
-                </label>
-                <textarea
-                  rows={5}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="What's on your mind?"
-                  className="pixel-input resize-none"
-                />
-              </div>
-
-              {formState === "error" && errorMsg && (
-                <p className="font-pixel text-[7px] text-red-400 tracking-wider">
-                  {errorMsg}
+        <div className="zone-contact transmission-console">
+          <PixelCard hover={false}>
+            {formState === "success" ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <h3 className="font-pixel text-xs text-shelley-spirit-green crt-glow-green mb-2 tracking-wider">
+                  SIGNAL RECEIVED &#10003;
+                </h3>
+                <p className="text-white/45 text-sm max-w-xs">
+                  We got it. We&apos;ll get back to you soon. In the meantime,
+                  check out the workshop or play some more.
                 </p>
-              )}
+                <button
+                  onClick={() => setFormState("idle")}
+                  className="pixel-btn-ghost mt-6"
+                >
+                  TRANSMIT AGAIN
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <h3 className="font-pixel text-[10px] text-shelley-spirit-green/70 tracking-wider">
+                  TRANSMIT SIGNAL
+                </h3>
 
-              <button
-                type="submit"
-                disabled={formState === "sending" || cooldown}
-                className="pixel-btn mt-2 disabled:opacity-40 disabled:cursor-not-allowed text-center"
-              >
-                {formState === "sending"
-                  ? "SENDING..."
-                  : cooldown
-                    ? "SENT \u2713"
-                    : "SEND MESSAGE"}
-              </button>
-            </form>
-          )}
-        </PixelCard>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
+                    NAME
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    className="pixel-input"
+                  />
+                </div>
 
-        {/* ─── CONNECT ─── */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
+                    EMAIL
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="pixel-input"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
+                    MESSAGE
+                  </label>
+                  <textarea
+                    rows={5}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="What's on your mind?"
+                    className="pixel-input resize-none"
+                  />
+                </div>
+
+                {formState === "error" && errorMsg && (
+                  <p className="font-pixel text-[7px] text-red-400 tracking-wider">
+                    {errorMsg}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={formState === "sending" || cooldown}
+                  className="pixel-btn-green mt-2 disabled:opacity-40 disabled:cursor-not-allowed text-center"
+                >
+                  {formState === "sending"
+                    ? "TRANSMITTING..."
+                    : cooldown
+                      ? "SIGNAL SENT \u2713"
+                      : "TRANSMIT SIGNAL"}
+                </button>
+              </form>
+            )}
+          </PixelCard>
+        </div>
+
+        {/* ─── FREQUENCY CHANNELS ─── */}
         <div className="flex flex-col gap-4">
-          <h3 className="font-pixel text-[10px] text-white/60 tracking-wider">
-            OTHER CHANNELS
+          <h3 className="font-pixel text-[10px] text-shelley-spirit-green/60 tracking-wider">
+            FREQUENCY CHANNELS
           </h3>
 
           {/* Instagram */}
@@ -211,6 +210,7 @@ export default function Contact() {
               </svg>
             </div>
             <div>
+              <p className="font-pixel text-[7px] text-shelley-spirit-green/25 tracking-wider mb-0.5">FREQ 01</p>
               <p className="font-pixel text-[8px] text-white/70 group-hover:text-white transition-colors tracking-wider">
                 @SHELLEYGUITARS
               </p>
@@ -226,6 +226,7 @@ export default function Contact() {
               </svg>
             </div>
             <div>
+              <p className="font-pixel text-[7px] text-shelley-spirit-green/25 tracking-wider mb-0.5">FREQ 02</p>
               <p className="font-pixel text-[8px] text-white/40 tracking-wider">DISCORD</p>
               <p className="text-white/20 text-xs">Community server coming soon</p>
             </div>
@@ -239,6 +240,7 @@ export default function Contact() {
               </svg>
             </div>
             <div>
+              <p className="font-pixel text-[7px] text-shelley-spirit-green/25 tracking-wider mb-0.5">FREQ 03</p>
               <p className="font-pixel text-[8px] text-white/40 tracking-wider">YOUTUBE</p>
               <p className="text-white/20 text-xs">Build logs &amp; music — coming soon</p>
             </div>
@@ -247,7 +249,7 @@ export default function Contact() {
           {/* Note */}
           <PixelCard variant="inset" hover={false} className="p-3 mt-2">
             <p className="text-white/20 text-xs leading-relaxed">
-              Messages go straight to our team on Discord. We typically respond
+              Signals reach our team directly. We typically respond
               within 24 hours. For urgent builds, mention your timeline.
             </p>
           </PixelCard>

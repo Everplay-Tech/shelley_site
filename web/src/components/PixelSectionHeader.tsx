@@ -7,7 +7,7 @@ const glowMap = {
   amber: "crt-glow",
   blue: "crt-glow-blue",
   purple: "crt-glow-purple",
-  green: "crt-glow",
+  green: "crt-glow-green",
 };
 
 const colorMap = {

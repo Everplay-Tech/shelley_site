@@ -33,6 +33,7 @@ const config: Config = {
         'sprite-idle': 'sprite-idle 1.6s steps(4) infinite',
         'blink-cursor': 'blink-cursor 1s steps(1) infinite',
         'float': 'float 3s ease-in-out infinite',
+        'badge-pulse': 'badge-pulse 2s ease-in-out infinite',
       },
       keyframes: {
         'sprite-idle': {

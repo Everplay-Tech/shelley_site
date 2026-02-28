@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
+import ZoneHeader from "@/components/ZoneHeader";
+import AmbientParticles from "@/components/AmbientParticles";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
+import { ZONES } from "@/lib/zone-config";
 import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Creative Universe data ─────────────────────────────────────────────── */
@@ -72,20 +75,11 @@ export default function Librarynth() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-16">
-      {/* ─── HERO ─── */}
-      <section className="text-center py-10">
-        <p className="font-pixel text-[7px] text-white/25 tracking-[0.4em] uppercase mb-4">
-          LIBRARY + LABYRINTH
-        </p>
-        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
-          THE <span className="text-shelley-amber">LIBRARYNTH</span>
-        </h1>
-        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
-          Study space meets creative labyrinth. Guitars, comics, music,
-          philosophy — everything Shelley, all in one place.
-        </p>
-      </section>
+    <div className="relative flex flex-col gap-16">
+      <AmbientParticles type="sparkles" count={12} />
+
+      {/* ─── ZONE HEADER ─── */}
+      <ZoneHeader zone={ZONES.librarynth} />
 
       {/* ─── LIBRARYNTH QUEST ─── */}
       {gameConfig && (
@@ -125,7 +119,7 @@ export default function Librarynth() {
 
       {/* ─── CREATIVE UNIVERSE ─── */}
       <section>
-        <PixelSectionHeader color="purple">The Creative Universe</PixelSectionHeader>
+        <PixelSectionHeader color="blue">The Creative Universe</PixelSectionHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {creativeArms.map((arm) => (
@@ -146,14 +140,24 @@ export default function Librarynth() {
         </div>
       </section>
 
-      {/* ─── MEET PO ─── */}
+      {/* ─── MEET THE CAST ─── */}
       <section>
-        <PixelSectionHeader>Meet the Cast</PixelSectionHeader>
+        <PixelSectionHeader color="blue">Meet the Cast</PixelSectionHeader>
 
         <PixelCard variant="raised" hover={false}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="font-pixel text-xs text-shelley-amber crt-glow mb-1 tracking-wider">PO</h3>
+              <div className="flex items-center gap-3 mb-1">
+                {/* Po idle sprite */}
+                <div
+                  className="sprite-anim animate-sprite-idle w-8 h-8 shrink-0"
+                  style={{
+                    backgroundImage: "url(/sprites/po/idle_sheet.png)",
+                    backgroundSize: "96px 24px",
+                  }}
+                />
+                <h3 className="font-pixel text-xs text-shelley-amber crt-glow tracking-wider">PO</h3>
+              </div>
               <p className="font-pixel text-[7px] text-white/25 mb-4 tracking-wider">
                 SKELETON GHOST &middot; TOUR GUIDE &middot; UNRELIABLE NARRATOR
               </p>
@@ -167,9 +171,13 @@ export default function Librarynth() {
               </p>
             </div>
             <div>
-              <h3 className="font-pixel text-xs text-shelley-amber crt-glow mb-1 tracking-wider">
-                CAPTAIN MAGUS
-              </h3>
+              <div className="flex items-center gap-3 mb-1">
+                {/* Magus glyph */}
+                <span className="text-shelley-amber text-lg">&#9733;</span>
+                <h3 className="font-pixel text-xs text-shelley-amber crt-glow tracking-wider">
+                  CAPTAIN MAGUS
+                </h3>
+              </div>
               <p className="font-pixel text-[7px] text-white/25 mb-4 tracking-wider">
                 THE ARCHITECT &middot; XZA &middot; BUILDER OF WORLDS
               </p>
@@ -187,16 +195,15 @@ export default function Librarynth() {
 
       {/* ─── WRITINGS & RESOURCES ─── */}
       <section>
-        <PixelSectionHeader>Writings &amp; Resources</PixelSectionHeader>
+        <PixelSectionHeader color="blue">Writings &amp; Resources</PixelSectionHeader>
 
         <PixelCard variant="inset" hover={false} className="text-center py-8">
-          <p className="font-pixel text-[8px] text-white/25 mb-2 tracking-wider">
-            COMING SOON
+          <p className="font-pixel text-[8px] text-shelley-spirit-blue/50 mb-2 tracking-wider crt-glow-blue">
+            CODEX INCOMING
           </p>
-          <p className="text-white/15 text-xs max-w-md mx-auto leading-relaxed">
-            Philosophy essays, build journals, guitar science deep-dives, comic
-            archives, and whatever else demands to be written. The stacks are
-            being assembled.
+          <p className="text-white/25 text-xs max-w-md mx-auto leading-relaxed">
+            The stacks are being assembled. Ancient scrolls. Build journals.
+            Guitar science. The Crystal Archive remembers everything.
           </p>
         </PixelCard>
       </section>

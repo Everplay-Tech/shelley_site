@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
+import ZoneHeader from "@/components/ZoneHeader";
+import AmbientParticles from "@/components/AmbientParticles";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
+import { ZONES } from "@/lib/zone-config";
 import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Guitar showcase data ───────────────────────────────────────────────── */
@@ -46,17 +49,11 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-16">
-      {/* ─── HERO ─── */}
-      <section className="text-center py-8">
-        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
-          THE <span className="text-shelley-amber">GALLERY</span>
-        </h1>
-        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
-          Handcrafted instruments, daily builds, and the creative process —
-          straight from the workshop.
-        </p>
-      </section>
+    <div className="relative flex flex-col gap-16">
+      <AmbientParticles type="motes" count={10} />
+
+      {/* ─── ZONE HEADER ─── */}
+      <ZoneHeader zone={ZONES.gallery} />
 
       {/* ─── GALLERY RUN ─── */}
       {gameConfig && (
@@ -112,31 +109,36 @@ export default function Gallery() {
             </div>
           </div>
 
-          {/* Placeholder grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <a
-                key={i}
-                href="https://www.instagram.com/shelleyguitars/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group aspect-square pixel-panel-inset flex items-center justify-center"
-              >
-                <div className="flex flex-col items-center gap-1 opacity-15 group-hover:opacity-30 transition-opacity">
-                  <span className="font-pixel text-[7px] text-white/40">VIEW</span>
-                </div>
-              </a>
-            ))}
+          {/* Live feed monitor */}
+          <div className="mt-6">
+            <span className="font-pixel text-[6px] text-purple-400/40 tracking-wider mb-2 block">
+              LIVE FEED MONITOR
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <a
+                  key={i}
+                  href="https://www.instagram.com/shelleyguitars/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group aspect-square pixel-panel-inset flex items-center justify-center"
+                >
+                  <div className="flex flex-col items-center gap-1 opacity-15 group-hover:opacity-30 transition-opacity">
+                    <span className="font-pixel text-[7px] text-white/40">VIEW</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+            <p className="text-center font-pixel text-[7px] text-white/15 mt-3 tracking-wider">
+              AWAITING SIGNAL
+            </p>
           </div>
-          <p className="text-center font-pixel text-[7px] text-white/15 mt-3 tracking-wider">
-            LIVE FEED COMING SOON
-          </p>
         </PixelCard>
       </section>
 
       {/* ─── WHAT MAKES A SHELLEY ─── */}
       <section>
-        <PixelSectionHeader>What Makes a Shelley Guitar</PixelSectionHeader>
+        <PixelSectionHeader color="purple">What Makes a Shelley Guitar</PixelSectionHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <PixelCard>
@@ -165,16 +167,17 @@ export default function Gallery() {
 
       {/* ─── GUITAR SHOWCASE ─── */}
       <section>
-        <PixelSectionHeader>Guitar Builds</PixelSectionHeader>
+        <PixelSectionHeader color="purple">Guitar Builds</PixelSectionHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {guitars.map((guitar) => (
-            <PixelCard key={guitar.name} variant="raised">
-              {/* Image placeholder */}
+            <PixelCard key={guitar.name} variant="raised" className="exhibition-frame">
+              {/* Exhibition frame placeholder */}
               <div className="aspect-[4/3] pixel-panel-inset flex items-center justify-center mb-4 -mx-5 -mt-5">
-                <div className="flex flex-col items-center gap-2 opacity-12">
-                  <span className="text-2xl">&#127928;</span>
-                  <span className="font-pixel text-[7px] tracking-wider">PHOTO SOON</span>
+                <div className="w-full h-full m-3 border-2 border-dashed border-white/5 flex items-center justify-center">
+                  <span className="font-pixel text-[7px] text-white/10 tracking-wider">
+                    AWAITING EXHIBIT
+                  </span>
                 </div>
               </div>
 
@@ -182,7 +185,7 @@ export default function Gallery() {
                 <h3 className="font-pixel text-[10px] text-white/85 tracking-wider">
                   {guitar.name.toUpperCase()}
                 </h3>
-                <span className="font-pixel text-[7px] text-shelley-amber/60 pixel-panel-inset px-2 py-0.5">
+                <span className="font-pixel text-[7px] text-shelley-djinn-purple/60 pixel-panel-inset px-2 py-0.5">
                   {guitar.status.toUpperCase()}
                 </span>
               </div>

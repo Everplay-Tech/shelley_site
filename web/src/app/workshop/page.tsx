@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import GodotEmbed from "@/components/GodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
+import ZoneHeader from "@/components/ZoneHeader";
+import AmbientParticles from "@/components/AmbientParticles";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
+import { ZONES } from "@/lib/zone-config";
 import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Current builds ─────────────────────────────────────────────────────── */
@@ -83,17 +86,11 @@ export default function Workshop() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-16">
-      {/* ─── HERO ─── */}
-      <section className="text-center py-8">
-        <h1 className="font-pixel text-lg sm:text-2xl tracking-wider mb-4 crt-glow">
-          THE <span className="text-shelley-amber">WORKSHOP</span>
-        </h1>
-        <p className="text-sm text-white/45 max-w-xl mx-auto leading-relaxed">
-          Where wood meets steel and passion becomes music. Every Shelley guitar
-          is built by hand, start to finish.
-        </p>
-      </section>
+    <div className="relative flex flex-col gap-16">
+      <AmbientParticles type="sawdust" count={8} />
+
+      {/* ─── ZONE HEADER ─── */}
+      <ZoneHeader zone={ZONES.workshop} />
 
       {/* ─── WORKSHOP CRAFT ─── */}
       {gameConfig && (
@@ -119,7 +116,7 @@ export default function Workshop() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {steps.map((step) => (
-            <PixelCard key={step.id}>
+            <PixelCard key={step.id} className="transition-all hover:border-l-2 hover:border-shelley-amber/30">
               <div className="flex items-center gap-3 mb-3">
                 <span className="font-pixel text-[10px] text-shelley-amber/70">
                   {step.id}
@@ -150,7 +147,7 @@ export default function Workshop() {
                 <h3 className="font-pixel text-[10px] text-shelley-amber tracking-wider">
                   {build.name.toUpperCase()}
                 </h3>
-                <span className="font-pixel text-[7px] text-white/30 pixel-panel-inset px-2 py-1">
+                <span className="font-pixel text-[7px] text-white/30 pixel-panel-inset px-2 py-1 badge-pulse">
                   {build.stage.toUpperCase()}
                 </span>
               </div>
@@ -181,8 +178,8 @@ export default function Workshop() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {tools.map((tool) => (
-            <PixelCard key={tool.name} variant="inset" hover={false} className="p-4">
-              <h4 className="font-pixel text-[8px] text-white/70 mb-1.5 tracking-wider">
+            <PixelCard key={tool.name} variant="inset" hover={false} className="p-4 group">
+              <h4 className="font-pixel text-[8px] text-white/70 mb-1.5 tracking-wider group-hover:text-shelley-amber/80 transition-colors">
                 {tool.name.toUpperCase()}
               </h4>
               <p className="text-white/30 text-xs leading-relaxed">{tool.desc}</p>
