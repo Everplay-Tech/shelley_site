@@ -6,6 +6,7 @@ extends Node
 
 signal narrative_started(beat_id: String)
 signal narrative_ended(beat_id: String)
+signal speaker_changed(speaker_name: String)  # For HUD speaker label
 signal onboarding_complete
 signal morph_to_platformer
 
@@ -128,9 +129,20 @@ func _show_line(beat: Dictionary) -> void:
 		_end_beat(beat)
 		return
 
+	# Multi-speaker support: lines can be String or Dictionary
+	var line_entry = lines[current_line_index]
+	var text: String
+	var speaker: String = "Po"
+	if line_entry is Dictionary:
+		text = line_entry.get("text", "")
+		speaker = line_entry.get("speaker", "Po")
+	else:
+		text = str(line_entry)
+
 	speech_bubble.visible = true
-	speech_label.text = lines[current_line_index]
+	speech_label.text = text
 	speech_label.visible_characters = 0  # Start hidden — player presses A to reveal
+	speaker_changed.emit(speaker)
 
 func _input(event: InputEvent) -> void:
 	if not is_active:

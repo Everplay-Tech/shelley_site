@@ -50,6 +50,17 @@ var _artifact_bg: ColorRect
 var _game_over_visible := false
 var _trophies: Dictionary = {}  # food_name → {node, count_label, count}
 
+# MGS Codec-style dialogue system
+var _speaker_label: Label = null
+var _codec_border_top: ColorRect = null
+var _codec_border_bottom: ColorRect = null
+var _codec_accent: ColorRect = null
+var _codec_built := false
+const SPEAKER_COLORS := {
+	"Po": Color(1.0, 0.749, 0.0, 0.9),       # Amber for Po
+	"Magus": Color(0.4, 0.85, 0.6, 0.9),      # Green for Magus (codec green)
+}
+
 @onready var heart_container: HBoxContainer = $HeartContainer  # Repurposed as bar anchor
 @onready var distance_label: Label = $DistanceLabel
 @onready var score_panel: HBoxContainer = $ScorePanel
@@ -393,3 +404,85 @@ func flash_danger() -> void:
 	tween.tween_property(danger_vignette, "modulate:a", 0.2, 0.08)
 	tween.tween_property(danger_vignette, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(func(): danger_vignette.visible = false)
+
+# ---- MGS Codec Dialogue System ----
+
+func _build_codec_overlay() -> void:
+	## Builds Metal Gear Solid-style codec frame around the SpeechBubble.
+	## Called once on first dialogue trigger. Modifies SpeechBubble styling in-place.
+	if _codec_built:
+		return
+	_codec_built = true
+
+	var bubble = %SpeechBubble as PanelContainer
+
+	# Restyle the panel — dark codec background
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.03, 0.04, 0.06, 0.92)  # Near-black with slight blue
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_color = Color(0.3, 0.6, 0.45, 0.5)  # Muted codec green border
+	style.corner_radius_top_left = 2
+	style.corner_radius_top_right = 2
+	style.corner_radius_bottom_left = 2
+	style.corner_radius_bottom_right = 2
+	bubble.add_theme_stylebox_override("panel", style)
+
+	# Reposition: wider, lower — classic codec bar across bottom
+	bubble.offset_left = 30.0
+	bubble.offset_right = 610.0
+	bubble.offset_top = 250.0
+	bubble.offset_bottom = 340.0
+
+	# Speaker name label — top-left inside codec frame
+	_speaker_label = Label.new()
+	_speaker_label.position = Vector2(8, -14)  # Sits above the panel top edge
+	_speaker_label.add_theme_font_size_override("font_size", 8)
+	_speaker_label.add_theme_color_override("font_color", Color(0.4, 0.85, 0.6, 0.9))
+	_speaker_label.visible = false
+	bubble.add_child(_speaker_label)
+
+	# Accent bar — thin colored line under speaker name
+	_codec_accent = ColorRect.new()
+	_codec_accent.size = Vector2(50, 1)
+	_codec_accent.position = Vector2(8, -3)
+	_codec_accent.color = Color(0.4, 0.85, 0.6, 0.4)
+	_codec_accent.visible = false
+	bubble.add_child(_codec_accent)
+
+	# Scanline overlay — faint horizontal lines for CRT feel
+	var scanlines = ColorRect.new()
+	scanlines.size = Vector2(580, 90)
+	scanlines.position = Vector2(0, 0)
+	scanlines.color = Color(0.0, 0.0, 0.0, 0.04)  # Very faint
+	scanlines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bubble.add_child(scanlines)
+
+	# Style the text label — codec green/white monospace feel
+	var label = %SpeechLabel as RichTextLabel
+	label.add_theme_color_override("default_color", Color(0.85, 0.9, 0.85, 1.0))
+	label.add_theme_font_size_override("normal_font_size", 10)
+
+func update_speaker(speaker_name: String) -> void:
+	## Called when narrative emits speaker_changed signal.
+	if not _codec_built:
+		_build_codec_overlay()
+	if _speaker_label:
+		_speaker_label.text = speaker_name
+		_speaker_label.visible = true
+		var color = SPEAKER_COLORS.get(speaker_name, Color(0.8, 0.8, 0.8, 0.8))
+		_speaker_label.add_theme_color_override("font_color", color)
+		# Accent bar matches speaker color
+		if _codec_accent:
+			_codec_accent.color = Color(color.r, color.g, color.b, 0.4)
+			_codec_accent.size.x = speaker_name.length() * 6.0 + 10
+			_codec_accent.visible = true
+
+func hide_speaker() -> void:
+	## Called when narrative beat ends.
+	if _speaker_label:
+		_speaker_label.visible = false
+	if _codec_accent:
+		_codec_accent.visible = false

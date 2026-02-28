@@ -76,9 +76,27 @@
     ]
   },
   {
+    "id": "magus_meeting",
+    "trigger_type": "area_entered",
+    "trigger_area": "amphitheatre",
+    "lines": [
+      {"speaker": "Po", "text": "Captain? You're HERE?"},
+      {"speaker": "Magus", "text": "Po. You found me. Welcome to the Librarynth."},
+      {"speaker": "Po", "text": "This place is... what IS all this?"},
+      {"speaker": "Magus", "text": "The Xenomyth. Everything I've been building. The Djinn World is part of it."},
+      {"speaker": "Magus", "text": "I lost someone. KOTON. My brother in all of this."},
+      {"speaker": "Po", "text": "..."},
+      {"speaker": "Magus", "text": "We designed something together. The Soul Communicator. A ship that could carry music across worlds."},
+      {"speaker": "Magus", "text": "We never built it. But the luthier path — building guitars, building THIS — it's the same impulse."},
+      {"speaker": "Magus", "text": "Making things that let people speak when words aren't enough."},
+      {"speaker": "Po", "text": "So what do we do now?"},
+      {"speaker": "Magus", "text": "We keep building. Go explore what's out there. I'll be here."}
+    ]
+  },
+  {
     "id": "explore_complete",
     "trigger_type": "area_entered",
-    "trigger_area": "door",
+    "trigger_area": "exit_portal",
     "lines": [
       "Alright! We cracked this place open.",
       "There's a whole site out there — builds, stories, music, everything.",

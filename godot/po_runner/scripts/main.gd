@@ -56,7 +56,10 @@ static var _should_auto_start := false
 
 # Platformer area (instanced on morph)
 const PlatformerAreaScript = preload("res://scripts/platformer_area.gd")
+const TunnelAreaScript = preload("res://scripts/tunnel_area.gd")
 var _platformer_area: Node2D = null
+var _tunnel_area: Node2D = null
+var _camera_max_x := 1100.0  # Dynamic — extends when tunnel loads
 
 func _ready() -> void:
 	# Connect signals
@@ -67,6 +70,7 @@ func _ready() -> void:
 	hud.restart_requested.connect(_on_restart)
 	narrative.narrative_started.connect(_on_narrative_started)
 	narrative.narrative_ended.connect(_on_narrative_ended)
+	narrative.speaker_changed.connect(_on_speaker_changed)
 	narrative.onboarding_complete.connect(_on_onboarding_complete)
 	web_bridge.host_command_received.connect(_on_host_command)
 	enemy_spawner.enemy_spawned.connect(_on_enemy_spawned)
@@ -222,9 +226,17 @@ func _on_narrative_ended(beat_id: String) -> void:
 	enemy_spawner.resume_spawning()
 	ground.set_narrative_mode(false)
 	web_bridge.send_narrative_end(beat_id)
+	# Hide speaker label
+	hud.hide_speaker()
 	# Spirits return to ambient — back to the drift
 	_spirit_mode = "ambient"
 	_spirit_target_color = SPIRIT_COLOR_AMBIENT
+	# After Magus meeting dialogue ends — reveal exit portal
+	if beat_id == "magus_meeting" and _tunnel_area:
+		_tunnel_area.activate_exit_portal()
+
+func _on_speaker_changed(speaker_name: String) -> void:
+	hud.update_speaker(speaker_name)
 
 func _on_onboarding_complete() -> void:
 	web_bridge.send_onboarding_complete()
@@ -472,7 +484,7 @@ func _update_platformer_camera(delta: float) -> void:
 	camera.global_position.x = lerp(camera.global_position.x, target_x, delta * 3.0)
 	camera.global_position.y = lerp(camera.global_position.y, target_y, delta * 3.0)
 	# Clamp to level bounds so camera doesn't show empty void
-	camera.global_position.x = clamp(camera.global_position.x, 100.0, 1100.0)
+	camera.global_position.x = clamp(camera.global_position.x, 100.0, _camera_max_x)
 
 # ============================================================
 # PLATFORMER AREA — Victory lap exploration zone
@@ -495,8 +507,78 @@ func _on_platformer_orb(count: int, total: int) -> void:
 	_attract_spirits()
 
 func _on_platformer_door() -> void:
-	## Po reached the door — trigger the explore_complete narrative beat.
-	narrative.notify_area_entered("door")
+	## Po reached the door — transition to the Librarynth tunnel.
+	_transition_to_tunnel()
+
+# ============================================================
+# TUNNEL TRANSITION — Door → Librarynth
+# ============================================================
+
+func _transition_to_tunnel() -> void:
+	## Amber flash transition, then swap platformer area for tunnel area.
+	# Disable input during transition
+	po.enter_narrative()
+
+	# Amber flash → dark → fade back
+	var flash = ColorRect.new()
+	flash.color = Color(1.0, 0.75, 0.0, 0.0)
+	flash.size = get_viewport().get_visible_rect().size
+	flash.z_index = 200
+	add_child(flash)
+
+	var tween = create_tween()
+	# Flash amber
+	tween.tween_property(flash, "color:a", 0.9, 0.2)
+	# Dark
+	tween.tween_property(flash, "color", Color(0.05, 0.03, 0.08, 1.0), 0.15)
+	# During dark: swap areas
+	tween.tween_callback(func():
+		# Remove platformer area
+		if _platformer_area:
+			_platformer_area.queue_free()
+			_platformer_area = null
+		# Spawn tunnel area
+		_spawn_tunnel_area()
+		# Move Po to tunnel start
+		po.global_position = Vector2(100, 288)
+		# Reposition camera
+		camera.global_position = Vector2(320, 180)
+		# Extend camera bounds for tunnel
+		_camera_max_x = 2500.0
+	)
+	# Hold dark briefly
+	tween.tween_interval(0.3)
+	# Fade back
+	tween.tween_property(flash, "color:a", 0.0, 0.4)
+	tween.tween_callback(func():
+		flash.queue_free()
+		po.exit_narrative()
+	)
+
+func _spawn_tunnel_area() -> void:
+	## Instance the tunnel area (Librarynth zones + amphitheatre + Magus NPC).
+	if _tunnel_area != null:
+		return
+	_tunnel_area = Node2D.new()
+	_tunnel_area.set_script(TunnelAreaScript)
+	add_child(_tunnel_area)
+	# Connect signals
+	_tunnel_area.orb_collected.connect(_on_tunnel_orb)
+	_tunnel_area.magus_reached.connect(_on_magus_reached)
+	_tunnel_area.exit_portal_reached.connect(_on_exit_portal_reached)
+
+func _on_tunnel_orb(count: int, total: int) -> void:
+	score += 1
+	hud.update_score(score)
+	_attract_spirits()
+
+func _on_magus_reached() -> void:
+	## Po reached Magus in the amphitheatre — trigger meeting dialogue.
+	narrative.notify_area_entered("amphitheatre")
+
+func _on_exit_portal_reached() -> void:
+	## Po entered the exit portal — trigger explore_complete beat.
+	narrative.notify_area_entered("exit_portal")
 
 # ============================================================
 # ENCOUNTER SYSTEM — Scroll-Stop Face-Offs
