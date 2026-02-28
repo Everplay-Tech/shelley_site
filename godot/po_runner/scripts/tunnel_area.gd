@@ -53,7 +53,11 @@ var _orb_base_y: Array[float] = []
 var _magus_active := true
 var _portal_node: Area2D = null
 var _portal_active := false
+var _magus_sprite: AnimatedSprite2D = null
+var _crystal_glows: Array[ColorRect] = []    # Crystal glow rects (for pulse animation)
+var _candle_flames: Array[ColorRect] = []    # Candle flame rects (for flicker)
 var _page_nodes: Array[ColorRect] = []       # Floating pages (ambient)
+var _page_base_x: Array[float] = []
 var _page_base_y: Array[float] = []
 
 # ─── Build ─────────────────────────────────────────────────────────────────
@@ -94,14 +98,21 @@ func _build_ground() -> void:
 # ============================================================
 
 func _build_zone_backgrounds() -> void:
+	# Zone backgrounds overlap by ~100px for smooth transitions (no hard seams)
 	# Zone 1: Crystal Cave bg
-	_add_bg_rect(Vector2(-100, -50), Vector2(950, 420), CAVE_BG)
+	_add_bg_rect(Vector2(-100, -50), Vector2(1000, 420), CAVE_BG)
+	# Transition blend: cave → library (gradient feel via overlapping lower-alpha rects)
+	_add_bg_rect(Vector2(750, -50), Vector2(150, 420), Color(LIB_BG.r, LIB_BG.g, LIB_BG.b, 0.4))
 	# Zone 2: Library bg
-	_add_bg_rect(Vector2(800, -50), Vector2(900, 420), LIB_BG)
+	_add_bg_rect(Vector2(850, -50), Vector2(850, 420), LIB_BG)
+	# Transition blend: library → spirit
+	_add_bg_rect(Vector2(1550, -50), Vector2(150, 420), Color(SPIRIT_BG.r, SPIRIT_BG.g, SPIRIT_BG.b, 0.4))
 	# Zone 3: Spirit Realm bg
-	_add_bg_rect(Vector2(1600, -50), Vector2(700, 420), SPIRIT_BG)
+	_add_bg_rect(Vector2(1650, -50), Vector2(650, 420), SPIRIT_BG)
+	# Transition blend: spirit → amphitheatre
+	_add_bg_rect(Vector2(2150, -50), Vector2(150, 420), Color(0.1, 0.08, 0.06, 0.4))
 	# Amphitheatre — slightly lighter
-	_add_bg_rect(Vector2(2200, -50), Vector2(500, 420), Color(0.1, 0.08, 0.06, 0.8))
+	_add_bg_rect(Vector2(2250, -50), Vector2(450, 420), Color(0.1, 0.08, 0.06, 0.8))
 
 func _add_bg_rect(pos: Vector2, sz: Vector2, color: Color) -> void:
 	var bg = ColorRect.new()
@@ -142,6 +153,7 @@ func _add_crystal(pos: Vector2) -> void:
 	glow.color = CAVE_CRYSTAL
 	glow.z_index = 2
 	add_child(glow)
+	_crystal_glows.append(glow)
 
 # ============================================================
 # ZONE 2: LIBRARY CORRIDORS (x=800 → x=1600)
@@ -173,12 +185,14 @@ func _add_candle(pos: Vector2) -> void:
 	flame.color = Color(1.0, 0.8, 0.3, 0.9)
 	flame.z_index = 4
 	add_child(flame)
+	_candle_flames.append(flame)
 	var glow = ColorRect.new()
 	glow.size = Vector2(14, 14)
 	glow.position = Vector2(pos.x - 7, pos.y - 10)
 	glow.color = LIB_CANDLE
 	glow.z_index = 2
 	add_child(glow)
+	_candle_flames.append(glow)  # Track glow too for coordinated flicker
 
 func _add_page(pos: Vector2) -> void:
 	# Floating page — drifts gently (animated in _process)
@@ -189,6 +203,7 @@ func _add_page(pos: Vector2) -> void:
 	page.z_index = 3
 	add_child(page)
 	_page_nodes.append(page)
+	_page_base_x.append(pos.x)
 	_page_base_y.append(pos.y)
 
 # ============================================================
@@ -338,6 +353,14 @@ func _build_magus_npc() -> void:
 	shape.shape = rect
 	magus.add_child(shape)
 
+	# Ambient glow behind Magus — subtle warm presence
+	var glow = ColorRect.new()
+	glow.size = Vector2(24, 40)
+	glow.position = Vector2(-12, -22)
+	glow.color = Color(1.0, 0.75, 0.0, 0.06)
+	glow.z_index = 5
+	magus.add_child(glow)
+
 	# Magus sprite — AnimatedSprite2D with idle animation
 	var sprite = AnimatedSprite2D.new()
 	sprite.name = "MagusSprite"
@@ -370,6 +393,7 @@ func _build_magus_npc() -> void:
 
 	sprite.z_index = 10
 	magus.add_child(sprite)
+	_magus_sprite = sprite  # Store ref for breathing scale animation
 
 	magus.body_entered.connect(_on_magus_touched)
 	add_child(magus)
@@ -476,11 +500,35 @@ func _on_portal_entered(body: Node2D) -> void:
 		)
 
 # ============================================================
-# ANIMATION — Orb bobbing + floating pages
+# ANIMATION — Orb bobbing + floating pages + Magus breathing
 # ============================================================
 
 func _process(delta: float) -> void:
 	var t = Time.get_ticks_msec() / 1000.0
+
+	# Magus breathing scale — gentle inhale/exhale
+	if _magus_sprite and is_instance_valid(_magus_sprite):
+		var breath = sin(t * 1.8) * 0.015  # ±1.5% scale
+		_magus_sprite.scale = Vector2(1.0 + breath, 1.0 + breath * 0.5)
+
+	# Crystal glow pulse — each crystal has unique phase for organic feel
+	for i in range(_crystal_glows.size()):
+		if is_instance_valid(_crystal_glows[i]):
+			var phase = float(i) * 1.7  # Unique offset per crystal
+			var pulse = sin(t * 2.0 + phase) * 0.15 + 0.5  # Alpha oscillates 0.35↔0.65
+			_crystal_glows[i].color.a = pulse
+
+	# Candle flicker — rapid irregular brightness (pairs of flame+glow)
+	for i in range(0, _candle_flames.size(), 2):  # Step by 2 (flame, glow pairs)
+		if i + 1 < _candle_flames.size():
+			var flame_node = _candle_flames[i]
+			var glow_node = _candle_flames[i + 1]
+			if is_instance_valid(flame_node) and is_instance_valid(glow_node):
+				var phase = float(i) * 2.3
+				# Irregular flicker: combine two sine waves for organic feel
+				var flick = sin(t * 5.0 + phase) * 0.15 + sin(t * 8.3 + phase * 0.7) * 0.08
+				flame_node.color.a = 0.85 + flick
+				glow_node.color.a = 0.35 + flick * 0.5
 
 	# Orb bobbing
 	for i in range(_orb_nodes.size()):
@@ -489,11 +537,11 @@ func _process(delta: float) -> void:
 			var bob = sin(t * 2.5 + phase) * 3.0
 			_orb_nodes[i].position.y = _orb_base_y[i] + bob
 
-	# Floating page drift (library zone)
+	# Floating page drift (library zone) — sine-wave on both axes from base positions
 	for i in range(_page_nodes.size()):
 		if is_instance_valid(_page_nodes[i]):
-			var phase = _page_nodes[i].position.x * 0.03
+			var phase = _page_base_x[i] * 0.03
 			var drift_y = sin(t * 1.5 + phase) * 5.0
-			var drift_x = cos(t * 0.8 + phase * 1.3) * 2.0
+			var drift_x = cos(t * 0.8 + phase * 1.3) * 8.0
 			_page_nodes[i].position.y = _page_base_y[i] + drift_y
-			_page_nodes[i].position.x += drift_x * delta
+			_page_nodes[i].position.x = _page_base_x[i] + drift_x
