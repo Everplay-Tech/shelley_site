@@ -8,10 +8,35 @@ const pool = new Pool({
   max: 10,
 });
 
+// ─── Auto-migration ────────────────────────────────────────────────────────
+// Ensures schema is up to date on first query after deploy.
+// Runs once per process lifetime — zero overhead after init.
+let _schemaReady = false;
+let _schemaPromise: Promise<void> | null = null;
+
+async function ensureSchema(): Promise<void> {
+  if (_schemaReady) return;
+  if (_schemaPromise) return _schemaPromise;
+
+  _schemaPromise = initSchema()
+    .then(() => {
+      _schemaReady = true;
+    })
+    .catch((err) => {
+      // Don't block the app if migration fails — log and continue.
+      // Queries may still work if schema was already set up manually.
+      console.warn("[db] Auto-migration failed (schema may already exist):", err?.message);
+      _schemaReady = true; // Don't retry every request
+    });
+
+  return _schemaPromise;
+}
+
 export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
 ) {
+  await ensureSchema();
   return pool.query<T>(text, params);
 }
 
@@ -57,6 +82,15 @@ export async function initSchema(): Promise<void> {
     -- Add pieces_collected column if table already exists (safe migration)
     ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS pieces_collected INTEGER DEFAULT 0;
     ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS reward_code TEXT DEFAULT NULL;
+
+    -- Narrative overrides — admin-editable dialogue for each beat
+    CREATE TABLE IF NOT EXISTS narrative_overrides (
+      id SERIAL PRIMARY KEY,
+      beat_id TEXT UNIQUE NOT NULL,
+      lines JSONB NOT NULL,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_by TEXT DEFAULT 'admin'
+    );
 
     -- Index for fast session lookups
     CREATE INDEX IF NOT EXISTS idx_game_progress_session

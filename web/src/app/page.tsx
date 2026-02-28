@@ -53,6 +53,23 @@ export default function Home() {
     switch (event.type) {
       case "game_ready":
         setScreen((prev) => (prev === "loading" ? "welcome" : prev));
+        // Send any narrative overrides from the CMS to the game
+        fetch("/api/narrative")
+          .then((r) => r.json())
+          .then((data) => {
+            const overridden = (data.beats ?? []).filter(
+              (b: { _overridden?: boolean }) => b._overridden
+            );
+            if (overridden.length > 0) {
+              embedRef.current?.sendCommand({
+                command: "update_narrative",
+                data: { beats: overridden },
+              });
+            }
+          })
+          .catch(() => {
+            /* CMS unavailable — game uses bundled defaults */
+          });
         break;
       case "narrative_start":
         setIsNarrative(true);

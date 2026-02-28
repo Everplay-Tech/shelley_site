@@ -48,6 +48,23 @@ func _load_beats() -> void:
 	else:
 		push_warning("Could not load narrative_beats.json")
 
+func override_beats(overrides: Array) -> void:
+	## Apply CMS overrides — replace lines for matching beat IDs.
+	## Called by main.gd when the host sends "update_narrative" command.
+	## Only replaces lines; triggers/signals stay as loaded from bundled JSON.
+	for override in overrides:
+		if not override is Dictionary:
+			continue
+		var beat_id = override.get("id", "")
+		var new_lines = override.get("lines", [])
+		if beat_id == "" or new_lines.size() == 0:
+			continue
+		for i in range(beats.size()):
+			if beats[i].get("id", "") == beat_id:
+				beats[i]["lines"] = new_lines
+				print("[Narrative] CMS override applied: ", beat_id)
+				break
+
 func _process(delta: float) -> void:
 	# Quick line auto-dismiss
 	if _quick_line_active:

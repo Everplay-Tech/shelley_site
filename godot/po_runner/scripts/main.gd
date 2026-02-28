@@ -287,6 +287,11 @@ func _on_host_command(command: String, _data: Dictionary) -> void:
 			Input.action_press("move_right")
 		"move_right_release":
 			Input.action_release("move_right")
+		# CMS narrative override — host sends updated beat lines
+		"update_narrative":
+			var beat_overrides = _data.get("beats", [])
+			if beat_overrides is Array and beat_overrides.size() > 0:
+				narrative.override_beats(beat_overrides)
 
 func _on_attack_fired(attack_type: String, spawn_pos: Vector2) -> void:
 	if attack_type == "spirit_fist":

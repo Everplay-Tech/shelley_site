@@ -44,13 +44,24 @@ export interface VirtualInputCommand {
     | "move_right_release";
 }
 
+export interface NarrativeOverrideCommand {
+  command: "update_narrative";
+  data: {
+    beats: Array<{
+      id: string;
+      lines: Array<string | { speaker: string; text: string }>;
+    }>;
+  };
+}
+
 export type GodotCommand =
   | StartCommand
   | PauseCommand
   | ResumeCommand
   | MoveToCommand
   | ConfigCommand
-  | VirtualInputCommand;
+  | VirtualInputCommand
+  | NarrativeOverrideCommand;
 
 export type GodotCommandType = GodotCommand["command"];
 
