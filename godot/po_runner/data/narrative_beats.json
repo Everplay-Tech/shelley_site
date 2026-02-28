@@ -6,9 +6,9 @@
     "lines": [
       "Oh hey! You're actually controlling me? Cool cool cool.",
       "Name's Po. Skeleton ghost. Fur-trimmed hoodie enthusiast.",
-      "Memory's fuzzy. I know I'm dead. Pretty sure about that one.",
-      "I'm running through a bamboo forest at night. Classic me.",
-      "Just help me jump over stuff. We'll figure the rest out together."
+      "My memory gets fuzzy from time to time. And time... sometimes again times...",
+      "Ah, Djinn World. Home. Pops told the palace guard to come find me, so I try to street rat it up and gather supplies for the adventures.",
+      "Just help me jump over stuff. We'll find Captain Magus and figure out the rest via his idearrhea."
     ]
   },
   {
@@ -19,7 +19,8 @@
       "Hold up. You smell that? Sawdust and lacquer.",
       "And that THING the big cat dropped... what is it?",
       "It's warm. Humming. Like it wants to be part of something bigger.",
-      "I think we're near a luthier's workshop. That's a guitar maker, fam.",
+      "I think we're near a luthier's workshop.",
+      "That's a guitar maker, fam.",
       "...Someone scattered these pieces on purpose. Keep moving."
     ]
   },
@@ -28,12 +29,12 @@
     "trigger_type": "distance",
     "trigger_distance": 900,
     "lines": [
-      "OK two of these things now. They're... resonating with each other.",
-      "These bamboo stalks have carvings on them... musical instruments.",
-      "Old ones. Beautiful ones. Carved with serious intention.",
-      "I'm starting to think these pieces ARE the forest somehow.",
-      "Like the whole world is built from whatever these things are.",
-      "*gestures at ghost tail* And I'm just the ghost stumbling through it."
+      "Real talk for a second.",
+      "You're still here. Playing a run game? That makes you an OG.",
+      "You know there's a whole website behind this game, right? Like RIGHT behind it.",
+      "Sign up. Save your progress. Get emails about cool stuff — builds, drops, music.",
+      "Or don't. I'm not a cop.",
+      "...OK back to running. Collecting them all leads to good things..."
     ]
   },
   {
@@ -57,12 +58,9 @@
       "Wait. WAIT. What's happening?",
       "The world... it stopped. The scrolling. The endless running.",
       "SIX pieces. That's all six.",
+      "We gotta get Magus.",
       "...",
-      "I CAN GO LEFT?! I CAN GO LEFT!!!",
-      "This whole time I was an auto-runner character?! A SIDE-SCROLLER NPC?!",
-      "Do you know how DEHUMANIZING that is?! Well. De-ghosting. Same energy.",
-      "OK OK OK. New plan. We EXPLORE. Left, right, up, wherever.",
-      "Let's see what Captain Magus actually built out here."
+      "Follow me."
     ],
     "signal": "morph_to_platformer"
   },

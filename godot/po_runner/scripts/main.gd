@@ -321,11 +321,11 @@ func _on_enemy_hit_po(_enemy_type: String) -> void:
 # Quick dialogue lines play without pausing the game.
 
 const ARTIFACT_QUICK_LINES := [
-	"What IS this thing?",
-	"Two. They fit together somehow.",
-	"Three. I'm starting to see a pattern...",
-	"FOUR. Something's building. I can feel it.",
-	"Five. One more. The world is SHAKING.",
+	"Ohhh there it is. The bosses carry these — you just gotta get lucky.",
+	"Two! These things are worth real money at the shop. Keep hunting.",
+	"Three of six. Halfway to the hookup. The big cats hate giving these up.",
+	"FOUR. Two more and Shelley's cutting us a deal.",
+	"Five of six. ONE MORE. I can feel the discount from here.",
 	"",  # 6th piece triggers morph — no quick line
 ]
 

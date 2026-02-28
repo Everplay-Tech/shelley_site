@@ -15,6 +15,11 @@ var is_active := false
 var current_line_index := 0
 var all_beats_done := false
 
+# Press-to-reveal: each A press reveals a growing chunk of text.
+# Counter escalates across the whole beat (resets per beat).
+const REVEAL_CHUNKS: Array[int] = [1, 2, 3, 5, -1]  # -1 = rest of line
+var _reveal_step := 0
+
 # Post-morph state
 var _morph_complete := false
 var _post_morph_timer := 0.0
@@ -113,6 +118,7 @@ func _check_post_morph_beats() -> void:
 func _start_beat(beat: Dictionary) -> void:
 	is_active = true
 	current_line_index = 0
+	_reveal_step = 0  # Reset reveal counter per beat
 	narrative_started.emit(beat.get("id", ""))
 	_show_line(beat)
 
@@ -123,19 +129,8 @@ func _show_line(beat: Dictionary) -> void:
 		return
 
 	speech_bubble.visible = true
-	speech_label.text = ""
-
-	# Typewriter effect
-	var full_text = lines[current_line_index]
-	_typewrite(full_text)
-
-func _typewrite(text: String) -> void:
-	speech_label.text = ""
-	speech_label.visible_characters = 0
-	speech_label.text = text
-	# Use a tween for the typewriter
-	var tween = create_tween()
-	tween.tween_property(speech_label, "visible_characters", text.length(), text.length() * 0.03)
+	speech_label.text = lines[current_line_index]
+	speech_label.visible_characters = 0  # Start hidden — player presses A to reveal
 
 func _input(event: InputEvent) -> void:
 	if not is_active:
@@ -155,11 +150,20 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _advance_text() -> void:
-	# If text is still typing, show all of it
-	if speech_label.visible_characters < speech_label.text.length():
-		speech_label.visible_characters = speech_label.text.length()
+	var total = speech_label.text.length()
+	if speech_label.visible_characters < total:
+		# Reveal next chunk — sizes escalate across the whole beat
+		var chunk_idx = mini(_reveal_step, REVEAL_CHUNKS.size() - 1)
+		var chunk_size = REVEAL_CHUNKS[chunk_idx]
+		if chunk_size == -1:
+			speech_label.visible_characters = total
+		else:
+			speech_label.visible_characters = mini(
+				speech_label.visible_characters + chunk_size, total
+			)
+		_reveal_step += 1
 		return
-	# Otherwise advance to next line
+	# Line fully revealed — advance to next line
 	current_line_index += 1
 	var beat = beats[current_beat_index]
 	_show_line(beat)
