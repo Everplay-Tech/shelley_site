@@ -48,9 +48,15 @@ export async function initSchema(): Promise<void> {
       po_relationship INTEGER DEFAULT 0,
       onboarding_complete BOOLEAN DEFAULT FALSE,
       fourth_wall_unlocked BOOLEAN DEFAULT FALSE,
+      pieces_collected INTEGER DEFAULT 0,
       game_records JSONB DEFAULT '{}',
+      reward_code TEXT DEFAULT NULL,
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    -- Add pieces_collected column if table already exists (safe migration)
+    ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS pieces_collected INTEGER DEFAULT 0;
+    ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS reward_code TEXT DEFAULT NULL;
 
     -- Index for fast session lookups
     CREATE INDEX IF NOT EXISTS idx_game_progress_session

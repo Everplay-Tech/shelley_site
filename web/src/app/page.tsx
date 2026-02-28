@@ -22,6 +22,9 @@ export default function Home() {
   const [screen, setScreen] = useState<GameScreen>("loading");
   const [isMobile, setIsMobile] = useState(false);
   const [isNarrative, setIsNarrative] = useState(false);
+  const [showReward, setShowReward] = useState(false);
+  const [rewardCode, setRewardCode] = useState<string | null>(null);
+  const [rewardDismissing, setRewardDismissing] = useState(false);
   const embedRef = useRef<GodotEmbedHandle>(null);
 
   useEffect(() => {
@@ -37,6 +40,14 @@ export default function Home() {
     setGameConfig(getLandingGame(returning));
   }, [progress.onboardingComplete]);
 
+  const dismissReward = useCallback(() => {
+    setRewardDismissing(true);
+    setTimeout(() => {
+      setShowReward(false);
+      setRewardDismissing(false);
+    }, 500);
+  }, []);
+
   const handleGodotEvent = useCallback((event: GodotEvent) => {
     emitGameEvent(event);
     switch (event.type) {
@@ -49,8 +60,23 @@ export default function Home() {
       case "narrative_end":
         setIsNarrative(false);
         break;
+      case "piece_collected":
+        if ("data" in event) {
+          reportGameEvent({
+            type: "piece_collected",
+            gameName: "po_runner",
+            pieceIndex: event.data.piece,
+            pieceTotal: event.data.total,
+          });
+        }
+        break;
       case "onboarding_complete":
-        reportGameEvent({ type: "onboarding_complete", gameName: "po_runner" });
+        reportGameEvent({ type: "onboarding_complete", gameName: "po_runner" }).then((p) => {
+          // If player collected all 6 pieces, prepare reward reveal
+          if (p.rewardCode) {
+            setRewardCode(p.rewardCode);
+          }
+        });
         setCookie(ONBOARDING_COOKIE, "1");
         setScreen("done");
         setTimeout(() => {
@@ -71,6 +97,22 @@ export default function Home() {
         break;
     }
   }, []);
+
+  // Show reward once we have a code and game is done
+  useEffect(() => {
+    if (rewardCode && !showGame && !showReward) {
+      const timer = setTimeout(() => setShowReward(true), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [rewardCode, showGame, showReward]);
+
+  // Auto-dismiss reward after 12 seconds
+  useEffect(() => {
+    if (showReward && !rewardDismissing) {
+      const timer = setTimeout(dismissReward, 12000);
+      return () => clearTimeout(timer);
+    }
+  }, [showReward, rewardDismissing, dismissReward]);
 
   const handlePlay = useCallback(() => {
     setScreen("controls");
@@ -327,6 +369,66 @@ export default function Home() {
               SKIP
             </button>
           )}
+        </div>
+      )}
+
+      {/* ─── REWARD REVEAL ─── */}
+      {showReward && rewardCode && (
+        <div
+          className={`fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${
+            rewardDismissing ? "opacity-0" : "opacity-100"
+          }`}
+          onClick={dismissReward}
+        >
+          <div
+            className="pixel-panel p-8 sm:p-10 max-w-md mx-4 text-center animate-bounce-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Six amber diamonds */}
+            <div className="flex justify-center gap-2 mb-4">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="w-3 h-3 bg-shelley-amber rotate-45 animate-pulse"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+
+            <h2 className="font-pixel text-sm sm:text-base tracking-widest text-shelley-amber crt-glow mb-2">
+              THE FORBIDDEN SIX
+            </h2>
+            <p className="font-pixel text-[8px] text-white/50 tracking-wider mb-6">
+              ALL PIECES COLLECTED
+            </p>
+
+            <div className="pixel-divider mb-6" />
+
+            <p className="text-xs text-white/40 mb-3">
+              Your reward for completing the journey:
+            </p>
+
+            {/* Discount code display */}
+            <div className="bg-black/50 border border-shelley-amber/30 rounded px-6 py-4 mb-4">
+              <p className="font-pixel text-[8px] text-white/30 tracking-wider mb-1">
+                DISCOUNT CODE
+              </p>
+              <p className="font-pixel text-lg sm:text-xl text-shelley-amber crt-glow tracking-[0.3em]">
+                {rewardCode}
+              </p>
+              <p className="font-pixel text-[8px] text-white/30 tracking-wider mt-1">
+                25% OFF YOUR FIRST CUSTOM BUILD
+              </p>
+            </div>
+
+            <p className="text-[10px] text-white/25 mb-5">
+              Use this code when you commission a Shelley Guitar build.
+            </p>
+
+            <button onClick={dismissReward} className="pixel-btn-ghost text-xs">
+              CONTINUE TO SITE
+            </button>
+          </div>
         </div>
       )}
 

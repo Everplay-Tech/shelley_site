@@ -4,12 +4,18 @@ import { query } from "@/lib/db";
 
 const SESSION_COOKIE = "shelley_session";
 
+// The Forbidden Six — discount code for collecting all 6 artifact pieces
+const FORBIDDEN_SIX_CODE = "SIX25";
+const FORBIDDEN_SIX_TOTAL = 6;
+
 interface GameEventBody {
-  type: "completed" | "skipped" | "score_update" | "onboarding_complete";
+  type: "completed" | "skipped" | "score_update" | "onboarding_complete" | "piece_collected";
   gameName?: string;
   score?: number;
   picks?: number;
   distance?: number;
+  pieceIndex?: number;
+  pieceTotal?: number;
 }
 
 interface ProgressRow {
@@ -21,6 +27,8 @@ interface ProgressRow {
   po_relationship: number;
   onboarding_complete: boolean;
   fourth_wall_unlocked: boolean;
+  pieces_collected: number;
+  reward_code: string | null;
   game_records: Record<string, unknown>;
   account_id: number | null;
 }
@@ -39,6 +47,7 @@ export async function POST(req: Request) {
     `SELECT games_played, games_completed, games_skipped,
             total_score, total_picks, po_relationship,
             onboarding_complete, fourth_wall_unlocked,
+            pieces_collected, reward_code,
             game_records, account_id
      FROM game_progress WHERE session_id = $1`,
     [sessionId]
@@ -132,15 +141,41 @@ export async function POST(req: Request) {
       break;
     }
 
+    case "piece_collected": {
+      // Track artifact pieces — cap at FORBIDDEN_SIX_TOTAL
+      const newCount = Math.min(
+        FORBIDDEN_SIX_TOTAL,
+        Math.max((row.pieces_collected ?? 0) + 1, body.pieceIndex ?? 1)
+      );
+      // Generate reward code when all pieces collected
+      const rewardCode = newCount >= FORBIDDEN_SIX_TOTAL ? FORBIDDEN_SIX_CODE : row.reward_code;
+
+      await query(
+        `UPDATE game_progress SET
+          pieces_collected = $2,
+          reward_code = $3,
+          updated_at = NOW()
+        WHERE session_id = $1`,
+        [sessionId, newCount, rewardCode]
+      );
+      break;
+    }
+
     case "onboarding_complete": {
       const newRelationship = Math.min(100, row.po_relationship + 5);
+      // If player collected all 6 pieces, ensure reward code is set
+      const rewardCode = (row.pieces_collected ?? 0) >= FORBIDDEN_SIX_TOTAL
+        ? (row.reward_code ?? FORBIDDEN_SIX_CODE)
+        : row.reward_code;
+
       await query(
         `UPDATE game_progress SET
           onboarding_complete = TRUE,
           po_relationship = $2,
+          reward_code = $3,
           updated_at = NOW()
         WHERE session_id = $1`,
-        [sessionId, newRelationship]
+        [sessionId, newRelationship, rewardCode]
       );
       break;
     }
@@ -150,7 +185,8 @@ export async function POST(req: Request) {
   const updated = await query<ProgressRow>(
     `SELECT games_played, games_completed, games_skipped,
             total_score, total_picks, po_relationship,
-            onboarding_complete, fourth_wall_unlocked, game_records
+            onboarding_complete, fourth_wall_unlocked,
+            pieces_collected, reward_code, game_records
      FROM game_progress WHERE session_id = $1`,
     [sessionId]
   );
@@ -166,6 +202,8 @@ export async function POST(req: Request) {
       poRelationship: u.po_relationship,
       onboardingComplete: u.onboarding_complete,
       fourthWallUnlocked: u.fourth_wall_unlocked,
+      piecesCollected: u.pieces_collected ?? 0,
+      rewardCode: u.reward_code,
       gameRecords: u.game_records,
     },
   });

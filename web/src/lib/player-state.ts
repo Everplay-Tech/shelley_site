@@ -12,6 +12,8 @@ export interface GameProgress {
   poRelationship: number;
   onboardingComplete: boolean;
   fourthWallUnlocked: boolean;
+  piecesCollected: number;
+  rewardCode: string | null;
   gameRecords: Record<string, GameRecord>;
 }
 
@@ -23,7 +25,7 @@ export interface GameRecord {
   bestDistance: number;
 }
 
-export type GameEventType = "completed" | "skipped" | "score_update" | "onboarding_complete";
+export type GameEventType = "completed" | "skipped" | "score_update" | "onboarding_complete" | "piece_collected";
 
 export interface GameEvent {
   type: GameEventType;
@@ -31,6 +33,8 @@ export interface GameEvent {
   score?: number;
   picks?: number;
   distance?: number;
+  pieceIndex?: number;
+  pieceTotal?: number;
 }
 
 // ─── Internal state ─────────────────────────────────────────────────────────
@@ -44,6 +48,8 @@ const EMPTY_PROGRESS: GameProgress = {
   poRelationship: 0,
   onboardingComplete: false,
   fourthWallUnlocked: false,
+  piecesCollected: 0,
+  rewardCode: null,
   gameRecords: {},
 };
 

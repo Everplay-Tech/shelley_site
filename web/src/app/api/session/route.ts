@@ -18,6 +18,8 @@ interface ProgressRow {
   po_relationship: number;
   onboarding_complete: boolean;
   fourth_wall_unlocked: boolean;
+  pieces_collected: number;
+  reward_code: string | null;
   game_records: Record<string, unknown>;
 }
 
@@ -65,7 +67,8 @@ export async function POST() {
   const progress = await query<ProgressRow>(
     `SELECT games_played, games_completed, games_skipped,
             total_score, total_picks, po_relationship,
-            onboarding_complete, fourth_wall_unlocked, game_records
+            onboarding_complete, fourth_wall_unlocked,
+            pieces_collected, reward_code, game_records
      FROM game_progress WHERE session_id = $1`,
     [sessionId]
   );
@@ -79,6 +82,8 @@ export async function POST() {
     po_relationship: 0,
     onboarding_complete: false,
     fourth_wall_unlocked: false,
+    pieces_collected: 0,
+    reward_code: null,
     game_records: {},
   };
 
@@ -94,6 +99,8 @@ export async function POST() {
       poRelationship: row.po_relationship,
       onboardingComplete: row.onboarding_complete,
       fourthWallUnlocked: row.fourth_wall_unlocked,
+      piecesCollected: row.pieces_collected ?? 0,
+      rewardCode: row.reward_code,
       gameRecords: row.game_records,
     },
   });

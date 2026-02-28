@@ -16,6 +16,7 @@ interface ProgressRow {
   games_completed: number;
   total_picks: number;
   po_relationship: number;
+  pieces_collected: number;
 }
 
 // Reward definitions — will move to config/rewards.json in Phase 2
@@ -33,6 +34,13 @@ const REWARD_TIERS = [
     description: "Completed 3 games without skipping",
     condition: (p: ProgressRow) => p.games_completed >= 3,
     reward: { type: "discount" as const, code: "PO10", percent: 10 },
+  },
+  {
+    id: "forbidden_six",
+    name: "The Forbidden Six",
+    description: "Collected all 6 artifact pieces",
+    condition: (p: ProgressRow) => (p.pieces_collected ?? 0) >= 6,
+    reward: { type: "discount" as const, code: "SIX25", percent: 25 },
   },
   {
     id: "bonded",
@@ -79,7 +87,8 @@ export async function GET() {
     `SELECT
       COALESCE(SUM(games_completed), 0) as games_completed,
       COALESCE(SUM(total_picks), 0) as total_picks,
-      COALESCE(MAX(po_relationship), 0) as po_relationship
+      COALESCE(MAX(po_relationship), 0) as po_relationship,
+      COALESCE(MAX(pieces_collected), 0) as pieces_collected
     FROM game_progress WHERE account_id = $1`,
     [accountId]
   );
