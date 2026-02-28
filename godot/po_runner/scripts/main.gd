@@ -316,9 +316,21 @@ func _on_enemy_defeated(enemy_type: String, pos: Vector2) -> void:
 	for s in _spirits:
 		s["pulse_timer"] = 0.5
 
-	# Boss encounters (scroll-stop enemies) drop artifact pieces
+	# Boss encounters (scroll-stop enemies) — RNG drop with pity counter
 	if _encounter_enemy != null and hud.get_artifact_count() < hud.ARTIFACT_TOTAL:
-		_spawn_artifact_drop(pos)
+		var should_drop := false
+		if _consecutive_misses >= PITY_THRESHOLD:
+			should_drop = true  # Pity drop — guaranteed after 2 consecutive misses
+		else:
+			should_drop = randf() < DROP_CHANCE
+		if should_drop:
+			_consecutive_misses = 0
+			_spawn_artifact_drop(pos)
+		else:
+			_consecutive_misses += 1
+			# Po reacts to the miss
+			var miss_idx = mini(_consecutive_misses - 1, ARTIFACT_MISS_LINES.size() - 1)
+			narrative.show_quick_line(ARTIFACT_MISS_LINES[miss_idx])
 
 func _on_enemy_hit_po(_enemy_type: String) -> void:
 	# Enemy hit is handled by the enemy's body_entered → po.stumble()
@@ -328,9 +340,14 @@ func _on_enemy_hit_po(_enemy_type: String) -> void:
 # ============================================================
 # ARTIFACT SYSTEM — The Forbidden Six
 # ============================================================
-# Boss encounters drop artifact pieces. 6 pieces = morph to platformer.
+# Boss encounters drop artifact pieces with RNG (70% + pity counter).
+# 2 consecutive misses = next drop guaranteed. Player may need more than 6 bosses.
 # Each piece has dramatic VFX: rises from corpse, flies to HUD.
 # Quick dialogue lines play without pausing the game.
+
+const DROP_CHANCE := 0.7            # 70% per boss kill
+const PITY_THRESHOLD := 2           # After 2 misses in a row, guaranteed drop
+var _consecutive_misses := 0
 
 const ARTIFACT_QUICK_LINES := [
 	"Ohhh there it is. The bosses carry these — you just gotta get lucky.",
@@ -339,6 +356,12 @@ const ARTIFACT_QUICK_LINES := [
 	"FOUR. Two more and Shelley's cutting us a deal.",
 	"Five of six. ONE MORE. I can feel the discount from here.",
 	"",  # 6th piece triggers morph — no quick line
+]
+
+# When a boss drops nothing — Po reacts
+const ARTIFACT_MISS_LINES := [
+	"Nothing?! These cats are stingy. Next one though...",
+	"Two duds. The universe owes us. KEEP RUNNING.",
 ]
 
 # Cumulative Po aura colors per piece count

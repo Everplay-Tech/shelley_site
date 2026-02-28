@@ -1,6 +1,7 @@
 extends Node2D
 ## Smart enemy spawner — distance-gated difficulty, weighted random enemy selection.
-## Now includes a BOSS SCHEDULE: 6 guaranteed scroll-stop encounters that drop artifact pieces.
+## BOSS SCHEDULE: 6 initial scroll-stop encounters, then rolling bosses every 300m.
+## Pieces drop with RNG (70%) + pity counter — player may need more than 6 bosses.
 ## Regular enemies still spawn between bosses for challenge.
 ## Prevents spawn conflicts with ObstacleSpawner.
 ## Passes projectile scenes to Spidat for its attack modes.
@@ -30,7 +31,8 @@ var is_paused := false
 var distance_ref := 0.0  # Updated by main.gd each frame
 
 # ---- Boss Schedule (Forbidden Six encounters) ----
-# 6 guaranteed boss encounters at fixed distances. Each drops an artifact piece.
+# 6 initial boss encounters at fixed distances. Drops are RNG (70% + pity in main.gd).
+# After these 6, rolling bosses spawn every 300m until player has all 6 pieces.
 # Boss type: "mantigre", "spidat", "mantigre_v2", "spidat_v2", "duo", "final"
 var _boss_schedule := [
 	{"distance": 400.0, "type": "mantigre", "spawned": false},
@@ -41,6 +43,11 @@ var _boss_schedule := [
 	{"distance": 2100.0, "type": "final", "spawned": false},
 ]
 var _next_boss_idx := 0
+
+# Rolling bosses: after initial schedule, keep spawning every ROLLING_INTERVAL meters
+const ROLLING_BOSS_INTERVAL := 300.0
+var _last_rolling_boss_dist := 0.0
+var _rolling_boss_count := 0
 
 # Buffer distance: suppress regular enemies within N meters of a boss trigger
 const BOSS_SUPPRESS_RANGE := 80.0
@@ -71,21 +78,44 @@ func _process(delta: float) -> void:
 
 func _is_near_boss_trigger() -> bool:
 	## Suppress regular enemies near upcoming boss encounters.
-	if _next_boss_idx >= _boss_schedule.size():
-		return false
-	var boss_dist = _boss_schedule[_next_boss_idx]["distance"]
-	return abs(distance_ref - boss_dist) < BOSS_SUPPRESS_RANGE
+	if _next_boss_idx < _boss_schedule.size():
+		var boss_dist = _boss_schedule[_next_boss_idx]["distance"]
+		return abs(distance_ref - boss_dist) < BOSS_SUPPRESS_RANGE
+	# Rolling boss suppression
+	if _last_rolling_boss_dist > 0.0:
+		var next_rolling = _last_rolling_boss_dist + ROLLING_BOSS_INTERVAL
+		return abs(distance_ref - next_rolling) < BOSS_SUPPRESS_RANGE
+	return false
 
 func _check_boss_schedule() -> void:
-	if _next_boss_idx >= _boss_schedule.size():
+	# Phase 1: Fixed schedule (initial 6 encounters)
+	if _next_boss_idx < _boss_schedule.size():
+		var boss = _boss_schedule[_next_boss_idx]
+		if not boss["spawned"] and distance_ref >= boss["distance"]:
+			boss["spawned"] = true
+			_spawn_boss(boss["type"])
+			_next_boss_idx += 1
 		return
-	var boss = _boss_schedule[_next_boss_idx]
-	if boss["spawned"]:
-		return
-	if distance_ref >= boss["distance"]:
-		boss["spawned"] = true
-		_spawn_boss(boss["type"])
-		_next_boss_idx += 1
+
+	# Phase 2: Rolling bosses — every 300m after schedule exhausted
+	if _last_rolling_boss_dist == 0.0:
+		_last_rolling_boss_dist = _boss_schedule[-1]["distance"]
+	var next_dist = _last_rolling_boss_dist + ROLLING_BOSS_INTERVAL
+	if distance_ref >= next_dist:
+		_last_rolling_boss_dist = next_dist
+		_rolling_boss_count += 1
+		# Alternate Mantigre/Spidat, escalating speed
+		if _rolling_boss_count % 2 == 1:
+			var enemy = _spawn_mantigre()
+			if enemy:
+				enemy.approach_speed = 120.0 + _rolling_boss_count * 5.0
+				add_child(enemy)
+				enemy_spawned.emit(enemy)
+		else:
+			var enemy = _spawn_spidat_confrontation()
+			if enemy:
+				add_child(enemy)
+				enemy_spawned.emit(enemy)
 
 func _spawn_boss(boss_type: String) -> void:
 	## Spawn a guaranteed scroll-stop boss encounter.
