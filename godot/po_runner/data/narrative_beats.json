@@ -81,16 +81,11 @@
     "trigger_area": "amphitheatre",
     "lines": [
       {"speaker": "Po", "text": "Captain? You're HERE?"},
-      {"speaker": "Magus", "text": "Po. You found me. Welcome to the Librarynth."},
-      {"speaker": "Po", "text": "This place is... what IS all this?"},
-      {"speaker": "Magus", "text": "The Xenomyth. Everything I've been building. The Djinn World is part of it."},
-      {"speaker": "Magus", "text": "I lost someone. KOTON. My brother in all of this."},
-      {"speaker": "Po", "text": "..."},
-      {"speaker": "Magus", "text": "We designed something together. The Soul Communicator. A ship that could carry music across worlds."},
-      {"speaker": "Magus", "text": "We never built it. But the luthier path — building guitars, building THIS — it's the same impulse."},
-      {"speaker": "Magus", "text": "Making things that let people speak when words aren't enough."},
-      {"speaker": "Po", "text": "So what do we do now?"},
-      {"speaker": "Magus", "text": "We keep building. Go explore what's out there. I'll be here."}
+      {"speaker": "Magus", "text": "Of course. Where'd you think I'd be?"},
+      {"speaker": "Po", "text": "*stares off blankly....*"},
+      {"speaker": "Magus", "text": "How's mom?"},
+      {"speaker": "Po", "text": "*snaps back* I haven't called her in well over a week."},
+      {"speaker": "Magus", "text": "Well don't just stand there — hand me that diamond coated file behind you."}
     ]
   },
   {
