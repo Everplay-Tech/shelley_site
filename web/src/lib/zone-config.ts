@@ -1,7 +1,28 @@
 // ─── Zone Configuration ─────────────────────────────────────────────────────
-// Single source of truth for zone theming, ambient effects, and Po quotes.
+// Single source of truth for zone theming, ambient effects, Po quotes, and costumes.
 
 export type ZoneId = "workshop" | "gallery" | "librarynth" | "contact";
+
+// ─── Po Costume System ──────────────────────────────────────────────────────
+
+export type PoCostumeId =
+  | "default"
+  | "craftsman"
+  | "artist"
+  | "scholar"
+  | "messenger"
+  | "sleepy"
+  | "glitch";
+
+export const PO_COSTUMES: Record<PoCostumeId, { sheetPath: string; label: string }> = {
+  default:   { sheetPath: "/sprites/po/idle_sheet.png", label: "Po" },
+  craftsman: { sheetPath: "/sprites/po/costumes/craftsman_idle_sheet.png", label: "Craftsman Po" },
+  artist:    { sheetPath: "/sprites/po/costumes/artist_idle_sheet.png", label: "Artist Po" },
+  scholar:   { sheetPath: "/sprites/po/costumes/scholar_idle_sheet.png", label: "Scholar Po" },
+  messenger: { sheetPath: "/sprites/po/costumes/messenger_idle_sheet.png", label: "Messenger Po" },
+  sleepy:    { sheetPath: "/sprites/po/costumes/sleepy_idle_sheet.png", label: "Sleepy Po" },
+  glitch:    { sheetPath: "/sprites/po/costumes/glitch_idle_sheet.png", label: "Glitch Po" },
+};
 
 export interface ZoneConfig {
   id: ZoneId;
@@ -15,6 +36,7 @@ export interface ZoneConfig {
   particleType: "sawdust" | "motes" | "sparkles" | "signals";
   borderColorClass: string;
   poQuotes: string[];
+  poCostume: PoCostumeId;
 }
 
 export const ZONES: Record<ZoneId, ZoneConfig> = {
@@ -35,6 +57,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "See those chisels? Each one sharper than my memory. Which isn't saying much.",
       "The go-bar deck is basically a medieval torture device. For wood.",
     ],
+    poCostume: "craftsman",
   },
   gallery: {
     id: "gallery",
@@ -53,6 +76,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "I tried to play one once. Turns out ghost fingers go through the strings.",
       "Magus says a guitar's soul develops over time. I believe him. I've seen weirder.",
     ],
+    poCostume: "artist",
   },
   librarynth: {
     id: "librarynth",
@@ -71,6 +95,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "Magus keeps his deepest ideas here. I keep my snacks here. Priorities.",
       "The crystals hum a different note depending on who walks past. Mine is apparently B-flat.",
     ],
+    poCostume: "scholar",
   },
   contact: {
     id: "contact",
@@ -89,6 +114,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "Messages go faster when you write them in all caps. That's not true. But it feels true.",
       "Magus checks messages between builds. So basically... constantly.",
     ],
+    poCostume: "messenger",
   },
 };
 

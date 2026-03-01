@@ -18,6 +18,12 @@ const PRECACHE_URLS = [
   "/fonts/press-start-2p.woff2",
   "/sprites/po/idle_sheet.png",
   "/sprites/po/idle_00.png",
+  "/sprites/po/costumes/craftsman_idle_sheet.png",
+  "/sprites/po/costumes/artist_idle_sheet.png",
+  "/sprites/po/costumes/scholar_idle_sheet.png",
+  "/sprites/po/costumes/messenger_idle_sheet.png",
+  "/sprites/po/costumes/sleepy_idle_sheet.png",
+  "/sprites/po/costumes/glitch_idle_sheet.png",
   "/_offline.html",
 ];
 

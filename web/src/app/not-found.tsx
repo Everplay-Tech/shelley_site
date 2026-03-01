@@ -43,7 +43,7 @@ export default function NotFound() {
 
         {/* Po */}
         <div className="flex justify-center mb-10">
-          <PoAside quote={quote} variant="compact" />
+          <PoAside quote={quote} variant="compact" costume="glitch" />
         </div>
 
         {/* Return Home */}

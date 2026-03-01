@@ -1,19 +1,24 @@
 "use client";
 
+import { PO_COSTUMES, type PoCostumeId } from "@/lib/zone-config";
+
 interface PoAsideProps {
   quote: string;
   variant?: "default" | "compact";
+  costume?: PoCostumeId;
   className?: string;
 }
 
 export default function PoAside({
   quote,
   variant = "default",
+  costume = "default",
   className = "",
 }: PoAsideProps) {
   const spriteSize = variant === "compact" ? "w-6 h-6" : "w-8 h-8";
   const bgSize = variant === "compact" ? "72px 18px" : "96px 24px";
   const textSize = variant === "compact" ? "text-[6px]" : "text-[7px]";
+  const sheetPath = PO_COSTUMES[costume].sheetPath;
 
   return (
     <div className={`flex items-start gap-3 ${className}`}>
@@ -21,7 +26,7 @@ export default function PoAside({
       <div
         className={`sprite-anim animate-sprite-idle ${spriteSize} shrink-0`}
         style={{
-          backgroundImage: "url(/sprites/po/idle_sheet.png)",
+          backgroundImage: `url(${sheetPath})`,
           backgroundSize: bgSize,
         }}
         aria-hidden="true"

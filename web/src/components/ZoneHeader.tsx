@@ -47,7 +47,7 @@ export default function ZoneHeader({ zone, className = "" }: ZoneHeaderProps) {
 
         {/* Po aside */}
         <div className="flex justify-center">
-          <PoAside quote={quote} variant="compact" />
+          <PoAside quote={quote} variant="compact" costume={zone.poCostume} />
         </div>
       </div>
     </section>

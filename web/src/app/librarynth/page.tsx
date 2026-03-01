@@ -9,7 +9,7 @@ import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
 import { getGameForRoute } from "@/lib/game-routes";
 import { emitGameEvent } from "@/lib/game-events";
-import { ZONES } from "@/lib/zone-config";
+import { ZONES, PO_COSTUMES } from "@/lib/zone-config";
 import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Creative Universe data ─────────────────────────────────────────────── */
@@ -152,7 +152,7 @@ export default function Librarynth() {
                 <div
                   className="sprite-anim animate-sprite-idle w-8 h-8 shrink-0"
                   style={{
-                    backgroundImage: "url(/sprites/po/idle_sheet.png)",
+                    backgroundImage: `url(${PO_COSTUMES["scholar"].sheetPath})`,
                     backgroundSize: "96px 24px",
                   }}
                 />

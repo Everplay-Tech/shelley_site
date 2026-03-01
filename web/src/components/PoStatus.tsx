@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useGameEvents } from "@/hooks/useGameEvents";
+import { PO_COSTUMES } from "@/lib/zone-config";
 
 interface PoState {
   mood: string;
@@ -51,7 +52,7 @@ const PoStatus: React.FC = () => {
       <div
         className="sprite-anim animate-sprite-idle w-6 h-6 sm:w-8 sm:h-8 shrink-0"
         style={{
-          backgroundImage: 'url(/sprites/po/idle_sheet.png)',
+          backgroundImage: `url(${PO_COSTUMES["default"].sheetPath})`,
           backgroundSize: '96px 24px',
         }}
       />

@@ -11,6 +11,7 @@ const MiniGameTransition = dynamic(
   { ssr: false }
 );
 import { TransitionProvider } from "@/components/TransitionContext";
+import { PO_COSTUMES } from "@/lib/zone-config";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -135,7 +136,7 @@ export default function RootLayout({
               <div
                 className="sprite-anim animate-sprite-idle w-8 h-8 sm:w-10 sm:h-10 shrink-0"
                 style={{
-                  backgroundImage: 'url(/sprites/po/idle_sheet.png)',
+                  backgroundImage: `url(${PO_COSTUMES["sleepy"].sheetPath})`,
                   backgroundSize: '128px 32px',
                 }}
                 aria-hidden="true"

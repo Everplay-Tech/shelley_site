@@ -31,6 +31,7 @@ export default function ErrorPage({ reset }: ErrorPageProps) {
           <PoAside
             quote="That wasn't supposed to happen. Blame the gremlins."
             variant="compact"
+            costume="glitch"
           />
         </div>
 
