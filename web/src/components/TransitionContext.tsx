@@ -10,6 +10,8 @@ interface TransitionContextValue {
   pendingUrl: string | null;
   /** The game config for the current transition (null = no game, just navigate) */
   activeGame: RouteGameConfig | null;
+  /** True when transitioning without a game (quick wipe overlay) */
+  quickTransit: boolean;
   complete: () => void;
 }
 
@@ -25,12 +27,13 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [activeGame, setActiveGame] = useState<RouteGameConfig | null>(null);
+  const [quickTransit, setQuickTransit] = useState(false);
 
   const navigate = useCallback((url: string) => {
-    setIsActive(false);
-    setPendingUrl(null);
-    setActiveGame(null);
-    window.location.href = url;
+    // Brief hold keeps overlay black, prevents white flash during hard reload
+    setTimeout(() => {
+      window.location.href = url;
+    }, 200);
   }, []);
 
   const startTransition = useCallback((url: string) => {
@@ -40,8 +43,10 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       setActiveGame(game);
       setIsActive(true);
     } else {
-      // No game for this route — navigate directly
-      window.location.href = url;
+      // No game — show quick wipe overlay then navigate
+      setPendingUrl(url);
+      setQuickTransit(true);
+      setIsActive(true);
     }
   }, []);
 
@@ -52,6 +57,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       setIsActive(false);
       setPendingUrl(null);
       setActiveGame(null);
+      setQuickTransit(false);
     }
   }, [pendingUrl, navigate]);
 
@@ -62,7 +68,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   }, [pendingUrl, navigate]);
 
   return (
-    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, complete }}>
+    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, quickTransit, complete }}>
       {children}
     </TransitionContext.Provider>
   );

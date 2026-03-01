@@ -98,7 +98,8 @@ export default function RootLayout({
               <PoStatus />
             </div>
           </header>
-          <main id="main-content" className="pt-20 min-h-screen relative z-[1]">
+          <div className="crt-boot-line" aria-hidden="true" />
+          <main id="main-content" className="crt-boot pt-20 min-h-screen relative z-[1]">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
               {children}
             </div>

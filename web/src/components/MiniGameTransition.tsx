@@ -8,7 +8,7 @@ import type { GodotEvent } from "@/lib/godot-messages";
 import { emitGameEvent } from "@/lib/game-events";
 
 const MiniGameTransition: React.FC = () => {
-  const { isActive, activeGame, skip, complete } = useTransition();
+  const { isActive, activeGame, quickTransit, pendingUrl, skip, complete } = useTransition();
 
   const handleGodotEvent = useCallback(
     (event: GodotEvent) => {
@@ -48,10 +48,32 @@ const MiniGameTransition: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isActive, handleSkip]);
 
-  if (!isActive || !activeGame) return null;
+  // Auto-navigate after quick transit wipe animation
+  useEffect(() => {
+    if (!quickTransit || !pendingUrl) return;
+    const timer = setTimeout(() => {
+      skip();
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [quickTransit, pendingUrl, skip]);
+
+  if (!isActive) return null;
+
+  // Quick transit — wipe overlay with no game
+  if (quickTransit) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black transition-wipe-in flex items-center justify-center" aria-hidden="true">
+        <div className="transition-scanline-edge" aria-hidden="true" />
+        <p className="font-pixel text-[8px] text-white/30 tracking-widest">TRAVELING...</p>
+      </div>
+    );
+  }
+
+  if (!activeGame) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center" role="dialog" aria-label="Game transition" aria-modal="true">
+    <div className="fixed inset-0 z-50 bg-black transition-wipe-in flex flex-col items-center justify-center" role="dialog" aria-label="Game transition" aria-modal="true">
+      <div className="transition-scanline-edge" aria-hidden="true" />
       <div className="w-full max-w-4xl px-4">
         <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
         <div className="mt-4 flex justify-between items-center">
