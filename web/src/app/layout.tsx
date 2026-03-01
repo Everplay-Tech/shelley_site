@@ -15,9 +15,43 @@ const pixelFont = localFont({
   display: "swap",
 });
 
+const SITE_URL = "https://www.shelleyguitar.com";
+
 export const metadata: Metadata = {
-  title: "Shelley Guitars | Luthier Craft & Adventure",
-  description: "Boutique guitar building with Po the mascot.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Shelley Guitar | Handcrafted Instruments & Creative Universe",
+    template: "%s | Shelley Guitar",
+  },
+  description:
+    "Boutique handcrafted guitars built with intention. Explore the workshop, gallery, and creative universe of Shelley Guitar — where luthier craft meets pixel-art adventure.",
+  keywords: [
+    "handmade guitars",
+    "luthier",
+    "custom guitars",
+    "shelley guitar",
+    "boutique guitars",
+    "acoustic guitar builder",
+    "handcrafted instruments",
+  ],
+  authors: [{ name: "Shelley Guitar" }],
+  creator: "Shelley Guitar",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: "Shelley Guitar",
+    title: "Shelley Guitar | Handcrafted Instruments & Creative Universe",
+    description:
+      "Boutique handcrafted guitars built with intention. Luthier craft meets pixel-art adventure.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shelley Guitar",
+    description:
+      "Boutique handcrafted guitars built with intention. Luthier craft meets pixel-art adventure.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -28,6 +62,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} ${pixelFont.variable}`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Shelley Guitar",
+              url: SITE_URL,
+              description:
+                "Boutique handcrafted guitars built with intention.",
+              sameAs: ["https://www.instagram.com/shelleyguitars/"],
+            }),
+          }}
+        />
         <TransitionProvider>
           <MiniGameTransition />
           <header className="fixed top-0 left-0 right-0 z-40 pixel-panel dither-border-bottom px-6 py-3">
