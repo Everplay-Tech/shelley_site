@@ -183,7 +183,7 @@ export default function Home() {
           {/* Game iframe */}
           <div className="absolute inset-0">
             <GodotEmbed
-              ref={embedRef}
+              innerRef={embedRef}
               gameName={gameConfig.gameName}
               onEvent={handleGodotEvent}
               fullScreen

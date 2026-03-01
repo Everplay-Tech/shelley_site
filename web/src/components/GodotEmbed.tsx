@@ -14,16 +14,18 @@ interface GodotEmbedProps {
   className?: string;
   /** When true, fills the parent container instead of using aspect-video */
   fullScreen?: boolean;
+  /** Ref bypass for next/dynamic which doesn't forward refs */
+  innerRef?: React.Ref<GodotEmbedHandle>;
 }
 
 const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
-  function GodotEmbed({ gameName, onEvent, className, fullScreen }, ref) {
+  function GodotEmbed({ gameName, onEvent, className, fullScreen, innerRef }, ref) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const { iframeRef, sendCommand } = useGodotBridge({ onEvent });
 
-    useImperativeHandle(ref, () => ({ sendCommand }), [sendCommand]);
+    useImperativeHandle(innerRef || ref, () => ({ sendCommand }), [sendCommand]);
 
     return (
       <div
