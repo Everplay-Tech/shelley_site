@@ -78,6 +78,26 @@ const nextConfig = {
           },
         ],
       },
+      // Service worker: never cache (browser must always check for updates)
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+      // Offline fallback: always fresh
+      {
+        source: "/_offline.html",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache",
+          },
+        ],
+      },
     ];
   },
 };

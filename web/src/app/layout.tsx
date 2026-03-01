@@ -82,6 +82,20 @@ export default function RootLayout({
             }),
           }}
         />
+        {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ("serviceWorker" in navigator) {
+                window.addEventListener("load", function() {
+                  navigator.serviceWorker.register("/sw.js", { scope: "/" })
+                    .then(function(reg) { reg.update(); })
+                    .catch(function() {});
+                });
+              }
+            `,
+          }}
+        />
         <TransitionProvider>
           <a href="#main-content" className="skip-link">
             Skip to content
