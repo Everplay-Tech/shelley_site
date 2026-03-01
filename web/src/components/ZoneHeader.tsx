@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { ZoneConfig } from "@/lib/zone-config";
 import AmbientParticles from "./AmbientParticles";
 import PoAside from "./PoAside";
@@ -11,10 +11,11 @@ interface ZoneHeaderProps {
 }
 
 export default function ZoneHeader({ zone, className = "" }: ZoneHeaderProps) {
-  // Pick a random Po quote — stable for the page session
-  const quote = useMemo(() => {
+  // Pick a random Po quote — deterministic default for SSR, randomized on mount
+  const [quote, setQuote] = useState(zone.poQuotes[0]);
+  useEffect(() => {
     const idx = Math.floor(Math.random() * zone.poQuotes.length);
-    return zone.poQuotes[idx];
+    setQuote(zone.poQuotes[idx]);
   }, [zone.poQuotes]);
 
   return (

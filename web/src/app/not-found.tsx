@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import AmbientParticles from "@/components/AmbientParticles";
 import PoAside from "@/components/PoAside";
@@ -20,9 +20,10 @@ const ZONES = [
 ];
 
 export default function NotFound() {
-  const quote = useMemo(() => {
+  const [quote, setQuote] = useState(LOST_QUOTES[0]);
+  useEffect(() => {
     const idx = Math.floor(Math.random() * LOST_QUOTES.length);
-    return LOST_QUOTES[idx];
+    setQuote(LOST_QUOTES[idx]);
   }, []);
 
   return (

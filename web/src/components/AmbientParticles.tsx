@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 
 export type ParticleType = "sawdust" | "motes" | "sparkles" | "signals";
 
@@ -22,15 +22,20 @@ export default function AmbientParticles({
   count = 10,
   className = "",
 }: AmbientParticlesProps) {
-  const particles = useMemo(() => {
+  const [particles, setParticles] = useState<
+    Array<{ id: number; left: string; top?: string; animationDelay: string; animationDuration: string }>
+  >([]);
+  useEffect(() => {
     const base = BASE_DURATIONS[type];
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: type === "sparkles" ? `${Math.random() * 80 + 10}%` : undefined,
-      animationDelay: `${Math.random() * base}s`,
-      animationDuration: `${base + Math.random() * base * 0.6}s`,
-    }));
+    setParticles(
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        top: type === "sparkles" ? `${Math.random() * 80 + 10}%` : undefined,
+        animationDelay: `${Math.random() * base}s`,
+        animationDuration: `${base + Math.random() * base * 0.6}s`,
+      }))
+    );
   }, [count, type]);
 
   return (
