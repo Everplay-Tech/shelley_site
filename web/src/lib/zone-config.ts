@@ -20,7 +20,7 @@ export interface ZoneConfig {
 export const ZONES: Record<ZoneId, ZoneConfig> = {
   workshop: {
     id: "workshop",
-    name: "THE FORGE",
+    name: "THE WORKSHOP",
     subtitle: "Workshop",
     tagline: "Where wood meets steel and passion becomes music.",
     accentColor: "text-shelley-amber",
@@ -38,7 +38,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
   },
   gallery: {
     id: "gallery",
-    name: "THE SHOWCASE",
+    name: "THE GALLERY",
     subtitle: "Gallery",
     tagline: "Handcrafted instruments and the stories they carry.",
     accentColor: "text-shelley-djinn-purple",
@@ -56,7 +56,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
   },
   librarynth: {
     id: "librarynth",
-    name: "THE CRYSTAL ARCHIVE",
+    name: "THE LIBRARYNTH",
     subtitle: "Library + Labyrinth",
     tagline: "Study space meets creative labyrinth. Everything Shelley, all in one place.",
     accentColor: "text-shelley-spirit-blue",
@@ -74,7 +74,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
   },
   contact: {
     id: "contact",
-    name: "THE SIGNAL TOWER",
+    name: "GET IN TOUCH",
     subtitle: "Contact",
     tagline: "Drop a signal. We're always listening.",
     accentColor: "text-shelley-spirit-green",
