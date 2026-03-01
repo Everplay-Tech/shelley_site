@@ -108,69 +108,81 @@ export default function Contact() {
         {/* ─── CONTACT FORM ─── */}
         <div className="zone-contact transmission-console">
           <PixelCard hover={false}>
-            {formState === "success" ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <h3 className="font-pixel text-xs text-shelley-spirit-green crt-glow-green mb-2 tracking-wider">
-                  SIGNAL RECEIVED &#10003;
-                </h3>
-                <p className="text-white/45 text-sm max-w-xs">
-                  We got it. We&apos;ll get back to you soon. In the meantime,
-                  check out the workshop or play some more.
-                </p>
-                <button
-                  onClick={() => setFormState("idle")}
-                  className="pixel-btn-ghost mt-6"
-                >
-                  TRANSMIT AGAIN
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <div role="status" aria-live="polite">
+              {formState === "success" && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <h3 className="font-pixel text-xs text-shelley-spirit-green crt-glow-green mb-2 tracking-wider">
+                    SIGNAL RECEIVED &#10003;
+                  </h3>
+                  <p className="text-white/45 text-sm max-w-xs">
+                    We got it. We&apos;ll get back to you soon. In the meantime,
+                    check out the workshop or play some more.
+                  </p>
+                  <button
+                    onClick={() => setFormState("idle")}
+                    className="pixel-btn-ghost mt-6"
+                  >
+                    TRANSMIT AGAIN
+                  </button>
+                </div>
+              )}
+            </div>
+            {formState !== "success" && (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
                 <h3 className="font-pixel text-[10px] text-shelley-spirit-green/70 tracking-wider">
                   TRANSMIT SIGNAL
                 </h3>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
+                  <label htmlFor="contact-name" className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
                     NAME
                   </label>
                   <input
+                    id="contact-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
                     className="pixel-input"
+                    aria-required="true"
+                    aria-describedby={formState === "error" ? "form-error" : undefined}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
+                  <label htmlFor="contact-email" className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
                     EMAIL
                   </label>
                   <input
+                    id="contact-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     className="pixel-input"
+                    aria-required="true"
+                    aria-describedby={formState === "error" ? "form-error" : undefined}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
+                  <label htmlFor="contact-message" className="font-pixel text-[7px] text-shelley-spirit-green/30 tracking-wider">
                     MESSAGE
                   </label>
                   <textarea
+                    id="contact-message"
                     rows={5}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="What's on your mind?"
                     className="pixel-input resize-none"
+                    aria-required="true"
+                    aria-describedby={formState === "error" ? "form-error" : undefined}
                   />
                 </div>
 
                 {formState === "error" && errorMsg && (
-                  <p className="font-pixel text-[7px] text-red-400 tracking-wider">
+                  <p id="form-error" role="alert" className="font-pixel text-[7px] text-red-400 tracking-wider">
                     {errorMsg}
                   </p>
                 )}
@@ -178,6 +190,7 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={formState === "sending" || cooldown}
+                  aria-disabled={formState === "sending" || cooldown}
                   className="pixel-btn-green mt-2 disabled:opacity-40 disabled:cursor-not-allowed text-center"
                 >
                   {formState === "sending"
@@ -202,6 +215,7 @@ export default function Contact() {
             href="https://www.instagram.com/shelleyguitars/"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Follow @shelleyguitars on Instagram"
             className="flex items-center gap-4 pixel-panel p-4 hover:border-pink-500/30 transition-colors group"
           >
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 flex items-center justify-center shrink-0">

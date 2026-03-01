@@ -492,3 +492,120 @@ body::after {
     0 0 0 0 rgba(0, 0, 0, 0.8),
     inset 2px 2px 0 0 rgba(0, 0, 0, 0.2);
 }
+
+/* ══════════════════════════════════════
+   ACCESSIBILITY
+   ══════════════════════════════════════ */
+
+/* ─── SKIP-TO-CONTENT ─── */
+
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 8px 16px;
+  background: #ffbf00;
+  color: #1a1a1a;
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  border: 2px solid #1a1a1a;
+  box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.8);
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ─── FOCUS-VISIBLE ─── */
+
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #ffbf00;
+  outline-offset: 2px;
+}
+
+.pixel-btn:focus-visible,
+.pixel-btn-ghost:focus-visible,
+.pixel-btn-green:focus-visible {
+  outline: 2px solid #ffbf00;
+  outline-offset: 4px;
+  box-shadow:
+    4px 4px 0 0 rgba(0, 0, 0, 0.8),
+    inset 2px 2px 0 0 rgba(255, 255, 255, 0.2),
+    0 0 0 4px rgba(255, 191, 0, 0.15);
+}
+
+.pixel-input:focus-visible {
+  outline: none;
+  border-color: rgba(255, 191, 0, 0.5);
+  box-shadow:
+    inset 2px 2px 0 0 rgba(0, 0, 0, 0.3),
+    0 0 0 2px rgba(255, 191, 0, 0.15);
+}
+
+a:focus-visible {
+  outline: 2px solid #ffbf00;
+  outline-offset: 2px;
+}
+
+/* ─── REDUCED MOTION ─── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse,
+  .animate-bounce-in,
+  .animate-sprite-idle,
+  .badge-pulse,
+  .zone-particle,
+  .zone-particle-sawdust,
+  .zone-particle-motes,
+  .zone-particle-sparkles,
+  .zone-particle-signals {
+    animation: none !important;
+  }
+
+  .sprite-anim.animate-sprite-idle {
+    background-position: 0 0 !important;
+  }
+
+  .pixel-btn,
+  .pixel-btn-ghost,
+  .pixel-btn-green,
+  .exhibition-frame {
+    transition: none !important;
+  }
+
+  body::after {
+    display: none;
+  }
+}
+
+/* ─── SCREEN READER ONLY ─── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

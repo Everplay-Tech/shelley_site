@@ -77,6 +77,9 @@ export default function RootLayout({
           }}
         />
         <TransitionProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to content
+          </a>
           <MiniGameTransition />
           <header className="fixed top-0 left-0 right-0 z-40 pixel-panel dither-border-bottom px-6 py-3">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -89,7 +92,7 @@ export default function RootLayout({
               <PoStatus />
             </div>
           </header>
-          <main className="pt-20 min-h-screen relative z-[1]">
+          <main id="main-content" className="pt-20 min-h-screen relative z-[1]">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
               {children}
             </div>
@@ -114,7 +117,8 @@ export default function RootLayout({
                   backgroundImage: 'url(/sprites/po/idle_sheet.png)',
                   backgroundSize: '128px 32px',
                 }}
-                aria-label="Po the ghost mascot"
+                aria-hidden="true"
+                role="presentation"
               />
             </div>
           </footer>

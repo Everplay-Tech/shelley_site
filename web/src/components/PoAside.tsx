@@ -24,6 +24,8 @@ export default function PoAside({
           backgroundImage: "url(/sprites/po/idle_sheet.png)",
           backgroundSize: bgSize,
         }}
+        aria-hidden="true"
+        role="presentation"
       />
       {/* Speech bubble */}
       <div className="po-speech-bubble pixel-panel-inset px-3 py-2 max-w-md">

@@ -124,12 +124,12 @@ export default function GameBoyControls({
   const dpadActive = `${dpadBtnBase} pointer-events-auto active:bg-white/10 rounded transition-colors text-white/50`;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[103] pointer-events-none pb-4 px-4 sm:pb-6 sm:px-6">
+    <div className="fixed inset-x-0 bottom-0 z-[103] pointer-events-none pb-4 px-4 sm:pb-6 sm:px-6" role="toolbar" aria-label="Game controls">
       <div className="flex items-end justify-between max-w-lg mx-auto">
         {/* ─── D-PAD ─── */}
-        <div className="relative w-[112px] h-[112px]">
+        <div className="relative w-[112px] h-[112px]" role="group" aria-label="Directional pad">
           {/* Cross shape background */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
             <div className="absolute w-[38px] h-[104px] bg-[#1a1a1a]/70 rounded-[4px]" />
             <div className="absolute w-[104px] h-[38px] bg-[#1a1a1a]/70 rounded-[4px]" />
           </div>
@@ -137,66 +137,72 @@ export default function GameBoyControls({
           {/* Up — visual only */}
           <div
             className={`absolute top-[4px] left-1/2 -translate-x-1/2 w-[38px] h-[33px] ${dpadInert}`}
+            aria-hidden="true"
           >
             <span className="text-sm font-bold">▲</span>
           </div>
 
           {/* Left — FUNCTIONAL (move left) */}
           <button
+            aria-label="Move left"
             onTouchStart={onDpadLeftStart}
             onTouchEnd={onDpadLeftEnd}
             onTouchCancel={onDpadLeftEnd}
             className={`absolute top-1/2 left-[4px] -translate-y-1/2 w-[33px] h-[38px] ${dpadActive}`}
           >
-            <span className="text-sm font-bold">◀</span>
+            <span className="text-sm font-bold" aria-hidden="true">◀</span>
           </button>
 
           {/* Right — FUNCTIONAL (move right) */}
           <button
+            aria-label="Move right"
             onTouchStart={onDpadRightStart}
             onTouchEnd={onDpadRightEnd}
             onTouchCancel={onDpadRightEnd}
             className={`absolute top-1/2 right-[4px] -translate-y-1/2 w-[33px] h-[38px] ${dpadActive}`}
           >
-            <span className="text-sm font-bold">▶</span>
+            <span className="text-sm font-bold" aria-hidden="true">▶</span>
           </button>
 
           {/* Down — FUNCTIONAL (slide) */}
           <button
+            aria-label="Slide"
             onTouchStart={onDpadDownStart}
             onTouchEnd={onDpadDownEnd}
             onTouchCancel={onDpadDownEnd}
             className={`absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[38px] h-[33px] ${dpadActive}`}
           >
-            <span className="text-sm font-bold">▼</span>
+            <span className="text-sm font-bold" aria-hidden="true">▼</span>
           </button>
 
           {/* Center dot */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[6px] h-[6px] rounded-full bg-white/8 pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[6px] h-[6px] rounded-full bg-white/8 pointer-events-none" aria-hidden="true" />
         </div>
 
         {/* ─── A / B / C BUTTONS ─── */}
-        <div className={`relative ${isNgPlus ? "w-[140px] h-[120px]" : "w-[120px] h-[100px]"}`}>
+        <div className={`relative ${isNgPlus ? "w-[140px] h-[120px]" : "w-[120px] h-[100px]"}`} role="group" aria-label="Action buttons">
           {/* B button — top-left (slide) */}
           <button
+            aria-label="Slide"
             onTouchStart={onBStart}
             onTouchEnd={onBEnd}
             onTouchCancel={onBEnd}
             className="pointer-events-auto absolute top-0 left-0 w-[52px] h-[52px] rounded-full bg-[#2C2C2C]/80 border-2 border-white/15 flex items-center justify-center active:bg-[#3a3a3a] active:border-white/30 active:scale-95 transition-all select-none touch-none"
           >
-            <span className="text-white/40 text-base font-bold leading-none">
+            <span className="text-white/40 text-base font-bold leading-none" aria-hidden="true">
               B
             </span>
           </button>
 
           {/* A button — bottom-right (jump / advance) */}
           <button
+            aria-label={isNarrative ? "Jump and advance dialogue" : "Jump"}
             onTouchStart={onAStart}
             onTouchEnd={onAEnd}
             onTouchCancel={onAEnd}
             className={`pointer-events-auto absolute ${isNgPlus ? "bottom-0 right-[44px]" : "bottom-0 right-0"} w-[52px] h-[52px] rounded-full bg-[#2C2C2C]/80 border-2 border-shelley-amber/30 flex items-center justify-center active:bg-[#3a3a3a] active:border-shelley-amber/60 active:scale-95 transition-all select-none touch-none`}
           >
-            <span className="text-shelley-amber text-base font-bold leading-none">
+            <span className="text-shelley-amber text-base font-bold leading-none" aria-hidden="true">
               A
             </span>
           </button>
@@ -204,12 +210,13 @@ export default function GameBoyControls({
           {/* C button — NG+ attack (top-right, purple accent) */}
           {isNgPlus && (
             <button
+              aria-label="Attack"
               onTouchStart={onCStart}
               onTouchEnd={onCEnd}
               onTouchCancel={onCEnd}
               className="pointer-events-auto absolute top-0 right-0 w-[48px] h-[48px] rounded-full bg-[#2C2C2C]/80 border-2 border-purple-400/30 flex items-center justify-center active:bg-[#3a3a3a] active:border-purple-400/60 active:scale-95 transition-all select-none touch-none"
             >
-              <span className="text-purple-400 text-sm font-bold leading-none">
+              <span className="text-purple-400 text-sm font-bold leading-none" aria-hidden="true">
                 C
               </span>
             </button>

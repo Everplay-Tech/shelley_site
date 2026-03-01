@@ -27,10 +27,12 @@ const Navigation: React.FC = () => {
 
   return (
     <nav
+      aria-label="Main navigation"
       className={clsx(
         "flex gap-1 sm:gap-2 items-center transition-opacity",
         isActive && "pointer-events-none opacity-50"
       )}
+      {...(isActive ? { "aria-disabled": "true" } : {})}
     >
       {navItems.map((item) => {
         const hasGame = getGameForRoute(item.href) !== null;
@@ -40,6 +42,7 @@ const Navigation: React.FC = () => {
             key={item.href}
             href={item.href}
             onClick={(e) => handleClick(e, item.href)}
+            aria-current={isCurrentPage ? "page" : undefined}
             className={clsx(
               "relative font-pixel text-[7px] sm:text-[8px] tracking-wider px-2 sm:px-3 py-1.5 sm:py-2 transition-all",
               isCurrentPage
@@ -48,9 +51,10 @@ const Navigation: React.FC = () => {
             )}
           >
             <span className="hidden sm:inline">{item.name.toUpperCase()}</span>
-            <span className="sm:hidden">{item.icon}</span>
+            <span className="sm:hidden" aria-hidden="true">{item.icon}</span>
+            <span className="sr-only sm:hidden">{item.name}</span>
             {hasGame && (
-              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-shelley-amber/60" />
+              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-shelley-amber/60" aria-hidden="true" />
             )}
           </Link>
         );

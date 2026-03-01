@@ -32,7 +32,7 @@ const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
         } ${className ?? ""}`}
       >
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10" role="status" aria-label="Loading game">
             <div className="flex flex-col items-center gap-3">
               <span className="font-pixel text-[9px] text-shelley-amber animate-pulse crt-glow tracking-wider">
                 LOADING
@@ -51,7 +51,7 @@ const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
         )}
 
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-shelley-charcoal z-10" role="alert">
             <div className="text-center px-4">
               <p className="font-pixel text-[8px] text-red-400 tracking-wider mb-2">
                 {error.toUpperCase()}
@@ -66,7 +66,7 @@ const GodotEmbed = forwardRef<GodotEmbedHandle, GodotEmbedProps>(
         <iframe
           ref={iframeRef}
           src={`/games/${gameName}/index.html`}
-          title={`${gameName} game`}
+          title={`${gameName.replace(/_/g, " ")} — interactive game`}
           className="w-full h-full border-none relative z-0"
           onLoad={() => setIsLoading(false)}
           onError={() => {

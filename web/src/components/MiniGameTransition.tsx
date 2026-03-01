@@ -51,14 +51,14 @@ const MiniGameTransition: React.FC = () => {
   if (!isActive || !activeGame) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center" role="dialog" aria-label="Game transition" aria-modal="true">
       <div className="w-full max-w-4xl px-4">
         <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
         <div className="mt-4 flex justify-between items-center">
           <p className="font-pixel text-[7px] text-white/40 tracking-wider">
             {activeGame.label?.toUpperCase() ?? "LOADING..."}
           </p>
-          <button onClick={handleSkip} className="pixel-btn-ghost">
+          <button onClick={handleSkip} className="pixel-btn-ghost" aria-label="Skip game and continue to page (Escape)">
             SKIP (ESC)
           </button>
         </div>
