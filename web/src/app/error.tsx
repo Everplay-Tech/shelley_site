@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import AmbientParticles from "@/components/AmbientParticles";
-import PoAside from "@/components/PoAside";
+import PoCodec from "@/components/PoCodec";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -28,7 +28,7 @@ export default function ErrorPage({ reset }: ErrorPageProps) {
 
         {/* Po */}
         <div className="flex justify-center mb-10">
-          <PoAside
+          <PoCodec
             quote="That wasn't supposed to happen. Blame the gremlins."
             variant="compact"
             costume="glitch"

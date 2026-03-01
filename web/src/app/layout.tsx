@@ -3,15 +3,21 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import Navigation from "@/components/Navigation";
-import PoStatus from "@/components/PoStatus";
 import dynamic from "next/dynamic";
 
 const MiniGameTransition = dynamic(
   () => import("@/components/MiniGameTransition"),
   { ssr: false }
 );
+const PoMascot = dynamic(
+  () => import("@/components/PoMascot"),
+  { ssr: false }
+);
+const FooterScene = dynamic(
+  () => import("@/components/FooterScene"),
+  { ssr: false }
+);
 import { TransitionProvider } from "@/components/TransitionContext";
-import { PO_COSTUMES } from "@/lib/zone-config";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -110,7 +116,7 @@ export default function RootLayout({
                 </h1>
                 <Navigation />
               </div>
-              <PoStatus />
+              <PoMascot />
             </div>
           </header>
           <div className="crt-boot-line" aria-hidden="true" />
@@ -119,29 +125,9 @@ export default function RootLayout({
               {children}
             </div>
           </main>
-          <footer className="pixel-panel dither-border-top px-6 py-5 relative z-[1]">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <span className="font-pixel text-[7px] text-white/25 tracking-wider">
-                &copy; 2026 SHELLEY GUITARS
-              </span>
-              <div className="hidden sm:flex items-center gap-4">
-                <span className="font-pixel text-[7px] text-white/15">
-                  BUILT BY HAND
-                </span>
-                <span className="font-pixel text-[7px] text-shelley-amber/30">
-                  PLAYED WITH HEART
-                </span>
-              </div>
-              {/* Po idle sprite */}
-              <div
-                className="sprite-anim animate-sprite-idle w-8 h-8 sm:w-10 sm:h-10 shrink-0"
-                style={{
-                  backgroundImage: `url(${PO_COSTUMES["sleepy"].sheetPath})`,
-                  backgroundSize: '128px 32px',
-                }}
-                aria-hidden="true"
-                role="presentation"
-              />
+          <footer className="pixel-panel dither-border-top relative z-[1]">
+            <div className="max-w-7xl mx-auto">
+              <FooterScene />
             </div>
           </footer>
         </TransitionProvider>

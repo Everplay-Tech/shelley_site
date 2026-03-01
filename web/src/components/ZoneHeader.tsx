@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import type { ZoneConfig } from "@/lib/zone-config";
 import AmbientParticles from "./AmbientParticles";
-import PoAside from "./PoAside";
+import PoCodec from "./PoCodec";
 
 interface ZoneHeaderProps {
   zone: ZoneConfig;
@@ -46,9 +46,9 @@ export default function ZoneHeader({ zone, className = "" }: ZoneHeaderProps) {
           {zone.tagline}
         </p>
 
-        {/* Po aside */}
+        {/* Po codec dialogue */}
         <div className="flex justify-center">
-          <PoAside quote={quote} variant="compact" costume={zone.poCostume} />
+          <PoCodec quote={quote} variant="compact" costume={zone.poCostume} />
         </div>
       </div>
     </section>

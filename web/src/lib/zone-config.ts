@@ -12,16 +12,47 @@ export type PoCostumeId =
   | "scholar"
   | "messenger"
   | "sleepy"
-  | "glitch";
+  | "glitch"
+  | "moped";
 
-export const PO_COSTUMES: Record<PoCostumeId, { sheetPath: string; label: string }> = {
-  default:   { sheetPath: "/sprites/po/idle_sheet.png", label: "Po" },
+export interface PoAnimationSheet {
+  id: string;
+  sheetPath: string;
+  frames: number;
+  frameWidth: number;
+  frameHeight: number;
+  fps?: number; // Target playback fps (default: 2.5 for legacy 4-frame sheets, 24 for interpolated)
+}
+
+export interface PoCostumeConfig {
+  sheetPath: string;                // primary sheet (backward compat for PoStatus/PoAside)
+  label: string;
+  sheets?: PoAnimationSheet[];      // multi-animation variants (PoCodec picks randomly)
+  portrait?: string;                // static portrait for codec dialogue
+}
+
+export const PO_COSTUMES: Record<PoCostumeId, PoCostumeConfig> = {
+  default: {
+    sheetPath: "/sprites/po/idle_24f_sheet.png",
+    label: "Po",
+    sheets: [
+      { id: "idle-24", sheetPath: "/sprites/po/idle_24f_sheet.png", frames: 24, frameWidth: 128, frameHeight: 128, fps: 24 },
+    ],
+    portrait: "/sprites/po/idle_00.png",
+  },
   craftsman: { sheetPath: "/sprites/po/costumes/craftsman_idle_sheet.png", label: "Craftsman Po" },
-  artist:    { sheetPath: "/sprites/po/costumes/artist_idle_sheet.png", label: "Artist Po" },
-  scholar:   { sheetPath: "/sprites/po/costumes/scholar_idle_sheet.png", label: "Scholar Po" },
+  artist:    { sheetPath: "/sprites/po/costumes/artist_idle_sheet.png",    label: "Artist Po" },
+  scholar:   { sheetPath: "/sprites/po/costumes/scholar_idle_sheet.png",   label: "Scholar Po" },
   messenger: { sheetPath: "/sprites/po/costumes/messenger_idle_sheet.png", label: "Messenger Po" },
-  sleepy:    { sheetPath: "/sprites/po/costumes/sleepy_idle_sheet.png", label: "Sleepy Po" },
-  glitch:    { sheetPath: "/sprites/po/costumes/glitch_idle_sheet.png", label: "Glitch Po" },
+  sleepy:    { sheetPath: "/sprites/po/costumes/sleepy_idle_sheet.png",    label: "Sleepy Po" },
+  glitch:    { sheetPath: "/sprites/po/costumes/glitch_idle_sheet.png",    label: "Glitch Po" },
+  moped: {
+    sheetPath: "/sprites/po/moped_ride_14f_sheet.png",
+    label: "Moped Po",
+    sheets: [
+      { id: "ride", sheetPath: "/sprites/po/moped_ride_14f_sheet.png", frames: 14, frameWidth: 48, frameHeight: 48, fps: 14 },
+    ],
+  },
 };
 
 export interface ZoneConfig {

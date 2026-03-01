@@ -31,14 +31,24 @@ const config: Config = {
       },
       animation: {
         'sprite-idle': 'sprite-idle 1.6s steps(4) infinite',
+        'sprite-idle-8': 'sprite-idle-8 3.2s steps(8) infinite',
         'blink-cursor': 'blink-cursor 1s steps(1) infinite',
         'float': 'float 3s ease-in-out infinite',
         'badge-pulse': 'badge-pulse 2s ease-in-out infinite',
+        'codec-scanline': 'codec-scanline 4s linear infinite',
       },
       keyframes: {
         'sprite-idle': {
           '0%': { backgroundPosition: '0 0' },
           '100%': { backgroundPosition: '-256px 0' },
+        },
+        'sprite-idle-8': {
+          '0%': { backgroundPosition: '0 0' },
+          '100%': { backgroundPosition: '-512px 0' },
+        },
+        'codec-scanline': {
+          '0%': { backgroundPosition: '0 0' },
+          '100%': { backgroundPosition: '0 8px' },
         },
         'blink-cursor': {
           '0%, 50%': { opacity: '1' },

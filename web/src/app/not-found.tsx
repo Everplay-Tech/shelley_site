@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import AmbientParticles from "@/components/AmbientParticles";
-import PoAside from "@/components/PoAside";
+import PoCodec from "@/components/PoCodec";
 
 const LOST_QUOTES = [
   "This doesn't look like any zone I've visited... and my memory's already bad enough.",
@@ -44,7 +44,7 @@ export default function NotFound() {
 
         {/* Po */}
         <div className="flex justify-center mb-10">
-          <PoAside quote={quote} variant="compact" costume="glitch" />
+          <PoCodec quote={quote} variant="compact" costume="glitch" />
         </div>
 
         {/* Return Home */}
