@@ -4,7 +4,12 @@ import localFont from "next/font/local";
 import "@/styles/globals.css";
 import Navigation from "@/components/Navigation";
 import PoStatus from "@/components/PoStatus";
-import MiniGameTransition from "@/components/MiniGameTransition";
+import dynamic from "next/dynamic";
+
+const MiniGameTransition = dynamic(
+  () => import("@/components/MiniGameTransition"),
+  { ssr: false }
+);
 import { TransitionProvider } from "@/components/TransitionContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -52,6 +57,7 @@ export const metadata: Metadata = {
       "Boutique handcrafted guitars built with intention. Luthier craft meets pixel-art adventure.",
   },
   robots: { index: true, follow: true },
+  other: { "theme-color": "#1a1a1a" },
 };
 
 export default function RootLayout({

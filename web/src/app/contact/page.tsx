@@ -2,7 +2,7 @@
 
 import { useState, useCallback, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
-import GodotEmbed from "@/components/GodotEmbed";
+import LazyGodotEmbed from "@/components/LazyGodotEmbed";
 import PixelCard from "@/components/PixelCard";
 import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
@@ -100,7 +100,7 @@ export default function Contact() {
               ARROWS OR TAP
             </span>
           </div>
-          <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
+          <LazyGodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
       )}
 

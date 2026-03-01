@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import GodotEmbed from "@/components/GodotEmbed";
+import dynamic from "next/dynamic";
 import type { GodotEmbedHandle } from "@/components/GodotEmbed";
-import GameBoyControls from "@/components/GameBoyControls";
+
+// Dynamic imports — code-split heavy components into separate chunks
+const GodotEmbed = dynamic(() => import("@/components/GodotEmbed"), { ssr: false });
+const GameBoyControls = dynamic(() => import("@/components/GameBoyControls"), { ssr: false });
 import PixelCard from "@/components/PixelCard";
 import { getLandingGame, ONBOARDING_COOKIE } from "@/lib/game-routes";
 import { hasCookie, setCookie } from "@/lib/cookies";

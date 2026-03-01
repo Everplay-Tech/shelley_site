@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { usePathname } from "next/navigation";
-import GodotEmbed from "@/components/GodotEmbed";
+import LazyGodotEmbed from "@/components/LazyGodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
 import ZoneHeader from "@/components/ZoneHeader";
@@ -95,7 +95,7 @@ export default function Librarynth() {
               ARROWS OR D-PAD
             </span>
           </div>
-          <GodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
+          <LazyGodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
         </section>
       )}
 
