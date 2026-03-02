@@ -49,7 +49,7 @@ export default function PoMascot() {
     >
       {/* Floating Po */}
       <div className="animate-float">
-        <PoSprite costume={costume} size={96} />
+        <PoSprite costume={costume} size={192} />
       </div>
 
       {/* Hover quip tooltip — positioned left of Po */}
