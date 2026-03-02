@@ -47,10 +47,10 @@ export const PO_COSTUMES: Record<PoCostumeId, PoCostumeConfig> = {
   sleepy:    { sheetPath: "/sprites/po/costumes/sleepy_idle_sheet.png",    label: "Sleepy Po" },
   glitch:    { sheetPath: "/sprites/po/costumes/glitch_idle_sheet.png",    label: "Glitch Po" },
   moped: {
-    sheetPath: "/sprites/po/moped_ride_14f_sheet.png",
+    sheetPath: "/sprites/po/moped_ride_8f_sheet.png",
     label: "Moped Po",
     sheets: [
-      { id: "ride", sheetPath: "/sprites/po/moped_ride_14f_sheet.png", frames: 14, frameWidth: 48, frameHeight: 48, fps: 14 },
+      { id: "ride", sheetPath: "/sprites/po/moped_ride_8f_sheet.png", frames: 8, frameWidth: 128, frameHeight: 128, fps: 8 },
     ],
   },
 };

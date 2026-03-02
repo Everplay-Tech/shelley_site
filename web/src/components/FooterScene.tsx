@@ -42,26 +42,53 @@ export default function FooterScene() {
 
 function DjinnSkyline() {
   return (
-    <div className="djinn-skyline relative h-[120px] sm:h-[160px]">
+    <div className="djinn-skyline relative h-[140px] sm:h-[180px]">
       {/* Horizon glow */}
-      <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-[#1a0a20]/60 via-[#2d1040]/30 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-[#1a0a20]/80 via-[#2d1040]/40 to-transparent" />
 
-      {/* Back mountains (darkest, furthest) */}
-      <div className="skyline-layer-back absolute bottom-0 left-0 right-0 h-[70%]" />
+      {/* Back mountains + temple pagodas (pixel art) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[75%] opacity-90"
+        style={{
+          backgroundImage: "url(/sprites/skyline/skyline_back.png)",
+          backgroundRepeat: "repeat-x",
+          backgroundPosition: "center bottom",
+          backgroundSize: "auto 100%",
+          imageRendering: "pixelated",
+        }}
+      />
 
-      {/* Mid bamboo forest */}
-      <div className="skyline-layer-mid absolute bottom-0 left-0 right-0 h-[50%]" />
+      {/* Mid bamboo forest treeline (pixel art) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[50%] opacity-80"
+        style={{
+          backgroundImage: "url(/sprites/skyline/skyline_mid.png)",
+          backgroundRepeat: "repeat-x",
+          backgroundPosition: "center bottom",
+          backgroundSize: "auto 100%",
+          imageRendering: "pixelated",
+        }}
+      />
 
-      {/* Front silhouettes (nearest) */}
-      <div className="skyline-layer-front absolute bottom-0 left-0 right-0 h-[35%]" />
+      {/* Front ground silhouette (pixel art) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[25%] opacity-70"
+        style={{
+          backgroundImage: "url(/sprites/skyline/skyline_front.png)",
+          backgroundRepeat: "repeat-x",
+          backgroundPosition: "center bottom",
+          backgroundSize: "auto 100%",
+          imageRendering: "pixelated",
+        }}
+      />
 
       {/* Stars */}
       <div className="djinn-stars absolute inset-0 pointer-events-none" />
 
       {/* Po on moped — traverses the scene */}
-      <div className="moped-rider absolute bottom-[18%] z-10">
-        <PoSprite costume="moped" size={40} className="sm:hidden" />
-        <PoSprite costume="moped" size={48} className="hidden sm:block" />
+      <div className="moped-rider absolute bottom-[15%] z-10">
+        <PoSprite costume="moped" size={56} className="sm:hidden" />
+        <PoSprite costume="moped" size={72} className="hidden sm:block" />
       </div>
     </div>
   );
