@@ -1,0 +1,7 @@
+{
+  "name": "Po Moped Large Ride 2x (8fps, east-facing)",
+  "base_path": "frames/po_moped_large_2x",
+  "frames": [
+    { "dir": ".", "range": [0, 7], "label": "moped ride bounce" }
+  ]
+}

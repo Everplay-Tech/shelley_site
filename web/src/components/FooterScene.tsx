@@ -88,7 +88,7 @@ function DjinnSkyline() {
       {/* Po on moped — traverses the scene */}
       <div className="moped-rider absolute bottom-[15%] z-10">
         <PoSprite costume="moped" size={128} className="sm:hidden" />
-        <PoSprite costume="moped" size={180} className="hidden sm:block" />
+        <PoSprite costume="moped" size={128} className="hidden sm:block" />
       </div>
     </div>
   );

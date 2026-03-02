@@ -36,7 +36,7 @@ export const PO_COSTUMES: Record<PoCostumeId, PoCostumeConfig> = {
     sheetPath: "/sprites/po/idle_24f_sheet.png",
     label: "Po",
     sheets: [
-      { id: "idle-24", sheetPath: "/sprites/po/idle_24f_sheet.png", frames: 24, frameWidth: 256, frameHeight: 256, fps: 24 },
+      { id: "idle-24", sheetPath: "/sprites/po/idle_24f_sheet.png", frames: 24, frameWidth: 256, frameHeight: 256, fps: 8 },
     ],
     portrait: "/sprites/po/idle_00.png",
   },
@@ -50,7 +50,7 @@ export const PO_COSTUMES: Record<PoCostumeId, PoCostumeConfig> = {
     sheetPath: "/sprites/po/moped_ride_8f_sheet.png",
     label: "Moped Po",
     sheets: [
-      { id: "ride", sheetPath: "/sprites/po/moped_ride_8f_sheet.png", frames: 8, frameWidth: 128, frameHeight: 128, fps: 8 },
+      { id: "ride", sheetPath: "/sprites/po/moped_ride_8f_sheet.png", frames: 8, frameWidth: 256, frameHeight: 256, fps: 8 },
     ],
   },
 };
