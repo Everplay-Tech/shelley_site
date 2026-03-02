@@ -42,7 +42,7 @@ export default function FooterScene() {
 
 function DjinnSkyline() {
   return (
-    <div className="djinn-skyline relative h-[140px] sm:h-[180px]">
+    <div className="djinn-skyline relative h-[180px] sm:h-[240px]">
       {/* Horizon glow */}
       <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-[#1a0a20]/80 via-[#2d1040]/40 to-transparent" />
 
@@ -87,8 +87,8 @@ function DjinnSkyline() {
 
       {/* Po on moped — traverses the scene */}
       <div className="moped-rider absolute bottom-[15%] z-10">
-        <PoSprite costume="moped" size={56} className="sm:hidden" />
-        <PoSprite costume="moped" size={72} className="hidden sm:block" />
+        <PoSprite costume="moped" size={128} className="sm:hidden" />
+        <PoSprite costume="moped" size={180} className="hidden sm:block" />
       </div>
     </div>
   );
