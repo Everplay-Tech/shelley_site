@@ -346,6 +346,58 @@ body::after {
   }
 }
 
+/* ─── CARRIER PIGEON CHAOS ───────────────────────────────────────────────── */
+
+/* Invisible timer that drives the cycle — animationiteration fires each loop */
+@keyframes pigeon-timer {
+  0%   { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* Pigeon flies in from offscreen and lands on head */
+@keyframes pigeon-land {
+  0%   { transform: translate(0, -80px) scale(0.6); opacity: 0; }
+  20%  { opacity: 1; }
+  70%  { transform: translate(0, 4px) scale(1.05); }
+  85%  { transform: translate(0, -2px) scale(0.98); }
+  100% { transform: translate(0, 0) scale(1); opacity: 1; }
+}
+
+/* Landed pigeons jostle/wobble */
+@keyframes pigeon-wobble {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  20%  { transform: rotate(-3deg) translateY(-1px); }
+  50%  { transform: rotate(2deg) translateY(0); }
+  75%  { transform: rotate(-1deg) translateY(-1px); }
+}
+
+/* Wing flap for landed pigeons — subtle */
+@keyframes pigeon-wing-flap {
+  0%, 100% { transform: scaleY(1); }
+  30%  { transform: scaleY(0.7); }
+  50%  { transform: scaleY(1.1); }
+  70%  { transform: scaleY(0.85); }
+}
+
+/* Pigeons fly away — each lifts off and flies to its --fly-x/--fly-y destination */
+@keyframes pigeon-fly-away {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  15%  { transform: translate(0, -8px) scale(1.05); opacity: 1; }
+  40%  { transform: translate(calc(var(--fly-x) * 0.3), calc(var(--fly-y) * 0.3)) scale(0.95); opacity: 1; }
+  70%  { transform: translate(calc(var(--fly-x) * 0.7), calc(var(--fly-y) * 0.7)) scale(0.8); opacity: 0.8; }
+  100% { transform: translate(var(--fly-x), var(--fly-y)) scale(0.5); opacity: 0; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .po-pigeon-timer,
+  .po-pigeon-body,
+  .po-pigeon-bird {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* ─── PIXEL PANELS ─── */
 
 .pixel-panel {
