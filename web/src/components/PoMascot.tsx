@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import PoSprite from "./PoSprite";
+import PoDribble from "./PoDribble";
+import PoSawHead from "./PoSawHead";
 import { getZoneForRoute, type PoCostumeId } from "@/lib/zone-config";
 import { useGameEvents } from "@/hooks/useGameEvents";
 
@@ -47,9 +49,15 @@ export default function PoMascot() {
       onMouseEnter={handleHover}
       onMouseLeave={handleLeave}
     >
-      {/* Floating Po */}
+      {/* Floating Po — custom animation per costume, sprite sheet fallback */}
       <div className="animate-float">
-        <PoSprite costume={costume} size={128} />
+        {costume === "default" ? (
+          <PoDribble size={128} />
+        ) : costume === "craftsman" ? (
+          <PoSawHead size={128} />
+        ) : (
+          <PoSprite costume={costume} size={128} />
+        )}
       </div>
 
       {/* Hover quip tooltip — positioned left of Po */}

@@ -78,6 +78,140 @@ body::after {
   100% { background-position: var(--sprite-offset) 0; }
 }
 
+/* ─── HEAD BONK PHYSICS ─── */
+/* Ball bounces off Po's head. Inverted gravity parabola:
+   fast at head (impact), slow at peak (comedic hang time).
+   y = 4t(1-t) gives slow at ends (head), fast through middle.
+   We INVERT so ball goes UP: translateY is negative. */
+
+@keyframes bonk-ball {
+  /* Ball sits on head, launches UP, hangs, falls back */
+  0%   { transform: translateY(0); }
+  3%   { transform: translateY(0) scaleY(0.75) scaleX(1.2); }             /* squash on head */
+  8%   { transform: translateY(calc(var(--bonk-height) * -0.25)); }        /* launch! */
+  18%  { transform: translateY(calc(var(--bonk-height) * -0.64)); }
+  30%  { transform: translateY(calc(var(--bonk-height) * -0.92)); }
+  42%  { transform: translateY(calc(var(--bonk-height) * -1.0)); }         /* peak — hang */
+  55%  { transform: translateY(calc(var(--bonk-height) * -0.92)); }        /* start falling */
+  70%  { transform: translateY(calc(var(--bonk-height) * -0.64)); }
+  82%  { transform: translateY(calc(var(--bonk-height) * -0.25)); }
+  93%  { transform: translateY(0); }                                        /* impact! */
+  96%  { transform: translateY(0) scaleY(0.75) scaleX(1.2); }             /* squash again */
+  100% { transform: translateY(0); }
+}
+
+/* Po body squish is JS-driven (progressive per bounce), no CSS keyframes needed */
+
+/* ─── TAPE MEASURE SNAP ────────────────────────────────────────────────────── */
+/* Blade extends left from housing, holds, then snaps back instantly.
+   The snap triggers a wobble on Po's body and flashes impact stars. */
+
+@keyframes tape-extend {
+  0%   { width: 0; }
+  40%  { width: var(--tape-max); }                   /* fully extended */
+  52%  { width: var(--tape-max); }                   /* hold... */
+  55%  { width: 0; }                                  /* SNAP! instant retract */
+  100% { width: 0; }                                  /* idle until next cycle */
+}
+
+/* Tip follows the blade end — translates left by blade width */
+@keyframes tape-tip {
+  0%   { transform: translateX(0); opacity: 1; }
+  40%  { transform: translateX(calc(var(--tape-max) * -1)); opacity: 1; }
+  52%  { transform: translateX(calc(var(--tape-max) * -1)); opacity: 1; }
+  55%  { transform: translateX(0); opacity: 0; }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+/* Po body wobble — triggered by the snap recoil */
+@keyframes tape-wobble {
+  0%, 52%  { transform: rotate(0deg) translateX(0); }
+  56%  { transform: rotate(var(--wobble-deg)) translateX(var(--wobble-px)); }
+  62%  { transform: rotate(calc(var(--wobble-deg) * -0.65)) translateX(calc(var(--wobble-px) * -0.5)); }
+  68%  { transform: rotate(calc(var(--wobble-deg) * 0.35)) translateX(calc(var(--wobble-px) * 0.2)); }
+  74%  { transform: rotate(calc(var(--wobble-deg) * -0.15)); }
+  80%  { transform: rotate(0deg) translateX(0); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+/* Impact stars — flash on snap, fade out */
+@keyframes tape-stars {
+  0%, 53%  { opacity: 0; transform: scale(0.3); }
+  56%  { opacity: 1; transform: scale(1.1); }
+  60%  { opacity: 1; transform: scale(1); }
+  75%  { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 0; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .po-dribble-ball {
+    animation: none !important;
+  }
+  .po-bonk-body {
+    transform: none !important;
+    transition: none !important;
+  }
+  .po-tape-body,
+  .po-tape-blade,
+  .po-tape-tip,
+  .po-tape-housing,
+  .po-tape-stars {
+    animation: none !important;
+    transform: none !important;
+  }
+  .po-saw-head-piece,
+  .po-saw-tool,
+  .po-saw-stars {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ─── SAW HEAD OFF ─────────────────────────────────────────────────────────── */
+/* Po saws his own head off. Head pops up, bounces, reconnects.
+   Uses clip-path split: body stays, head flies. */
+
+/* Head detaches after sawing, pops up with hang time, falls back, squash on reconnect */
+@keyframes head-detach {
+  0%, 28%  { transform: translateY(0); }                                       /* sawing — head on */
+  32%  { transform: translateY(-2px); }                                         /* loosening... */
+  38%  { transform: translateY(calc(var(--head-pop) * -0.55)); }               /* POP! */
+  48%  { transform: translateY(calc(var(--head-pop) * -1)); }                  /* peak — comedic hang */
+  58%  { transform: translateY(calc(var(--head-pop) * -0.55)); }               /* falling */
+  66%  { transform: translateY(0) scaleY(0.8) scaleX(1.2); }                  /* SPLAT reconnect */
+  71%  { transform: translateY(calc(var(--head-pop) * -0.15)); }               /* mini bounce */
+  78%  { transform: translateY(0); }                                            /* settled */
+  100% { transform: translateY(0); }                                            /* idle */
+}
+
+/* Circular saw blade spins */
+@keyframes saw-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Saw sweeps back-and-forth across neck, then hides for head pop */
+@keyframes saw-sweep {
+  0%   { transform: translateX(0); opacity: 1; }
+  7%   { transform: translateX(var(--saw-sweep)); opacity: 1; }       /* sweep right */
+  14%  { transform: translateX(0); opacity: 1; }                       /* sweep back */
+  21%  { transform: translateX(var(--saw-sweep)); opacity: 1; }       /* sweep right again */
+  28%  { transform: translateX(calc(var(--saw-sweep) * 0.5)); opacity: 1; } /* mid-neck — cut! */
+  32%  { transform: translateX(calc(var(--saw-sweep) * 0.5)); opacity: 0; } /* hide */
+  90%  { transform: translateX(0); opacity: 0; }
+  95%  { transform: translateX(0); opacity: 1; }                       /* reappear for next cycle */
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* Stars flash when head reconnects */
+@keyframes saw-stars {
+  0%, 63%  { opacity: 0; transform: scale(0.3); }
+  66%  { opacity: 1; transform: scale(1.3); }
+  71%  { opacity: 1; transform: scale(1); }
+  83%  { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; }
+}
+
 /* ─── PIXEL PANELS ─── */
 
 .pixel-panel {
