@@ -7,6 +7,7 @@ import PoDribble from "./PoDribble";
 import PoSawHead from "./PoSawHead";
 import PoPaintDump from "./PoPaintDump";
 import PoCarrierPigeon from "./PoCarrierPigeon";
+import PoScholar from "./PoScholar";
 import { getZoneForRoute, type PoCostumeId } from "@/lib/zone-config";
 import { useGameEvents } from "@/hooks/useGameEvents";
 
@@ -61,6 +62,8 @@ export default function PoMascot() {
           <PoPaintDump size={128} />
         ) : costume === "messenger" ? (
           <PoCarrierPigeon size={128} />
+        ) : costume === "scholar" ? (
+          <PoScholar size={128} />
         ) : (
           <PoSprite costume={costume} size={128} />
         )}
