@@ -212,6 +212,140 @@ body::after {
   100% { opacity: 0; }
 }
 
+/* ─── PAINT BUCKET DUMP ────────────────────────────────────────────────────── */
+/* Bucket tips over Po's head, paint pours, Po shakes like a wet dog.
+   Beret wobbles on impact, moustache twirls + grows each cycle. */
+
+/* Beret wobbles when paint hits */
+@keyframes beret-wobble {
+  0%, 48%  { transform: rotate(0deg) translateY(0); }
+  52%  { transform: rotate(12deg) translateY(-2px); }  /* paint impact! */
+  56%  { transform: rotate(-8deg) translateY(1px); }
+  60%  { transform: rotate(5deg); }
+  64%  { transform: rotate(-2deg); }
+  68%  { transform: rotate(0deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+/* Moustache twirls before each dump, then scales up */
+@keyframes stache-twirl {
+  0%, 5%   { transform: scale(var(--stache-scale, 1)) rotate(0deg); }
+  10%  { transform: scale(var(--stache-scale, 1)) rotate(360deg); }  /* full twirl! */
+  15%  { transform: scale(var(--stache-scale, 1)) rotate(360deg); }
+  52%  { transform: scale(var(--stache-scale, 1)) rotate(360deg) translateY(1px); }  /* paint wobble */
+  58%  { transform: scale(var(--stache-scale, 1)) rotate(360deg) translateY(-1px); }
+  65%  { transform: scale(var(--stache-scale, 1)) rotate(360deg) translateY(0); }
+  100% { transform: scale(var(--stache-scale, 1)) rotate(360deg); }
+}
+
+/* Paintbrush spins like a baton each cycle */
+@keyframes brush-spin {
+  0%, 8%   { transform: rotate(0deg); }
+  14%  { transform: rotate(360deg); }   /* full spin before dump */
+  20%, 48% { transform: rotate(360deg); }
+  52%  { transform: rotate(375deg); }    /* paint-hit jolt */
+  56%  { transform: rotate(355deg); }
+  60%  { transform: rotate(360deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Bucket tips from upright to inverted */
+@keyframes paint-bucket-tip {
+  0%, 15%  { transform: rotate(0deg) translateY(0); }           /* sitting upright */
+  25%  { transform: rotate(-120deg) translateY(-5px); }          /* tipping over! */
+  40%  { transform: rotate(-150deg) translateY(-3px); }          /* fully dumped */
+  55%  { transform: rotate(-150deg) translateY(-3px); }          /* holding... */
+  65%  { transform: rotate(-30deg) translateY(0); }              /* swinging back */
+  75%  { transform: rotate(0deg) translateY(0); }                /* upright again */
+  100% { transform: rotate(0deg) translateY(0); }                /* idle */
+}
+
+/* Paint stream appears during dump */
+@keyframes paint-pour {
+  0%, 22%  { opacity: 0; transform: scaleY(0); transform-origin: top; }
+  28%  { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  50%  { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  58%  { opacity: 0; transform: scaleY(0); transform-origin: bottom; }
+  100% { opacity: 0; }
+}
+
+/* Po shakes after being dumped on (legacy, kept for reference) */
+@keyframes paint-shake {
+  0%, 48%  { transform: rotate(0deg) translateX(0); }
+  52%  { transform: rotate(5deg) translateX(3px); }
+  55%  { transform: rotate(-5deg) translateX(-3px); }
+  58%  { transform: rotate(4deg) translateX(2px); }
+  61%  { transform: rotate(-3deg) translateX(-2px); }
+  64%  { transform: rotate(2deg) translateX(1px); }
+  67%  { transform: rotate(-1deg); }
+  70%  { transform: rotate(0deg) translateX(0); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+/* Po shakes paint off — vigorous burst shake */
+@keyframes paint-shake-off {
+  0%   { transform: rotate(0deg) translateX(0); }
+  10%  { transform: rotate(8deg) translateX(4px); }
+  20%  { transform: rotate(-8deg) translateX(-4px); }
+  30%  { transform: rotate(6deg) translateX(3px); }
+  40%  { transform: rotate(-6deg) translateX(-3px); }
+  50%  { transform: rotate(4deg) translateX(2px); }
+  60%  { transform: rotate(-4deg) translateX(-2px); }
+  70%  { transform: rotate(2deg) translateX(1px); }
+  80%  { transform: rotate(-1deg); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+/* Splatter visibility pulses with dump cycle */
+@keyframes paint-splat-drip {
+  0%, 25%  { transform: scale(0); }
+  30%  { transform: scale(1.2); }
+  35%  { transform: scale(1); }
+  85%  { transform: scale(1); opacity: 1; }
+  95%  { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* Drip streams fall down from head */
+@keyframes paint-drips {
+  0%, 28%  { opacity: 0; }
+  35%  { opacity: 1; }
+  70%  { opacity: 1; }
+  80%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes paint-drip-fall {
+  0%, 28%  { transform: translateY(0); opacity: 0; }
+  35%  { transform: translateY(0); opacity: 1; }
+  70%  { transform: translateY(20px); opacity: 0.6; }
+  80%  { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+/* Splatter burst — paint flies off in all directions on reset */
+@keyframes splatter-burst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  60%  { transform: translate(var(--burst-x), var(--burst-y)) scale(1.3); opacity: 0.8; }
+  100% { transform: translate(var(--burst-x), var(--burst-y)) scale(0); opacity: 0; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .po-paint-body,
+  .po-paint-tint,
+  .po-paint-beret,
+  .po-paint-stache,
+  .po-paint-brush,
+  .po-paint-bucket,
+  .po-paint-pour,
+  .po-paint-splat,
+  .po-paint-drips {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* ─── PIXEL PANELS ─── */
 
 .pixel-panel {

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import PoSprite from "./PoSprite";
 import PoDribble from "./PoDribble";
 import PoSawHead from "./PoSawHead";
+import PoPaintDump from "./PoPaintDump";
 import { getZoneForRoute, type PoCostumeId } from "@/lib/zone-config";
 import { useGameEvents } from "@/hooks/useGameEvents";
 
@@ -55,6 +56,8 @@ export default function PoMascot() {
           <PoDribble size={128} />
         ) : costume === "craftsman" ? (
           <PoSawHead size={128} />
+        ) : costume === "artist" ? (
+          <PoPaintDump size={128} />
         ) : (
           <PoSprite costume={costume} size={128} />
         )}
