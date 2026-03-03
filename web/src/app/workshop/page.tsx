@@ -1,16 +1,10 @@
 "use client";
 
-import { useCallback } from "react";
-import { usePathname } from "next/navigation";
-import LazyGodotEmbed from "@/components/LazyGodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
 import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
-import { getGameForRoute } from "@/lib/game-routes";
-import { emitGameEvent } from "@/lib/game-events";
 import { ZONES } from "@/lib/zone-config";
-import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Current builds ─────────────────────────────────────────────────────── */
 
@@ -78,37 +72,12 @@ const steps = [
 ];
 
 export default function Workshop() {
-  const pathname = usePathname();
-  const gameConfig = getGameForRoute(pathname);
-
-  const handleGodotEvent = useCallback((event: GodotEvent) => {
-    emitGameEvent(event);
-  }, []);
-
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="sawdust" count={8} />
 
-      {/* ─── ZONE HEADER ─── */}
+      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
       <ZoneHeader zone={ZONES.workshop} />
-
-      {/* ─── WORKSHOP CRAFT ─── */}
-      {gameConfig && (
-        <section className="pixel-panel p-5 sm:p-8">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <h3 className="font-pixel text-[10px] text-[#c4956a] crt-glow tracking-wider">WORKSHOP CRAFT</h3>
-              <p className="text-white/40 text-xs mt-1">
-                Stack wood blocks Tetris-style &mdash; clear lines to prove your craftsmanship
-              </p>
-            </div>
-            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
-              ARROWS &middot; UP ROT &middot; SPACE DROP
-            </span>
-          </div>
-          <LazyGodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
-        </section>
-      )}
 
       {/* ─── PROCESS STEPS ─── */}
       <section>

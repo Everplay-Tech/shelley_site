@@ -1,16 +1,10 @@
 "use client";
 
-import { useCallback } from "react";
-import { usePathname } from "next/navigation";
-import LazyGodotEmbed from "@/components/LazyGodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
 import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
-import { getGameForRoute } from "@/lib/game-routes";
-import { emitGameEvent } from "@/lib/game-events";
 import { ZONES } from "@/lib/zone-config";
-import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Guitar showcase data ───────────────────────────────────────────────── */
 
@@ -41,37 +35,12 @@ const guitars = [
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export default function Gallery() {
-  const pathname = usePathname();
-  const gameConfig = getGameForRoute(pathname);
-
-  const handleGodotEvent = useCallback((event: GodotEvent) => {
-    emitGameEvent(event);
-  }, []);
-
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="motes" count={10} />
 
-      {/* ─── ZONE HEADER ─── */}
+      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
       <ZoneHeader zone={ZONES.gallery} />
-
-      {/* ─── GALLERY RUN ─── */}
-      {gameConfig && (
-        <section className="pixel-panel p-5 sm:p-8">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <h3 className="font-pixel text-[10px] text-purple-300 crt-glow-purple tracking-wider">GALLERY RUN</h3>
-              <p className="text-white/40 text-xs mt-1">
-                Pilot the Axis Mundi and defend the gallery from haunted artwork
-              </p>
-            </div>
-            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
-              ARROWS &middot; SPACE FIRE
-            </span>
-          </div>
-          <LazyGodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
-        </section>
-      )}
 
       {/* ─── INSTAGRAM FEED ─── */}
       <section>

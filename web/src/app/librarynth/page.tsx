@@ -1,16 +1,10 @@
 "use client";
 
-import { useCallback } from "react";
-import { usePathname } from "next/navigation";
-import LazyGodotEmbed from "@/components/LazyGodotEmbed";
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
 import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
-import { getGameForRoute } from "@/lib/game-routes";
-import { emitGameEvent } from "@/lib/game-events";
 import { ZONES, PO_COSTUMES } from "@/lib/zone-config";
-import type { GodotEvent } from "@/lib/godot-messages";
 
 /* ─── Creative Universe data ─────────────────────────────────────────────── */
 
@@ -67,37 +61,12 @@ const philosophyPoints = [
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export default function Librarynth() {
-  const pathname = usePathname();
-  const gameConfig = getGameForRoute(pathname);
-
-  const handleGodotEvent = useCallback((event: GodotEvent) => {
-    emitGameEvent(event);
-  }, []);
-
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="sparkles" count={12} />
 
-      {/* ─── ZONE HEADER ─── */}
+      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
       <ZoneHeader zone={ZONES.librarynth} />
-
-      {/* ─── LIBRARYNTH QUEST ─── */}
-      {gameConfig && (
-        <section className="pixel-panel p-5 sm:p-8">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <h3 className="font-pixel text-[10px] text-blue-300 crt-glow-blue tracking-wider">LIBRARYNTH QUEST</h3>
-              <p className="text-white/40 text-xs mt-1">
-                Guide the Scholar through the magical library maze &mdash; collect scrolls, find keys, unlock doors
-              </p>
-            </div>
-            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
-              ARROWS OR D-PAD
-            </span>
-          </div>
-          <LazyGodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
-        </section>
-      )}
 
       {/* ─── PHILOSOPHY ─── */}
       <section>

@@ -2,32 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import PoSprite from "./PoSprite";
-import PoDribble from "./PoDribble";
-import PoSawHead from "./PoSawHead";
-import PoPaintDump from "./PoPaintDump";
-import PoCarrierPigeon from "./PoCarrierPigeon";
-import PoScholar from "./PoScholar";
+import PoZoneAnimation from "./PoZoneAnimation";
 import { getZoneForRoute, type PoCostumeId } from "@/lib/zone-config";
 import { useGameEvents } from "@/hooks/useGameEvents";
-
-const GENERIC_QUIPS = [
-  "Don't mind me, just haunting.",
-  "I forgot what I was doing.",
-  "Ghost problems: walking through doors is too easy.",
-  "Magus says I need to focus. Focus on what?",
-  "I had something important to say... never mind.",
-  "Is it weird that I can't feel my bones?",
-];
+import { useCodecOverlay } from "@/hooks/useCodecOverlay";
 
 export default function PoMascot() {
   const pathname = usePathname();
   const zone = getZoneForRoute(pathname);
   const costume: PoCostumeId = zone?.poCostume ?? "default";
-  const quips = zone?.poQuotes ?? GENERIC_QUIPS;
-
-  const [quip, setQuip] = useState<string | null>(null);
-  const [showQuip, setShowQuip] = useState(false);
+  const { openCodec } = useCodecOverlay();
 
   // Game event awareness (future: visual reactions)
   const [, setIsPlaying] = useState(false);
@@ -36,58 +20,32 @@ export default function PoMascot() {
     if (event.type === "onboarding_complete") setIsPlaying(false);
   });
 
-  const handleHover = useCallback(() => {
-    const idx = Math.floor(Math.random() * quips.length);
-    setQuip(quips[idx]);
-    setShowQuip(true);
-  }, [quips]);
+  const handleClick = useCallback(() => {
+    openCodec(costume, zone?.id ?? null);
+  }, [openCodec, costume, zone]);
 
-  const handleLeave = useCallback(() => {
-    setShowQuip(false);
-  }, []);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleClick();
+      }
+    },
+    [handleClick]
+  );
 
   return (
     <div
-      className="relative flex items-center"
-      onMouseEnter={handleHover}
-      onMouseLeave={handleLeave}
+      className="relative flex items-center cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-label="Talk to Po"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
-      {/* Floating Po — custom animation per costume, sprite sheet fallback */}
       <div className="animate-float">
-        {costume === "default" ? (
-          <PoDribble size={128} />
-        ) : costume === "craftsman" ? (
-          <PoSawHead size={128} />
-        ) : costume === "artist" ? (
-          <PoPaintDump size={128} />
-        ) : costume === "messenger" ? (
-          <PoCarrierPigeon size={128} />
-        ) : costume === "scholar" ? (
-          <PoScholar size={128} />
-        ) : (
-          <PoSprite costume={costume} size={128} />
-        )}
+        <PoZoneAnimation costume={costume} size={128} />
       </div>
-
-      {/* Hover quip tooltip — positioned left of Po */}
-      {showQuip && quip && (
-        <div
-          className="absolute right-full mr-2 top-1/2 -translate-y-1/2
-            pixel-panel-inset px-2.5 py-1.5 max-w-[200px] whitespace-normal
-            pointer-events-none z-50"
-        >
-          <p className="font-pixel text-[6px] text-white/40 leading-relaxed">
-            &ldquo;{quip}&rdquo;
-          </p>
-          {/* Speech arrow pointing right */}
-          <div
-            className="absolute top-1/2 -right-[6px] -translate-y-1/2
-              w-0 h-0 border-t-[4px] border-t-transparent
-              border-b-[4px] border-b-transparent
-              border-l-[6px] border-l-white/5"
-          />
-        </div>
-      )}
     </div>
   );
 }

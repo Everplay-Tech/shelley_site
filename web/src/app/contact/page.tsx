@@ -1,32 +1,20 @@
 "use client";
 
-import { useState, useCallback, type FormEvent } from "react";
-import { usePathname } from "next/navigation";
-import LazyGodotEmbed from "@/components/LazyGodotEmbed";
+import { useState, type FormEvent } from "react";
 import PixelCard from "@/components/PixelCard";
 import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
-import { getGameForRoute } from "@/lib/game-routes";
-import { emitGameEvent } from "@/lib/game-events";
 import { ZONES } from "@/lib/zone-config";
-import type { GodotEvent } from "@/lib/godot-messages";
 
 type FormState = "idle" | "sending" | "success" | "error";
 
 export default function Contact() {
-  const pathname = usePathname();
-  const gameConfig = getGameForRoute(pathname);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [cooldown, setCooldown] = useState(false);
-
-  const handleGodotEvent = useCallback((event: GodotEvent) => {
-    emitGameEvent(event);
-  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -83,26 +71,8 @@ export default function Contact() {
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="signals" count={6} />
 
-      {/* ─── ZONE HEADER ─── */}
+      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
       <ZoneHeader zone={ZONES.contact} />
-
-      {/* ─── CONTACT DASH ─── */}
-      {gameConfig && (
-        <section className="pixel-panel p-5 sm:p-8">
-          <div className="flex justify-between items-end mb-4">
-            <div>
-              <h3 className="font-pixel text-[10px] text-shelley-spirit-green crt-glow-green tracking-wider">CONTACT DASH</h3>
-              <p className="text-white/40 text-xs mt-1">
-                Help Hpar the ronin catch your messages before they hit the ground
-              </p>
-            </div>
-            <span className="font-pixel text-[7px] text-white/20 hidden sm:block">
-              ARROWS OR TAP
-            </span>
-          </div>
-          <LazyGodotEmbed gameName={gameConfig.gameName} onEvent={handleGodotEvent} />
-        </section>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* ─── CONTACT FORM ─── */}

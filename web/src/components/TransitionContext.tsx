@@ -13,6 +13,10 @@ interface TransitionContextValue {
   /** True when transitioning without a game (quick wipe overlay) */
   quickTransit: boolean;
   complete: () => void;
+  /** Open a game overlay without navigation (e.g. from GameCartridge) */
+  replayGame: (game: RouteGameConfig) => void;
+  /** True when the overlay is a replay (close on complete, don't navigate) */
+  isReplay: boolean;
 }
 
 const TransitionContext = createContext<TransitionContextValue | null>(null);
@@ -28,6 +32,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const [isActive, setIsActive] = useState(false);
   const [activeGame, setActiveGame] = useState<RouteGameConfig | null>(null);
   const [quickTransit, setQuickTransit] = useState(false);
+  const [isReplay, setIsReplay] = useState(false);
 
   const navigate = useCallback((url: string) => {
     // Brief hold keeps overlay black, prevents white flash during hard reload
@@ -50,25 +55,40 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
+  const resetOverlay = useCallback(() => {
+    setIsActive(false);
+    setPendingUrl(null);
+    setActiveGame(null);
+    setQuickTransit(false);
+    setIsReplay(false);
+  }, []);
+
   const skip = useCallback(() => {
-    if (pendingUrl) {
+    if (isReplay) {
+      resetOverlay();
+    } else if (pendingUrl) {
       navigate(pendingUrl);
     } else {
-      setIsActive(false);
-      setPendingUrl(null);
-      setActiveGame(null);
-      setQuickTransit(false);
+      resetOverlay();
     }
-  }, [pendingUrl, navigate]);
+  }, [isReplay, pendingUrl, navigate, resetOverlay]);
 
   const complete = useCallback(() => {
-    if (pendingUrl) {
+    if (isReplay) {
+      resetOverlay();
+    } else if (pendingUrl) {
       navigate(pendingUrl);
     }
-  }, [pendingUrl, navigate]);
+  }, [isReplay, pendingUrl, navigate, resetOverlay]);
+
+  const replayGame = useCallback((game: RouteGameConfig) => {
+    setActiveGame(game);
+    setIsReplay(true);
+    setIsActive(true);
+  }, []);
 
   return (
-    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, quickTransit, complete }}>
+    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, quickTransit, complete, replayGame, isReplay }}>
       {children}
     </TransitionContext.Provider>
   );

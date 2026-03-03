@@ -18,6 +18,12 @@ const FooterScene = dynamic(
   { ssr: false }
 );
 import { TransitionProvider } from "@/components/TransitionContext";
+import { CodecProvider } from "@/hooks/useCodecOverlay";
+
+const CodecOverlay = dynamic(
+  () => import("@/components/CodecOverlay"),
+  { ssr: false }
+);
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -104,10 +110,12 @@ export default function RootLayout({
           }}
         />
         <TransitionProvider>
+        <CodecProvider>
           <a href="#main-content" className="skip-link">
             Skip to content
           </a>
           <MiniGameTransition />
+          <CodecOverlay />
           <header className="fixed top-0 left-0 right-0 z-40 pixel-panel dither-border-bottom px-6 py-3">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
               <div className="flex items-center gap-6">
@@ -130,6 +138,7 @@ export default function RootLayout({
               <FooterScene />
             </div>
           </footer>
+        </CodecProvider>
         </TransitionProvider>
       </body>
     </html>
