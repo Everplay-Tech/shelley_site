@@ -1702,3 +1702,37 @@ body.sidebar-collapsed .site-content {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ─── KNOCK ENCOUNTER ANIMATIONS ─── */
+
+@keyframes knock-ripple-expand {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+  100% {
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+  }
+}
+
+@keyframes knock-border-flash {
+  0% {
+    opacity: 0.2;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knock-ripple,
+  .knock-border-flash {
+    animation: none !important;
+  }
+}
