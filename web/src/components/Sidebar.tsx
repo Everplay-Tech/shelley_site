@@ -109,7 +109,7 @@ export default function Sidebar() {
             <div className={`w-full h-px ${zone.accentColor} opacity-10`} />
 
             {/* Po Animation */}
-            <div className="flex justify-center">
+            <div className="flex justify-center" data-po-zone-sprite>
               <PoZoneAnimation costume={zone.poCostume} size={64} />
             </div>
 
