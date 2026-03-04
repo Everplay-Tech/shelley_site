@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import dynamic from "next/dynamic";
 import { useTransition } from "./TransitionContext";
-import { useCodecOverlay } from "@/hooks/useCodecOverlay";
 import { useZoneSidebar } from "./ZoneSidebarContext";
 import { getGameForRoute } from "@/lib/game-routes";
 import GameCartridge from "./GameCartridge";
@@ -26,7 +25,6 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { startTransition, isActive } = useTransition();
-  const { openCodec } = useCodecOverlay();
   const zone = useZoneSidebar();
   const gameConfig = zone ? getGameForRoute(pathname) : null;
   const [collapsed, setCollapsed] = useState(false);
@@ -40,20 +38,6 @@ export default function Sidebar() {
     if (pathname === href) return;
     startTransition(href);
   };
-
-  const handleCodecOpen = useCallback(() => {
-    if (zone) openCodec(zone.poCostume, zone.id);
-  }, [openCodec, zone]);
-
-  const handleCodecKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handleCodecOpen();
-      }
-    },
-    [handleCodecOpen]
-  );
 
   return (
     <>
@@ -137,22 +121,6 @@ export default function Sidebar() {
               />
             )}
 
-            {/* Divider */}
-            <div className={`w-full h-px ${zone.accentColor} opacity-10`} />
-
-            {/* Talk to Po */}
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={handleCodecOpen}
-              onKeyDown={handleCodecKeyDown}
-              aria-label={`Talk to Po about ${zone.name}`}
-              className="cursor-pointer group w-full text-center py-1.5"
-            >
-              <span className="font-pixel text-[6px] tracking-widest text-white/30 group-hover:text-white/60 transition-colors uppercase">
-                Talk to Po
-              </span>
-            </div>
           </div>
         )}
       </aside>

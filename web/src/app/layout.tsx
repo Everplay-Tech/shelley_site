@@ -30,18 +30,13 @@ const CodecOverlay = dynamic(
   { ssr: false }
 );
 
-const PaperPlaneEncounter = dynamic(
-  () => import("@/components/encounters/PaperPlaneEncounter"),
+const PoEncounterLayer = dynamic(
+  () => import("@/components/encounters/PoEncounterLayer"),
   { ssr: false }
 );
 
-const CursorStalkEncounter = dynamic(
-  () => import("@/components/encounters/CursorStalkEncounter"),
-  { ssr: false }
-);
-
-const ZoneDropEncounter = dynamic(
-  () => import("@/components/encounters/ZoneDropEncounter"),
+const PhoneBooth = dynamic(
+  () => import("@/components/PhoneBooth"),
   { ssr: false }
 );
 
@@ -138,10 +133,9 @@ export default function RootLayout({
           </a>
           <MiniGameTransition />
           <CodecOverlay />
-          <PaperPlaneEncounter />
-          <CursorStalkEncounter />
-          <ZoneDropEncounter />
+          <PoEncounterLayer />
           <Sidebar />
+          <PhoneBooth />
           <div className="crt-boot-line" aria-hidden="true" />
           <main id="main-content" className="crt-boot site-content min-h-screen relative z-[1]">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
