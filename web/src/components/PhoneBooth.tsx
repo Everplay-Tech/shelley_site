@@ -14,7 +14,7 @@ export default function PhoneBooth() {
     if (zone) {
       openCodec(zone.poCostume, zone.id);
     } else {
-      openCodec("default", "home");
+      openCodec("default", null);
     }
   }, [openCodec, zone]);
 
