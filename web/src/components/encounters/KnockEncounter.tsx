@@ -113,14 +113,22 @@ export default function KnockEncounter() {
       return;
     }
 
-    // Knock 1 at 0ms
+    // Knock 1 at 0ms — shake the screen
     flashBorder();
     spawnRipple();
+    document.documentElement.classList.add("knock-shake");
+    schedule(() => {
+      document.documentElement.classList.remove("knock-shake");
+    }, 200);
 
-    // Knock 2 at 400ms
+    // Knock 2 at 400ms — second shake
     schedule(() => {
       flashBorder();
       spawnRipple();
+      document.documentElement.classList.add("knock-shake-2");
+      schedule(() => {
+        document.documentElement.classList.remove("knock-shake-2");
+      }, 200);
     }, KNOCK_2_DELAY);
 
     // Show bubble after knock sequence

@@ -19,6 +19,11 @@ const SESSION_ENCOUNTER_CAP = 5;
 const RANDOM_TIMER_MIN_MS = 90_000;
 const RANDOM_TIMER_MAX_MS = 180_000;
 const VISITED_ZONES_KEY = "po_visited_zones";
+const CODEC_RING_COUNT_KEY = "po_codec_ring_count";
+const CODEC_RING_DATE_KEY = "po_codec_ring_date";
+const CODEC_RING_DAILY_CAP = 3;
+const PHONE_TAB_HOVER_MS = 2_500;
+const SCROLL_BACK_UP_THRESHOLD = 0.5; // must scroll past 50% first
 
 function isInteractiveElement(el: Element | null): boolean {
   if (!el) return false;
@@ -45,6 +50,37 @@ function markZoneVisited(zoneId: string): void {
   } catch {
     // sessionStorage unavailable — silent fail
   }
+}
+
+function getCodecRingCount(): number {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const storedDate = localStorage.getItem(CODEC_RING_DATE_KEY);
+    if (storedDate !== today) {
+      // New day — reset
+      localStorage.setItem(CODEC_RING_DATE_KEY, today);
+      localStorage.setItem(CODEC_RING_COUNT_KEY, "0");
+      return 0;
+    }
+    return parseInt(localStorage.getItem(CODEC_RING_COUNT_KEY) || "0", 10);
+  } catch {
+    return 0;
+  }
+}
+
+function incrementCodecRingCount(): void {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem(CODEC_RING_DATE_KEY, today);
+    const count = getCodecRingCount();
+    localStorage.setItem(CODEC_RING_COUNT_KEY, String(count + 1));
+  } catch {
+    // localStorage unavailable
+  }
+}
+
+function canCodecRing(): boolean {
+  return getCodecRingCount() < CODEC_RING_DAILY_CAP;
 }
 
 export function PoEncounterProvider({ children }: { children: React.ReactNode }) {
@@ -223,21 +259,67 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
     };
   }, [fireEncounter]);
 
-  // --- D) ZONE CHANGE (first visit → codec_ring) ---
-  const prevZoneId = useRef<string | null>(null);
-
+  // --- D1) CODEC RING: Phone tab hover (2.5s dwell) ---
   useEffect(() => {
-    if (!zone) return;
-    const zoneId = zone.id;
-    if (zoneId === prevZoneId.current) return;
-    prevZoneId.current = zoneId;
+    let hoverTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const visited = getVisitedZones();
-    if (!visited.has(zoneId)) {
-      markZoneVisited(zoneId);
-      fireEncounter("codec_ring");
+    const onEnter = () => {
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        if (canCodecRing()) {
+          incrementCodecRingCount();
+          fireEncounter("codec_ring");
+        }
+      }, PHONE_TAB_HOVER_MS);
+    };
+
+    const onLeave = () => {
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = null;
+    };
+
+    // Bind to the phone booth tab
+    const tab = document.querySelector(".phone-booth-tab");
+    if (tab) {
+      tab.addEventListener("mouseenter", onEnter);
+      tab.addEventListener("mouseleave", onLeave);
     }
-  }, [zone, fireEncounter]);
+
+    return () => {
+      if (hoverTimer) clearTimeout(hoverTimer);
+      if (tab) {
+        tab.removeEventListener("mouseenter", onEnter);
+        tab.removeEventListener("mouseleave", onLeave);
+      }
+    };
+  }, [fireEncounter]);
+
+  // --- D2) CODEC RING: Scroll back up (scroll past 50%, then back to top 10%) ---
+  useEffect(() => {
+    let passedThreshold = false;
+
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight <= 0) return;
+      const ratio = scrollTop / docHeight;
+
+      if (ratio > SCROLL_BACK_UP_THRESHOLD) {
+        passedThreshold = true;
+      }
+
+      if (passedThreshold && ratio < 0.1) {
+        passedThreshold = false;
+        if (canCodecRing()) {
+          incrementCodecRingCount();
+          fireEncounter("codec_ring");
+        }
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [fireEncounter]);
 
   // --- E) RANDOM TIMER ---
   useEffect(() => {

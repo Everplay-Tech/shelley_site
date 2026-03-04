@@ -2026,6 +2026,30 @@ body.sidebar-collapsed .site-content {
    KNOCK ENCOUNTER
    ═══════════════════════════════════════ */
 
+/* Screen shake — applied to <html> during knocks */
+html.knock-shake {
+  animation: knock-screen-shake 200ms steps(4) forwards;
+}
+html.knock-shake-2 {
+  animation: knock-screen-shake-2 200ms steps(4) forwards;
+}
+
+@keyframes knock-screen-shake {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-4px, 2px); }
+  50%  { transform: translate(3px, -2px); }
+  75%  { transform: translate(-2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes knock-screen-shake-2 {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(3px, -3px); }
+  50%  { transform: translate(-5px, 2px); }
+  75%  { transform: translate(2px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
 @keyframes knock-ripple-expand {
   0% {
     width: 0px;
@@ -2055,6 +2079,200 @@ body.sidebar-collapsed .site-content {
   .knock-ripple,
   .knock-border-flash {
     animation: none !important;
+  }
+  html.knock-shake,
+  html.knock-shake-2 {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════
+   CODEC RING ENCOUNTER — phone booth effects
+   ═══════════════════════════════════════ */
+
+/* Phone shakes when ringing */
+.phone-ring-shake {
+  animation: phone-ring-shake 400ms steps(6);
+}
+
+@keyframes phone-ring-shake {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  15%  { transform: translate(-3px, 0) rotate(-5deg); }
+  30%  { transform: translate(3px, 0) rotate(5deg); }
+  45%  { transform: translate(-2px, 0) rotate(-3deg); }
+  60%  { transform: translate(2px, 0) rotate(3deg); }
+  80%  { transform: translate(-1px, 0) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Ringing state — amber glow on the phone booth panel */
+.phone-booth--ringing {
+  transform: translateX(0) !important;
+  border-left-color: rgba(255, 191, 0, 0.4);
+  box-shadow: inset 0 0 30px rgba(255, 191, 0, 0.05);
+}
+
+.phone-booth--ringing .phone-booth-phone {
+  border-color: rgba(255, 191, 0, 0.6);
+  box-shadow: 0 0 16px rgba(255, 191, 0, 0.25);
+}
+
+.phone-booth--ringing .phone-booth-label {
+  color: rgba(255, 191, 0, 0.8);
+}
+
+/* Zigzag signal lines — positioned to emanate left from the phone booth */
+.codec-ring-signals {
+  position: fixed;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80px;
+  height: 120px;
+  pointer-events: none;
+  z-index: 56;
+}
+
+.codec-ring-zigzag {
+  position: absolute;
+  right: 0;
+  width: 40px;
+  height: 2px;
+  opacity: 0;
+}
+
+/* Zigzag shape via clip-path */
+.codec-ring-zigzag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #ffbf00;
+  clip-path: polygon(
+    0% 0%, 20% 100%, 40% 0%, 60% 100%, 80% 0%, 100% 100%,
+    100% 100%, 80% 0%, 60% 100%, 40% 0%, 20% 100%, 0% 0%
+  );
+  height: 8px;
+  top: -3px;
+}
+
+.codec-ring-zigzag-1 {
+  top: 25%;
+  animation: codec-zigzag-fly 800ms ease-out forwards;
+}
+.codec-ring-zigzag-2 {
+  top: 50%;
+  animation: codec-zigzag-fly 800ms ease-out 150ms forwards;
+}
+.codec-ring-zigzag-3 {
+  top: 75%;
+  animation: codec-zigzag-fly 800ms ease-out 300ms forwards;
+}
+
+@keyframes codec-zigzag-fly {
+  0% {
+    opacity: 0.9;
+    transform: translateX(0) scaleX(0.5);
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-70px) scaleX(1.2);
+  }
+}
+
+/* INCOMING label — right side, above the phone booth tab */
+.codec-ring-incoming {
+  position: fixed;
+  right: 88px;
+  top: calc(50% - 50px);
+  z-index: 56;
+  font-family: var(--font-pixel, monospace);
+  font-size: 9px;
+  color: #ffbf00;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 191, 0, 0.6);
+  pointer-events: none;
+  animation: codec-ring-incoming-fade 600ms steps(4) forwards;
+}
+
+.codec-ring-incoming-blink {
+  animation: codec-ring-blink 500ms steps(1) infinite;
+}
+
+@keyframes codec-ring-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes codec-ring-incoming-fade {
+  0% { opacity: 0; transform: translateX(10px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Invisible click zone over the phone booth for answering */
+.codec-ring-answer-zone {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 57;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* IGNORE button — below the INCOMING label */
+.codec-ring-ignore {
+  position: fixed;
+  right: 88px;
+  top: calc(50% + 20px);
+  z-index: 56;
+  font-family: var(--font-pixel, monospace);
+  font-size: 7px;
+  color: #666;
+  background: none;
+  border: 1px solid #333;
+  padding: 2px 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: color 200ms, border-color 200ms;
+}
+
+.codec-ring-ignore:hover {
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+/* Mobile: hide codec ring signals (phone booth hidden on mobile) */
+@media (max-width: 768px) {
+  .codec-ring-signals,
+  .codec-ring-incoming,
+  .codec-ring-answer-zone,
+  .codec-ring-ignore {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-ring-shake {
+    animation: none !important;
+  }
+  .codec-ring-zigzag {
+    animation: none !important;
+    display: none;
+  }
+  .codec-ring-incoming {
+    animation: none;
+    opacity: 1;
+  }
+  .codec-ring-incoming-blink {
+    animation: none;
+    opacity: 1;
   }
 }
 
