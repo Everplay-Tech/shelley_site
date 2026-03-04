@@ -40,6 +40,11 @@ const CursorStalkEncounter = dynamic(
   { ssr: false }
 );
 
+const ZoneDropEncounter = dynamic(
+  () => import("@/components/encounters/ZoneDropEncounter"),
+  { ssr: false }
+);
+
 const inter = Inter({ subsets: ["latin"] });
 
 const pixelFont = localFont({
@@ -135,6 +140,7 @@ export default function RootLayout({
           <CodecOverlay />
           <PaperPlaneEncounter />
           <CursorStalkEncounter />
+          <ZoneDropEncounter />
           <Sidebar />
           <div className="crt-boot-line" aria-hidden="true" />
           <main id="main-content" className="crt-boot site-content min-h-screen relative z-[1]">
