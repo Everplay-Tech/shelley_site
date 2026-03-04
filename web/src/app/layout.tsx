@@ -20,6 +20,11 @@ import { TransitionProvider } from "@/components/TransitionContext";
 import { CodecProvider } from "@/hooks/useCodecOverlay";
 import { ZoneSidebarProvider } from "@/components/ZoneSidebarContext";
 
+const PoEncounterProvider = dynamic(
+  () => import("@/components/PoEncounterProvider"),
+  { ssr: false }
+);
+
 const CodecOverlay = dynamic(
   () => import("@/components/CodecOverlay"),
   { ssr: false }
@@ -112,6 +117,7 @@ export default function RootLayout({
         <TransitionProvider>
         <CodecProvider>
         <ZoneSidebarProvider>
+        <PoEncounterProvider>
           <a href="#main-content" className="skip-link">
             Skip to content
           </a>
@@ -129,6 +135,7 @@ export default function RootLayout({
               <FooterScene />
             </div>
           </footer>
+        </PoEncounterProvider>
         </ZoneSidebarProvider>
         </CodecProvider>
         </TransitionProvider>
