@@ -135,6 +135,13 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
     setEncounterPhase("entering");
   }, []);
 
+  // --- Auto-transition: entering → waiting after entrance animation ---
+  useEffect(() => {
+    if (encounterPhase !== "entering") return;
+    const id = setTimeout(() => setEncounterPhase("waiting"), 300);
+    return () => clearTimeout(id);
+  }, [encounterPhase]);
+
   // =====================================================================
   // DETECTION LOGIC — all runs inside effects, cleaned up on unmount
   // =====================================================================
