@@ -1805,7 +1805,7 @@ body.sidebar-collapsed .site-content {
   outline-offset: 2px;
 }
 
-/* ── Reduced motion ── */
+/* ── Paper Plane Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .paper-plane-encounter * {
     animation-duration: 0.01ms !important;
@@ -1817,5 +1817,41 @@ body.sidebar-collapsed .site-content {
 @media (max-width: 768px) {
   .paper-plane-encounter {
     display: none;
+  }
+}
+
+/* ═══════════════════════════════════════
+   KNOCK ENCOUNTER
+   ═══════════════════════════════════════ */
+
+@keyframes knock-ripple-expand {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+  100% {
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+  }
+}
+
+@keyframes knock-border-flash {
+  0% {
+    opacity: 0.2;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knock-ripple,
+  .knock-border-flash {
+    animation: none !important;
   }
 }
