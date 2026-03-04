@@ -1403,6 +1403,292 @@ body.sidebar-collapsed .site-content {
   }
 }
 
+/* ─── CODEC V2: THREE-PANEL LAYOUT ─── */
+
+/* Scanlines — tight 1px gap for V2 */
+.codec-v2-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, 0.12) 1px,
+    rgba(0, 0, 0, 0.12) 2px
+  );
+}
+
+/* Panel container — three columns on desktop */
+.codec-v2-panels {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  min-height: 180px;
+}
+
+/* ── Left: Po Portrait ── */
+.codec-portrait-frame {
+  flex: 0 0 35%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.codec-portrait-inner {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  aspect-ratio: 4 / 5;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 100, 0.12);
+  box-shadow:
+    inset 2px 2px 0 0 rgba(0, 0, 0, 0.5),
+    inset -1px -1px 0 0 rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Green CRT tint on the sprite */
+.codec-portrait-crt {
+  position: relative;
+  z-index: 1;
+  filter: sepia(1) hue-rotate(70deg) saturate(1.5) brightness(0.8);
+  animation: codec-portrait-breathe 3s ease-in-out infinite;
+}
+
+@keyframes codec-portrait-breathe {
+  0%, 100% { transform: scale(0.98); }
+  50%      { transform: scale(1.02); }
+}
+
+/* Tight scanlines over portrait */
+.codec-portrait-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, 0.15) 1px,
+    rgba(0, 0, 0, 0.15) 2px
+  );
+  z-index: 2;
+}
+
+/* ── Center: Crystal Bonsai ── */
+.codec-artifact-frame {
+  flex: 0 0 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid rgba(0, 255, 242, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 20px rgba(0, 255, 242, 0.03);
+}
+
+/* Crystal Bonsai breathing pulse */
+.crystal-bonsai {
+  animation: crystal-breathe 4s ease-in-out infinite;
+}
+
+@keyframes crystal-breathe {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+
+/* Orbit rotation */
+.crystal-orbit-1 { animation: crystal-orbit-spin 16s linear infinite; transform-origin: 60px 75px; }
+.crystal-orbit-2 { animation: crystal-orbit-spin 12s linear infinite reverse; transform-origin: 60px 70px; }
+.crystal-orbit-3 { animation: crystal-orbit-spin 8s linear infinite; transform-origin: 60px 65px; }
+
+@keyframes crystal-orbit-spin {
+  0%   { opacity: 0.15; }
+  50%  { opacity: 0.35; }
+  100% { opacity: 0.15; }
+}
+
+/* ── Center: Triple Flux Capacitor ── */
+.triple-flux {
+  animation: triple-flux-breathe 3s ease-in-out infinite;
+}
+
+@keyframes triple-flux-breathe {
+  0%, 100% { opacity: 0.88; }
+  50%      { opacity: 1; }
+}
+
+/* Core pulse */
+.tf-core {
+  animation: tf-core-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tf-core-pulse {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+.tf-core-bright {
+  animation: tf-core-bright-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes tf-core-bright-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.15); }
+}
+
+/* Inner concentric rings — slow expand/contract */
+.tf-inner-ring-1 { animation: tf-ring-pulse 3s ease-in-out infinite; }
+.tf-inner-ring-2 { animation: tf-ring-pulse 4s ease-in-out infinite 0.5s; }
+.tf-inner-ring-3 { animation: tf-ring-pulse 5s ease-in-out infinite 1s; }
+
+@keyframes tf-ring-pulse {
+  0%, 100% { opacity: 0.1; transform-origin: center; }
+  50%      { opacity: 0.3; }
+}
+
+/* Outer dashed rings — slow counter-rotate */
+.tf-outer-ring {
+  animation: tf-outer-spin 20s linear infinite;
+  transform-origin: 60px 72px;
+}
+.tf-outer-ring-2 {
+  animation: tf-outer-spin 28s linear infinite reverse;
+  transform-origin: 60px 72px;
+}
+
+@keyframes tf-outer-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Right: Dossier ── */
+.codec-dossier-frame {
+  flex: 0 0 35%;
+  border: 1px solid rgba(0, 255, 100, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem;
+  box-shadow: inset 0 0 15px rgba(0, 255, 100, 0.02);
+}
+
+.codec-dossier {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.codec-dossier-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Dialogue area ── */
+.codec-v2-dialogue {
+  position: relative;
+  border: 1px solid rgba(255, 191, 0, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.75rem 1rem;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Faint green scan line sweeping down the dialogue */
+.codec-dialogue-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 255, 100, 0.06) 30%,
+    rgba(0, 255, 100, 0.12) 50%,
+    rgba(0, 255, 100, 0.06) 70%,
+    transparent 100%
+  );
+  animation: codec-sweep 4s linear infinite;
+}
+
+@keyframes codec-sweep {
+  0%   { top: 0; }
+  100% { top: 100%; }
+}
+
+/* ── Mobile: portrait + dialogue only ── */
+@media (max-width: 768px) {
+  .codec-v2-panels {
+    justify-content: center;
+    min-height: auto;
+  }
+
+  .codec-portrait-frame {
+    flex: 0 0 auto;
+    width: 120px;
+  }
+
+  .codec-portrait-inner {
+    max-width: 120px;
+  }
+}
+
+/* ── Reduced motion for V2 additions ── */
+@media (prefers-reduced-motion: reduce) {
+  .codec-portrait-crt {
+    animation: none;
+    transform: scale(1);
+  }
+
+  .crystal-bonsai {
+    animation: none;
+    opacity: 1;
+  }
+
+  .crystal-orbit-1,
+  .crystal-orbit-2,
+  .crystal-orbit-3 {
+    animation: none;
+  }
+
+  .crystal-particle,
+  .crystal-particle-1,
+  .crystal-particle-2,
+  .crystal-particle-3 {
+    display: none;
+  }
+
+  .crystal-bonsai-svg animateMotion {
+    /* SVG animations paused via CSS */
+  }
+
+  .codec-dialogue-sweep {
+    animation: none;
+    display: none;
+  }
+
+  /* Triple Flux */
+  .triple-flux {
+    animation: none;
+    opacity: 1;
+  }
+
+  .tf-core,
+  .tf-core-bright,
+  .tf-inner-ring-1,
+  .tf-inner-ring-2,
+  .tf-inner-ring-3,
+  .tf-outer-ring,
+  .tf-outer-ring-2 {
+    animation: none;
+  }
+
+  .tf-pulse,
+  .tf-pulse-1,
+  .tf-pulse-1b,
+  .tf-pulse-2,
+  .tf-pulse-2b,
+  .tf-pulse-3,
+  .tf-pulse-3b {
+    display: none;
+  }
+}
+
 /* ─── SCREEN READER ONLY ─── */
 
 .sr-only {

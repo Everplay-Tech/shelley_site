@@ -1,10 +1,21 @@
 "use client";
 
+// ─── Codec V2 — Three-Panel MGS-Inspired Layout ────────────────────────────
+// Left: Po portrait (large, green CRT tint)
+// Center: Crystal Bonsai OR Triple Flux Capacitor (random per open)
+// Right: Dossier pentagon chart
+// Bottom: Dialogue with typewriter (preserved from V1)
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useCodecOverlay } from "@/hooks/useCodecOverlay";
 import { getCodecScript, type CodecLine } from "@/lib/codec-content";
 import { PO_COSTUMES } from "@/lib/zone-config";
 import PoZoneAnimation from "./PoZoneAnimation";
+import CrystalBonsai from "./CrystalBonsai";
+import TripleFlux from "./TripleFlux";
+import PoDossier from "./PoDossier";
+
+type ArtifactType = "bonsai" | "flux";
 
 // Read context from cookies (lightweight, no server round-trip)
 function getCodecContext(zoneId: ReturnType<typeof useCodecOverlay>["zoneId"]) {
@@ -41,12 +52,13 @@ export default function CodecOverlay() {
   const [displayedText, setDisplayedText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
   const [closing, setClosing] = useState(false);
+  const [artifact, setArtifact] = useState<ArtifactType>("bonsai");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Load script when opening
+  // Load script + randomize center artifact when opening
   useEffect(() => {
     if (!isOpen) return;
     const context = getCodecContext(zoneId);
@@ -54,6 +66,7 @@ export default function CodecOverlay() {
     setLines(script.lines);
     setLineIndex(0);
     setClosing(false);
+    setArtifact(Math.random() < 0.5 ? "bonsai" : "flux");
   }, [isOpen, zoneId]);
 
   // Typewriter effect
@@ -85,7 +98,6 @@ export default function CodecOverlay() {
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
-      // Delay to let animation start
       setTimeout(() => closeBtnRef.current?.focus(), 50);
     }
     return () => {
@@ -95,14 +107,13 @@ export default function CodecOverlay() {
     };
   }, [isOpen]);
 
-  // ESC to close
+  // ESC to close + focus trap
   useEffect(() => {
     if (!isOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
         handleClose();
       }
-      // Focus trap: Tab wrapping
       if (e.key === "Tab" && overlayRef.current) {
         const focusable = overlayRef.current.querySelectorAll<HTMLElement>(
           'button, [tabindex]:not([tabindex="-1"])'
@@ -171,30 +182,32 @@ export default function CodecOverlay() {
       className="fixed inset-0 z-[60] flex items-center justify-center"
       onClick={handleBackdropClick}
     >
-      {/* Backdrop — semi-transparent so page is visible */}
+      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60" />
 
-      {/* Dialog window */}
+      {/* Dialog window — wider for three panels */}
       <div
-        className={`relative max-w-xl w-full mx-4 codec-window ${
+        className={`relative max-w-[800px] w-full mx-4 codec-window ${
           closing ? "codec-window-exit" : "codec-window-enter"
         }`}
       >
-        {/* Scanlines — inside dialog only */}
+        {/* Scanlines — tight 1px gap inside dialog */}
         <div
-          className="absolute inset-0 pointer-events-none z-[1] rounded-sm"
-          style={{
-            background:
-              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px)",
-          }}
+          className="absolute inset-0 pointer-events-none z-[1] rounded-sm codec-v2-scanlines"
           aria-hidden="true"
         />
 
         {/* Title bar */}
         <div className="codec-titlebar relative z-10">
-          <span className="font-pixel text-[7px] text-shelley-amber/60 tracking-[0.2em]">
-            CODEC
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-pixel text-[7px] text-shelley-amber/60 tracking-[0.2em]">
+              CODEC
+            </span>
+            <div className="hidden sm:block h-px flex-1 max-w-[100px] bg-shelley-amber/10" />
+            <span className="hidden sm:block font-pixel text-[5px] text-white/15 tracking-[0.15em]">
+              v2.0
+            </span>
+          </div>
           <button
             ref={closeBtnRef}
             onClick={handleClose}
@@ -205,67 +218,82 @@ export default function CodecOverlay() {
           </button>
         </div>
 
-        {/* Content area */}
-        <div className="relative z-10 p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
-            {/* Portrait */}
-            <div className="shrink-0 text-center">
-              <div className="relative w-[64px] h-[64px] sm:w-[80px] sm:h-[80px] pixel-panel-inset flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-black/40" />
-                <div className="relative">
-                  <PoZoneAnimation costume={costume} size={80} />
+        {/* ── Three-panel area (desktop) ── */}
+        <div className="relative z-10 p-3 sm:p-4">
+          <div className="codec-v2-panels">
+            {/* LEFT: Po Portrait (large, green CRT) */}
+            <div className="codec-portrait-frame">
+              <div className="codec-portrait-inner">
+                {/* Dark inset background */}
+                <div className="absolute inset-0 bg-black/50" />
+                {/* Green CRT tint wrapper */}
+                <div className="codec-portrait-crt">
+                  <PoZoneAnimation costume={costume} size={200} />
                 </div>
-                {/* Portrait scanlines */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background:
-                      "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.12) 1px, rgba(0,0,0,0.12) 2px)",
-                  }}
-                  aria-hidden="true"
-                />
+                {/* Tight scanlines over portrait */}
+                <div className="absolute inset-0 pointer-events-none codec-portrait-scanlines" />
               </div>
-              <p className="font-pixel text-[5px] sm:text-[6px] text-shelley-amber/50 tracking-widest mt-1.5">
+              {/* Label */}
+              <p className="font-pixel text-[6px] text-shelley-amber/50 tracking-[0.2em] mt-1.5 text-center">
                 {costumeConfig.label.toUpperCase()}
               </p>
             </div>
 
-            {/* Dialogue */}
-            <div className="flex-1 min-w-0 w-full">
-              {/* Speaker label */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="font-pixel text-[8px] text-shelley-amber crt-glow tracking-wider">
-                  {currentLine?.speaker ?? "PO"}
-                </span>
-                <div className="flex-1 h-px bg-shelley-amber/10" />
-              </div>
+            {/* CENTER: Crystal Bonsai or Triple Flux (hidden on mobile) */}
+            <div className="codec-artifact-frame hidden sm:flex">
+              {artifact === "flux" ? (
+                <TripleFlux className="w-full h-full" />
+              ) : (
+                <CrystalBonsai className="w-full h-full" />
+              )}
+            </div>
 
-              {/* Dialogue text with typewriter */}
-              <div
-                role="log"
-                aria-live="polite"
-                className="min-h-[60px] sm:min-h-[72px] mb-4"
+            {/* RIGHT: Dossier/Stats (hidden on mobile) */}
+            <div className="codec-dossier-frame hidden sm:block">
+              <PoDossier zoneId={zoneId} />
+            </div>
+          </div>
+
+          {/* ── Dialogue area (full width, below panels) ── */}
+          <div className="codec-v2-dialogue mt-3">
+            {/* Dialogue scan sweep */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-sm">
+              <div className="codec-dialogue-sweep" aria-hidden="true" />
+            </div>
+
+            {/* Speaker label */}
+            <div className="flex items-center gap-2 mb-2 relative z-10">
+              <span className="font-pixel text-[8px] text-shelley-amber crt-glow tracking-wider">
+                {currentLine?.speaker ?? "PO"}
+              </span>
+              <div className="flex-1 h-px bg-shelley-amber/10" />
+            </div>
+
+            {/* Dialogue text with typewriter */}
+            <div
+              role="log"
+              aria-live="polite"
+              className="min-h-[48px] sm:min-h-[56px] mb-3 relative z-10"
+            >
+              <p className="font-pixel text-[7px] sm:text-[8px] text-white/60 leading-[2]">
+                {displayedText}
+                {showCursor && (
+                  <span className="inline-block w-[5px] h-[10px] bg-shelley-amber/70 ml-[1px] animate-blink-cursor align-middle" />
+                )}
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div className="flex justify-between items-center relative z-10">
+              <span className="font-pixel text-[5px] text-white/15 tracking-widest">
+                {lineIndex + 1}/{lines.length}
+              </span>
+              <button
+                onClick={handleAdvance}
+                className="pixel-btn-ghost text-[7px]"
               >
-                <p className="font-pixel text-[7px] sm:text-[8px] text-white/60 leading-[2]">
-                  {displayedText}
-                  {showCursor && (
-                    <span className="inline-block w-[5px] h-[10px] bg-shelley-amber/70 ml-[1px] animate-blink-cursor align-middle" />
-                  )}
-                </p>
-              </div>
-
-              {/* Advance / close button + line counter */}
-              <div className="flex justify-between items-center">
-                <span className="font-pixel text-[5px] text-white/15 tracking-widest">
-                  {lineIndex + 1}/{lines.length}
-                </span>
-                <button
-                  onClick={handleAdvance}
-                  className="pixel-btn-ghost text-[7px]"
-                >
-                  {isTyping ? "SKIP \u25B6" : isLastLine ? "CLOSE" : "NEXT \u25B6"}
-                </button>
-              </div>
+                {isTyping ? "SKIP \u25B6" : isLastLine ? "CLOSE" : "NEXT \u25B6"}
+              </button>
             </div>
           </div>
         </div>
