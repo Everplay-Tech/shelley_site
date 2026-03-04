@@ -228,7 +228,18 @@ export default function CodecOverlay() {
                 <div className="absolute inset-0 bg-black/50" />
                 {/* Green CRT tint wrapper */}
                 <div className="codec-portrait-crt">
-                  <PoZoneAnimation costume={costume} size={200} />
+                  {costumeConfig.portrait ? (
+                    <img
+                      src={costumeConfig.portrait}
+                      alt={`${costumeConfig.label} portrait`}
+                      width={200}
+                      height={200}
+                      className="w-[200px] h-[200px] object-contain"
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                  ) : (
+                    <PoZoneAnimation costume={costume} size={200} />
+                  )}
                 </div>
                 {/* Tight scanlines over portrait */}
                 <div className="absolute inset-0 pointer-events-none codec-portrait-scanlines" />
