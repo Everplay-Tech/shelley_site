@@ -30,6 +30,11 @@ const CodecOverlay = dynamic(
   { ssr: false }
 );
 
+const CursorStalkEncounter = dynamic(
+  () => import("@/components/encounters/CursorStalkEncounter"),
+  { ssr: false }
+);
+
 const inter = Inter({ subsets: ["latin"] });
 
 const pixelFont = localFont({
@@ -123,6 +128,7 @@ export default function RootLayout({
           </a>
           <MiniGameTransition />
           <CodecOverlay />
+          <CursorStalkEncounter />
           <Sidebar />
           <div className="crt-boot-line" aria-hidden="true" />
           <main id="main-content" className="crt-boot site-content min-h-screen relative z-[1]">
