@@ -168,107 +168,105 @@ export default function CodecOverlay() {
       role="dialog"
       aria-modal="true"
       aria-label="Po codec dialogue"
-      className={`fixed inset-0 z-[60] ${closing ? "codec-overlay-exit" : "codec-overlay-enter"}`}
+      className="fixed inset-0 z-[60] flex items-center justify-center"
       onClick={handleBackdropClick}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/95" />
+      {/* Backdrop — semi-transparent so page is visible */}
+      <div className="absolute inset-0 bg-black/60" />
 
-      {/* Scanlines */}
+      {/* Dialog window */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px)",
-        }}
-        aria-hidden="true"
-      />
+        className={`relative max-w-xl w-full mx-4 codec-window ${
+          closing ? "codec-window-exit" : "codec-window-enter"
+        }`}
+      >
+        {/* Scanlines — inside dialog only */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[1] rounded-sm"
+          style={{
+            background:
+              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px)",
+          }}
+          aria-hidden="true"
+        />
 
-      {/* Codec frame */}
-      <div className="relative z-10 h-full flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl">
-          {/* Top bar */}
-          <div className="flex justify-between items-center mb-4">
-            <span className="font-pixel text-[7px] text-white/20 tracking-widest">
-              CODEC
-            </span>
-            <button
-              ref={closeBtnRef}
-              onClick={handleClose}
-              className="pixel-btn-ghost text-[7px]"
-              aria-label="Close codec dialogue (Escape)"
-            >
-              CLOSE
-            </button>
-          </div>
+        {/* Title bar */}
+        <div className="codec-titlebar relative z-10">
+          <span className="font-pixel text-[7px] text-shelley-amber/60 tracking-[0.2em]">
+            CODEC
+          </span>
+          <button
+            ref={closeBtnRef}
+            onClick={handleClose}
+            className="font-pixel text-[7px] text-white/30 hover:text-shelley-amber/80 transition-colors px-1.5 py-0.5 border border-white/10 hover:border-shelley-amber/30"
+            aria-label="Close codec dialogue (Escape)"
+          >
+            &#x2715;
+          </button>
+        </div>
 
-          {/* Main content */}
-          <div className="pixel-panel p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-              {/* Portrait */}
-              <div className="shrink-0 text-center">
-                <div className="relative w-[96px] h-[96px] sm:w-[120px] sm:h-[120px] pixel-panel-inset flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-black/40" />
-                  <div className="relative">
-                    <PoZoneAnimation costume={costume} size={96} />
-                  </div>
-                  {/* Portrait scanlines */}
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background:
-                        "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.12) 1px, rgba(0,0,0,0.12) 2px)",
-                    }}
-                    aria-hidden="true"
-                  />
+        {/* Content area */}
+        <div className="relative z-10 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
+            {/* Portrait */}
+            <div className="shrink-0 text-center">
+              <div className="relative w-[64px] h-[64px] sm:w-[80px] sm:h-[80px] pixel-panel-inset flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-black/40" />
+                <div className="relative">
+                  <PoZoneAnimation costume={costume} size={80} />
                 </div>
-                <p className="font-pixel text-[6px] text-shelley-amber/50 tracking-widest mt-2">
-                  {costumeConfig.label.toUpperCase()}
+                {/* Portrait scanlines */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.12) 1px, rgba(0,0,0,0.12) 2px)",
+                  }}
+                  aria-hidden="true"
+                />
+              </div>
+              <p className="font-pixel text-[5px] sm:text-[6px] text-shelley-amber/50 tracking-widest mt-1.5">
+                {costumeConfig.label.toUpperCase()}
+              </p>
+            </div>
+
+            {/* Dialogue */}
+            <div className="flex-1 min-w-0 w-full">
+              {/* Speaker label */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="font-pixel text-[8px] text-shelley-amber crt-glow tracking-wider">
+                  {currentLine?.speaker ?? "PO"}
+                </span>
+                <div className="flex-1 h-px bg-shelley-amber/10" />
+              </div>
+
+              {/* Dialogue text with typewriter */}
+              <div
+                role="log"
+                aria-live="polite"
+                className="min-h-[60px] sm:min-h-[72px] mb-4"
+              >
+                <p className="font-pixel text-[7px] sm:text-[8px] text-white/60 leading-[2]">
+                  {displayedText}
+                  {showCursor && (
+                    <span className="inline-block w-[5px] h-[10px] bg-shelley-amber/70 ml-[1px] animate-blink-cursor align-middle" />
+                  )}
                 </p>
               </div>
 
-              {/* Dialogue */}
-              <div className="flex-1 min-w-0 w-full">
-                {/* Speaker label */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="font-pixel text-[8px] text-shelley-amber crt-glow tracking-wider">
-                    {currentLine?.speaker ?? "PO"}
-                  </span>
-                  <div className="flex-1 h-px bg-shelley-amber/10" />
-                </div>
-
-                {/* Dialogue text with typewriter */}
-                <div
-                  role="log"
-                  aria-live="polite"
-                  className="min-h-[60px] sm:min-h-[80px] mb-4"
+              {/* Advance / close button + line counter */}
+              <div className="flex justify-between items-center">
+                <span className="font-pixel text-[5px] text-white/15 tracking-widest">
+                  {lineIndex + 1}/{lines.length}
+                </span>
+                <button
+                  onClick={handleAdvance}
+                  className="pixel-btn-ghost text-[7px]"
                 >
-                  <p className="font-pixel text-[7px] sm:text-[8px] text-white/60 leading-[2]">
-                    {displayedText}
-                    {showCursor && (
-                      <span className="inline-block w-[5px] h-[10px] bg-shelley-amber/70 ml-[1px] animate-blink-cursor align-middle" />
-                    )}
-                  </p>
-                </div>
-
-                {/* Advance / close button */}
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleAdvance}
-                    className="pixel-btn-ghost text-[7px]"
-                  >
-                    {isTyping ? "SKIP \u25B6" : isLastLine ? "CLOSE" : "NEXT \u25B6"}
-                  </button>
-                </div>
+                  {isTyping ? "SKIP \u25B6" : isLastLine ? "CLOSE" : "NEXT \u25B6"}
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Status bar */}
-          <div className="flex justify-between items-center mt-3 px-1">
-            <span className="font-pixel text-[5px] text-white/10 tracking-widest">
-              {lineIndex + 1}/{lines.length}
-            </span>
           </div>
         </div>
       </div>

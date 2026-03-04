@@ -68,6 +68,7 @@ export interface ZoneConfig {
   borderColorClass: string;
   poQuotes: string[];
   poCostume: PoCostumeId;
+  cartridgeImage: string;
 }
 
 export const ZONES: Record<ZoneId, ZoneConfig> = {
@@ -89,6 +90,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "The go-bar deck is basically a medieval torture device. For wood.",
     ],
     poCostume: "craftsman",
+    cartridgeImage: "/images/cartridges/workshop.png",
   },
   gallery: {
     id: "gallery",
@@ -108,6 +110,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "Magus says a guitar's soul develops over time. I believe him. I've seen weirder.",
     ],
     poCostume: "artist",
+    cartridgeImage: "/images/cartridges/gallery.png",
   },
   librarynth: {
     id: "librarynth",
@@ -127,6 +130,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "The crystals hum a different note depending on who walks past. Mine is apparently B-flat.",
     ],
     poCostume: "scholar",
+    cartridgeImage: "/images/cartridges/librarynth.png",
   },
   contact: {
     id: "contact",
@@ -146,6 +150,7 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "Magus checks messages between builds. So basically... constantly.",
     ],
     poCostume: "messenger",
+    cartridgeImage: "/images/cartridges/contact.png",
   },
 };
 

@@ -21,6 +21,7 @@ interface ProgressRow {
   pieces_collected: number;
   reward_code: string | null;
   game_records: Record<string, unknown>;
+  preferences: Record<string, unknown>;
 }
 
 // POST /api/session — Create or resume a session.
@@ -69,7 +70,7 @@ export async function POST() {
       `SELECT games_played, games_completed, games_skipped,
               total_score, total_picks, po_relationship,
               onboarding_complete, fourth_wall_unlocked,
-              pieces_collected, reward_code, game_records
+              pieces_collected, reward_code, game_records, preferences
        FROM game_progress WHERE session_id = $1`,
       [sessionId]
     );
@@ -86,6 +87,7 @@ export async function POST() {
       pieces_collected: 0,
       reward_code: null,
       game_records: {},
+      preferences: {},
     };
 
     // Set session cookie
@@ -103,6 +105,7 @@ export async function POST() {
         piecesCollected: row.pieces_collected ?? 0,
         rewardCode: row.reward_code,
         gameRecords: row.game_records,
+        preferences: row.preferences ?? {},
       },
     });
 

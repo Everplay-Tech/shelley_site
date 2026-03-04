@@ -9,10 +9,6 @@ const MiniGameTransition = dynamic(
   () => import("@/components/MiniGameTransition"),
   { ssr: false }
 );
-const PoMascot = dynamic(
-  () => import("@/components/PoMascot"),
-  { ssr: false }
-);
 const FooterScene = dynamic(
   () => import("@/components/FooterScene"),
   { ssr: false }
@@ -124,7 +120,6 @@ export default function RootLayout({
                 </h1>
                 <Navigation />
               </div>
-              <PoMascot />
             </div>
           </header>
           <div className="crt-boot-line" aria-hidden="true" />

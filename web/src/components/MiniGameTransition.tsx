@@ -8,7 +8,7 @@ import type { GodotEvent } from "@/lib/godot-messages";
 import { emitGameEvent } from "@/lib/game-events";
 
 const MiniGameTransition: React.FC = () => {
-  const { isActive, activeGame, quickTransit, pendingUrl, skip, complete, isReplay } = useTransition();
+  const { isActive, activeGame, quickTransit, pendingUrl, skip, complete, isReplay, setGamesEnabled } = useTransition();
 
   const handleGodotEvent = useCallback(
     (event: GodotEvent) => {
@@ -80,9 +80,23 @@ const MiniGameTransition: React.FC = () => {
           <p className="font-pixel text-[7px] text-white/40 tracking-wider">
             {activeGame.label?.toUpperCase() ?? "LOADING..."}
           </p>
-          <button onClick={handleSkip} className="pixel-btn-ghost" aria-label={isReplay ? "Close game (Escape)" : "Skip game and continue to page (Escape)"}>
-            {isReplay ? "CLOSE (ESC)" : "SKIP (ESC)"}
-          </button>
+          <div className="flex items-center gap-3">
+            {!isReplay && (
+              <button
+                onClick={() => {
+                  setGamesEnabled(false);
+                  handleSkip();
+                }}
+                className="font-pixel text-[6px] text-white/20 hover:text-white/50 transition-colors tracking-wider"
+                aria-label="Turn off transition games"
+              >
+                TURN OFF GAMES
+              </button>
+            )}
+            <button onClick={handleSkip} className="pixel-btn-ghost" aria-label={isReplay ? "Close game (Escape)" : "Skip game and continue to page (Escape)"}>
+              {isReplay ? "CLOSE (ESC)" : "SKIP (ESC)"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

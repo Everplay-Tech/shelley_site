@@ -15,6 +15,7 @@ export interface GameProgress {
   piecesCollected: number;
   rewardCode: string | null;
   gameRecords: Record<string, GameRecord>;
+  preferences: Record<string, unknown>;
 }
 
 export interface GameRecord {
@@ -51,6 +52,7 @@ const EMPTY_PROGRESS: GameProgress = {
   piecesCollected: 0,
   rewardCode: null,
   gameRecords: {},
+  preferences: {},
 };
 
 let _progress: GameProgress = { ...EMPTY_PROGRESS };

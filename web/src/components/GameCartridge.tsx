@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useTransition } from "./TransitionContext";
 import type { RouteGameConfig } from "@/lib/game-routes";
 
@@ -10,13 +10,38 @@ interface GameCartridgeProps {
   accentColor: string;
   /** Zone accent hex for glow (e.g. "#ffbf00") */
   accentHex: string;
+  /** Optional cover art image for the cartridge label */
+  coverImage?: string;
   className?: string;
+}
+
+function CoverArt({ src, accentHex }: { src: string; accentHex: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <div className="mb-2 flex justify-center">
+      <img
+        src={src}
+        alt=""
+        width={80}
+        height={80}
+        onError={() => setFailed(true)}
+        className="block"
+        style={{
+          imageRendering: "pixelated",
+          objectFit: "contain",
+          border: `1px solid ${accentHex}20`,
+        }}
+      />
+    </div>
+  );
 }
 
 export default function GameCartridge({
   game,
   accentColor,
   accentHex,
+  coverImage,
   className = "",
 }: GameCartridgeProps) {
   const { replayGame } = useTransition();
@@ -58,6 +83,11 @@ export default function GameCartridge({
 
         {/* Label area */}
         <div className="pixel-panel-inset p-3 sm:p-4 text-center">
+          {/* Cover art */}
+          {coverImage && (
+            <CoverArt src={coverImage} accentHex={accentHex} />
+          )}
+
           {/* Game title */}
           <p className={`font-pixel text-[8px] sm:text-[9px] ${accentColor} tracking-wider mb-2`}>
             {(game.label ?? game.gameName).replace(/\.\.\.$/, "").toUpperCase()}

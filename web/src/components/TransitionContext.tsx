@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { getGameForRoute, type RouteGameConfig } from "@/lib/game-routes";
+import { usePreferences } from "@/hooks/usePreferences";
 
 interface TransitionContextValue {
   startTransition: (url: string) => void;
@@ -17,6 +18,10 @@ interface TransitionContextValue {
   replayGame: (game: RouteGameConfig) => void;
   /** True when the overlay is a replay (close on complete, don't navigate) */
   isReplay: boolean;
+  /** Whether transition games are enabled (user preference) */
+  gamesEnabled: boolean;
+  /** Toggle games on/off */
+  setGamesEnabled: (enabled: boolean) => void;
 }
 
 const TransitionContext = createContext<TransitionContextValue | null>(null);
@@ -33,6 +38,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const [activeGame, setActiveGame] = useState<RouteGameConfig | null>(null);
   const [quickTransit, setQuickTransit] = useState(false);
   const [isReplay, setIsReplay] = useState(false);
+  const { gamesEnabled, setGamesEnabled } = usePreferences();
 
   const navigate = useCallback((url: string) => {
     // Brief hold keeps overlay black, prevents white flash during hard reload
@@ -43,17 +49,18 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
 
   const startTransition = useCallback((url: string) => {
     const game = getGameForRoute(url);
-    if (game) {
+    // Play game only if user has games enabled
+    if (game && gamesEnabled) {
       setPendingUrl(url);
       setActiveGame(game);
       setIsActive(true);
     } else {
-      // No game — show quick wipe overlay then navigate
+      // No game or games disabled — show quick wipe overlay then navigate
       setPendingUrl(url);
       setQuickTransit(true);
       setIsActive(true);
     }
-  }, []);
+  }, [gamesEnabled]);
 
   const resetOverlay = useCallback(() => {
     setIsActive(false);
@@ -88,7 +95,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, quickTransit, complete, replayGame, isReplay }}>
+    <TransitionContext.Provider value={{ startTransition, skip, isActive, pendingUrl, activeGame, quickTransit, complete, replayGame, isReplay, gamesEnabled, setGamesEnabled }}>
       {children}
     </TransitionContext.Provider>
   );

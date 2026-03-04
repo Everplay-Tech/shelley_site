@@ -82,6 +82,7 @@ export async function initSchema(): Promise<void> {
     -- Add pieces_collected column if table already exists (safe migration)
     ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS pieces_collected INTEGER DEFAULT 0;
     ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS reward_code TEXT DEFAULT NULL;
+    ALTER TABLE game_progress ADD COLUMN IF NOT EXISTS preferences JSONB DEFAULT '{}';
 
     -- Narrative overrides — admin-editable dialogue for each beat
     CREATE TABLE IF NOT EXISTS narrative_overrides (
