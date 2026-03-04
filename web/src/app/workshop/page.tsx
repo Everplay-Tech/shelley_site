@@ -2,9 +2,9 @@
 
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
-import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
 import { ZONES } from "@/lib/zone-config";
+import { useSetZoneSidebar } from "@/components/ZoneSidebarContext";
 
 /* ─── Current builds ─────────────────────────────────────────────────────── */
 
@@ -72,12 +72,11 @@ const steps = [
 ];
 
 export default function Workshop() {
+  useSetZoneSidebar(ZONES.workshop);
+
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="sawdust" count={8} />
-
-      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
-      <ZoneHeader zone={ZONES.workshop} />
 
       {/* ─── PROCESS STEPS ─── */}
       <section>

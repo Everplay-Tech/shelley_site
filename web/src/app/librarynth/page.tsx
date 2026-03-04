@@ -2,9 +2,9 @@
 
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
-import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
 import { ZONES, PO_COSTUMES } from "@/lib/zone-config";
+import { useSetZoneSidebar } from "@/components/ZoneSidebarContext";
 
 /* ─── Creative Universe data ─────────────────────────────────────────────── */
 
@@ -61,12 +61,11 @@ const philosophyPoints = [
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export default function Librarynth() {
+  useSetZoneSidebar(ZONES.librarynth);
+
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="sparkles" count={12} />
-
-      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
-      <ZoneHeader zone={ZONES.librarynth} />
 
       {/* ─── PHILOSOPHY ─── */}
       <section>

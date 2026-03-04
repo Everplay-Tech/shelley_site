@@ -2,9 +2,9 @@
 
 import PixelSectionHeader from "@/components/PixelSectionHeader";
 import PixelCard from "@/components/PixelCard";
-import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
 import { ZONES } from "@/lib/zone-config";
+import { useSetZoneSidebar } from "@/components/ZoneSidebarContext";
 
 /* ─── Guitar showcase data ───────────────────────────────────────────────── */
 
@@ -35,12 +35,11 @@ const guitars = [
 /* ─── Component ──────────────────────────────────────────────────────────── */
 
 export default function Gallery() {
+  useSetZoneSidebar(ZONES.gallery);
+
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="motes" count={10} />
-
-      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
-      <ZoneHeader zone={ZONES.gallery} />
 
       {/* ─── INSTAGRAM FEED ─── */}
       <section>

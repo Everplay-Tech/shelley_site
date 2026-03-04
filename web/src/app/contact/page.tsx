@@ -2,13 +2,15 @@
 
 import { useState, type FormEvent } from "react";
 import PixelCard from "@/components/PixelCard";
-import ZoneHeader from "@/components/ZoneHeader";
 import AmbientParticles from "@/components/AmbientParticles";
 import { ZONES } from "@/lib/zone-config";
+import { useSetZoneSidebar } from "@/components/ZoneSidebarContext";
 
 type FormState = "idle" | "sending" | "success" | "error";
 
 export default function Contact() {
+  useSetZoneSidebar(ZONES.contact);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -70,9 +72,6 @@ export default function Contact() {
   return (
     <div className="relative flex flex-col gap-16">
       <AmbientParticles type="signals" count={6} />
-
-      {/* ─── ZONE SIDEBAR (floating: zone label + game link) ─── */}
-      <ZoneHeader zone={ZONES.contact} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* ─── CONTACT FORM ─── */}

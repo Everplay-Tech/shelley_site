@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
-import Navigation from "@/components/Navigation";
 import dynamic from "next/dynamic";
 
 const MiniGameTransition = dynamic(
@@ -13,8 +12,13 @@ const FooterScene = dynamic(
   () => import("@/components/FooterScene"),
   { ssr: false }
 );
+const Sidebar = dynamic(
+  () => import("@/components/Sidebar"),
+  { ssr: false }
+);
 import { TransitionProvider } from "@/components/TransitionContext";
 import { CodecProvider } from "@/hooks/useCodecOverlay";
+import { ZoneSidebarProvider } from "@/components/ZoneSidebarContext";
 
 const CodecOverlay = dynamic(
   () => import("@/components/CodecOverlay"),
@@ -107,32 +111,25 @@ export default function RootLayout({
         />
         <TransitionProvider>
         <CodecProvider>
+        <ZoneSidebarProvider>
           <a href="#main-content" className="skip-link">
             Skip to content
           </a>
           <MiniGameTransition />
           <CodecOverlay />
-          <header className="fixed top-0 left-0 right-0 z-40 pixel-panel dither-border-bottom px-6 py-3">
-            <div className="max-w-7xl mx-auto flex justify-between items-center">
-              <div className="flex items-center gap-6">
-                <h1 className="font-pixel text-[10px] sm:text-xs tracking-widest crt-glow">
-                  SHELLEY<span className="text-shelley-amber">GUITARS</span>
-                </h1>
-                <Navigation />
-              </div>
-            </div>
-          </header>
+          <Sidebar />
           <div className="crt-boot-line" aria-hidden="true" />
-          <main id="main-content" className="crt-boot pt-20 min-h-screen relative z-[1]">
+          <main id="main-content" className="crt-boot site-content min-h-screen relative z-[1]">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
               {children}
             </div>
           </main>
-          <footer className="pixel-panel dither-border-top relative z-[1]">
+          <footer className="pixel-panel dither-border-top relative z-[1] site-content">
             <div className="max-w-7xl mx-auto">
               <FooterScene />
             </div>
           </footer>
+        </ZoneSidebarProvider>
         </CodecProvider>
         </TransitionProvider>
       </body>
