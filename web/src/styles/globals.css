@@ -1702,3 +1702,120 @@ body.sidebar-collapsed .site-content {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ═══════════════════════════════════════
+   PAPER PLANE ENCOUNTER
+   ═══════════════════════════════════════ */
+
+/* Flight: tumbling arc from start to landing via CSS custom properties */
+@keyframes paper-plane-flight {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(calc(var(--pp-end-x) * 0.2), calc(var(--pp-end-y) * 0.3 - 30px)) rotate(15deg);
+  }
+  50% {
+    transform: translate(calc(var(--pp-end-x) * 0.5), calc(var(--pp-end-y) * 0.5 - 50px)) rotate(-10deg);
+  }
+  80% {
+    transform: translate(calc(var(--pp-end-x) * 0.85), calc(var(--pp-end-y) * 0.85 - 15px)) rotate(5deg);
+  }
+  100% {
+    transform: translate(var(--pp-end-x), var(--pp-end-y)) rotate(0deg);
+  }
+}
+
+/* Landing bounce */
+@keyframes paper-plane-bounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.1); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* Unfold: plane rotates open + grows */
+@keyframes paper-plane-unfold {
+  0%   { transform: rotateX(0deg) scale(1); opacity: 1; }
+  60%  { transform: rotateX(120deg) scale(1.2); opacity: 0.6; }
+  100% { transform: rotateX(180deg) scale(1.3); opacity: 0; }
+}
+
+/* Refold: reverse unfold */
+@keyframes paper-plane-refold {
+  0%   { transform: rotateX(180deg) scale(1.3); opacity: 0; }
+  40%  { transform: rotateX(60deg) scale(1.1); opacity: 0.6; }
+  100% { transform: rotateX(0deg) scale(1); opacity: 1; }
+}
+
+/* Exit flight: fly back to sidebar via CSS custom properties */
+@keyframes paper-plane-exit-fly {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(calc(var(--pp-return-x) * 0.3), calc(var(--pp-return-y) * 0.3 - 20px)) rotate(-10deg);
+  }
+  70% {
+    transform: translate(calc(var(--pp-return-x) * 0.7), calc(var(--pp-return-y) * 0.7 - 10px)) rotate(8deg);
+  }
+  100% {
+    transform: translate(var(--pp-return-x), var(--pp-return-y)) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+/* Drift: timeout exit — drift off right edge */
+@keyframes paper-plane-drift {
+  0%   { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(110vw); opacity: 0; }
+}
+
+/* Note appear */
+@keyframes encounter-note-in {
+  0%   { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Hover: plane tilts up */
+.paper-plane-hoverable:hover {
+  transform: rotate(-5deg) !important;
+}
+
+/* Fade out for accepted state */
+.paper-plane-fade-out {
+  animation: paper-plane-accepted-fade 200ms ease-out forwards;
+}
+
+@keyframes paper-plane-accepted-fade {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* EncounterNote checkbox hover — amber fill */
+.encounter-note-btn:hover .encounter-note-box,
+.encounter-note-btn:focus-visible .encounter-note-box {
+  background: rgba(217, 164, 30, 0.35) !important;
+}
+
+.encounter-note-btn:focus-visible {
+  outline: 1px solid #d9a41e;
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .paper-plane-encounter * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Mobile: hide paper plane encounter ── */
+@media (max-width: 768px) {
+  .paper-plane-encounter {
+    display: none;
+  }
+}
