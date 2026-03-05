@@ -467,12 +467,13 @@ export default function Home() {
       <div className="flex flex-col gap-12">
         <section className="text-center py-16">
           <h2 className="font-pixel text-xl sm:text-3xl tracking-wider mb-6 crt-glow leading-relaxed">
-            CRAFTING <span className="text-shelley-amber">SOUND</span>,{" "}
-            <br className="sm:hidden" />
-            BUILDING <span className="text-shelley-amber">LEGENDS</span>.
+            RELEASE YOUR INNER{" "}
+            <span className="text-shelley-amber">PROMETHEUS</span>.
+            <br />
+            PLAY WITH <span className="text-shelley-amber">FIRE</span>.
           </h2>
           <p className="text-base text-white/50 max-w-2xl mx-auto">
-            Handcrafted guitars built with intention. Explore the workshop.
+            When the going gets weird, the weird turn pro. Then they meet Po.
           </p>
         </section>
 
