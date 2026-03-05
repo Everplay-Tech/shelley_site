@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "The Gallery",
   description:
-    "Handcrafted instruments and the stories they carry. Browse guitar builds, specs, and the philosophy behind every Shelley guitar.",
+    "Finished Shelley guitars — each one built from scratch, voiced by hand, and unrepeatable. Follow the builds on Instagram.",
   openGraph: {
     title: "The Gallery | Shelley Guitar",
     description:
-      "Handcrafted instruments and the stories they carry.",
+      "Finished Shelley guitars — each one voiced by hand and unrepeatable.",
   },
 };
 
