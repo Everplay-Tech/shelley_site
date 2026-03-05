@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { ZONES, PO_COSTUMES, type ZoneId } from "@/lib/zone-config";
+import { ZONES, type ZoneId } from "@/lib/zone-config";
 
 // Zone-specific intro lines Po says before a game
 const INTRO_LINES: Record<ZoneId, string[]> = {
@@ -27,6 +27,14 @@ const INTRO_LINES: Record<ZoneId, string[]> = {
   ],
 };
 
+// Zone-specific portrait paintings
+const INTRO_PORTRAITS: Record<ZoneId, string> = {
+  workshop: "/images/intro/workshop.png",
+  gallery: "/images/intro/gallery.png",
+  librarynth: "/images/intro/librarynth.png",
+  contact: "/images/intro/contact.png",
+};
+
 interface PoGameIntroProps {
   zoneId: ZoneId;
   onComplete: () => void;
@@ -35,7 +43,6 @@ interface PoGameIntroProps {
 const PoGameIntro: React.FC<PoGameIntroProps> = ({ zoneId, onComplete }) => {
   const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
   const zone = ZONES[zoneId];
-  const costume = PO_COSTUMES[zone.poCostume];
 
   const line = useMemo(() => {
     const lines = INTRO_LINES[zoneId];
@@ -43,9 +50,9 @@ const PoGameIntro: React.FC<PoGameIntroProps> = ({ zoneId, onComplete }) => {
   }, [zoneId]);
 
   useEffect(() => {
-    // enter: 600ms slide up → hold: 2500ms display → exit: 600ms slide away
-    const enterTimer = setTimeout(() => setPhase("hold"), 600);
-    const holdTimer = setTimeout(() => setPhase("exit"), 3100);
+    // enter: 800ms fade in + scale → hold: 2200ms display → exit: 700ms dissolve out
+    const enterTimer = setTimeout(() => setPhase("hold"), 800);
+    const holdTimer = setTimeout(() => setPhase("exit"), 3000);
     const exitTimer = setTimeout(() => onComplete(), 3700);
 
     return () => {
@@ -56,30 +63,56 @@ const PoGameIntro: React.FC<PoGameIntroProps> = ({ zoneId, onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="po-game-intro">
+    <div className="po-intro-portrait">
+      {/* Dark vignette backdrop */}
+      <div
+        className={`po-intro-backdrop ${phase !== "enter" ? "po-intro-backdrop--visible" : ""}`}
+      />
+
+      {/* Portrait painting */}
+      <div
+        className={`po-intro-painting ${
+          phase === "enter"
+            ? "po-intro-painting--enter"
+            : phase === "exit"
+              ? "po-intro-painting--exit"
+              : "po-intro-painting--hold"
+        }`}
+      >
+        {/* Ornate frame glow */}
+        <div
+          className="po-intro-frame-glow"
+          style={{ boxShadow: `0 0 60px 20px ${zone.accentHex}33, 0 0 120px 40px ${zone.accentHex}11` }}
+        />
+
+        {/* The painting image */}
+        <img
+          src={INTRO_PORTRAITS[zoneId]}
+          alt=""
+          className="po-intro-painting-img"
+          aria-hidden="true"
+          draggable={false}
+        />
+      </div>
+
       {/* Speech bubble — visible during hold phase */}
       <div
-        className={`po-game-intro-bubble ${phase === "hold" ? "po-game-intro-bubble-visible" : ""}`}
+        className={`po-intro-speech ${phase === "hold" ? "po-intro-speech--visible" : ""}`}
       >
-        <span className="font-pixel" style={{ color: zone.accentHex, fontSize: "10px" }}>
+        <span className="font-pixel" style={{ color: zone.accentHex, fontSize: "11px", letterSpacing: "0.1em" }}>
           {line}
         </span>
       </div>
 
-      {/* Po sprite cutout */}
+      {/* Zone name plate */}
       <div
-        className={`po-game-intro-sprite ${
-          phase === "enter"
-            ? "po-game-intro-sprite-enter"
-            : phase === "exit"
-              ? "po-game-intro-sprite-exit"
-              : ""
-        }`}
-        style={{
-          backgroundImage: `url(${costume.sheetPath})`,
-        }}
-        aria-hidden="true"
-      />
+        className={`po-intro-nameplate ${phase === "hold" ? "po-intro-nameplate--visible" : ""}`}
+        style={{ borderColor: `${zone.accentHex}44` }}
+      >
+        <span className="font-pixel" style={{ color: zone.accentHex, fontSize: "8px", letterSpacing: "0.2em" }}>
+          {zone.name}
+        </span>
+      </div>
     </div>
   );
 };
