@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
 interface RewardTier {
@@ -126,6 +127,16 @@ export default function ProfilePage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Quick Links */}
+      <div className="flex gap-3">
+        <Link href="/shop" className="pixel-btn-ghost flex-1 text-center">
+          SHOP
+        </Link>
+        <Link href="/library" className="pixel-btn-ghost flex-1 text-center">
+          MY LIBRARY
+        </Link>
       </div>
 
       {/* Password Management */}
