@@ -9,17 +9,24 @@ import { useTransition } from "./TransitionContext";
 import { useZoneSidebar } from "./ZoneSidebarContext";
 import { getGameForRoute } from "@/lib/game-routes";
 import GameCartridge from "./GameCartridge";
+import {
+  HomeIcon,
+  WorkshopIcon,
+  GalleryIcon,
+  LibrarynthIcon,
+  ContactIcon,
+} from "./ZoneIcons";
 
 const PoZoneAnimation = dynamic(() => import("./PoZoneAnimation"), {
   ssr: false,
 });
 
 const navItems = [
-  { name: "Home", href: "/", icon: "^" },
-  { name: "Workshop", href: "/workshop", icon: "W" },
-  { name: "Gallery", href: "/gallery", icon: "G" },
-  { name: "Librarynth", href: "/librarynth", icon: "L" },
-  { name: "Contact", href: "/contact", icon: "C" },
+  { name: "Home", href: "/", icon: HomeIcon },
+  { name: "Workshop", href: "/workshop", icon: WorkshopIcon },
+  { name: "Gallery", href: "/gallery", icon: GalleryIcon },
+  { name: "Librarynth", href: "/librarynth", icon: LibrarynthIcon },
+  { name: "Contact", href: "/contact", icon: ContactIcon },
 ];
 
 export default function Sidebar() {
@@ -76,7 +83,7 @@ export default function Sidebar() {
                   isCurrentPage && "sidebar-nav-link--active"
                 )}
               >
-                <span className="sidebar-nav-icon" aria-hidden="true">{item.icon}</span>
+                <span className="sidebar-nav-icon" aria-hidden="true"><item.icon /></span>
                 <span className="sidebar-nav-label">{item.name.toUpperCase()}</span>
                 {hasGame && (
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-shelley-amber/60" aria-hidden="true" />
