@@ -10,12 +10,52 @@ import { useSetZoneSidebar } from "@/components/ZoneSidebarContext";
 
 const currentBuilds: {
   name: string;
+  model: string;
   stage: string;
   progress: number;
   woods: string;
   note: string;
 }[] = [
-  // TODO: Replace with real builds from Magus
+  {
+    name: "Purp Dagon",
+    model: "Dagon",
+    stage: "In Progress",
+    progress: 0,
+    woods: "",
+    note: "",
+  },
+  {
+    name: "Weird Barbara",
+    model: "Dagon",
+    stage: "In Progress",
+    progress: 0,
+    woods: "",
+    note: "",
+  },
+  {
+    name: "Quint",
+    model: "Chimera",
+    stage: "In Progress",
+    progress: 0,
+    woods: "",
+    note: "",
+  },
+  {
+    name: "Purp Turtle",
+    model: "Turtle",
+    stage: "In Progress",
+    progress: 0,
+    woods: "",
+    note: "",
+  },
+  {
+    name: "Starfox",
+    model: "SolidGuitar",
+    stage: "In Progress",
+    progress: 0,
+    woods: "",
+    note: "",
+  },
 ];
 
 /* ─── Toolkit ────────────────────────────────────────────────────────────── */
@@ -125,29 +165,41 @@ export default function Workshop() {
             {currentBuilds.map((build) => (
               <PixelCard key={build.name} variant="raised">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-pixel text-[10px] text-shelley-amber tracking-wider">
-                    {build.name.toUpperCase()}
-                  </h3>
+                  <div>
+                    <h3 className="font-pixel text-[10px] text-shelley-amber tracking-wider">
+                      {build.name.toUpperCase()}
+                    </h3>
+                    <p className="font-pixel text-[7px] text-white/30 tracking-wider mt-0.5">
+                      {build.model}
+                    </p>
+                  </div>
                   <span className="font-pixel text-[7px] text-white/30 pixel-panel-inset px-2 py-1 badge-pulse">
                     {build.stage.toUpperCase()}
                   </span>
                 </div>
-                <p className="font-pixel text-[7px] text-white/25 mb-3 tracking-wider">
-                  {build.woods}
-                </p>
-                <p className="text-white/45 text-sm leading-relaxed mb-4">
-                  {build.note}
-                </p>
-                {/* Pixel progress bar */}
-                <div className="pixel-progress-track">
-                  <div
-                    className="pixel-progress-fill"
-                    style={{ width: `${build.progress}%` }}
-                  />
-                </div>
-                <p className="font-pixel text-[7px] text-white/20 mt-1.5 text-right">
-                  {build.progress}%
-                </p>
+                {build.woods && (
+                  <p className="font-pixel text-[7px] text-white/25 mb-3 tracking-wider">
+                    {build.woods}
+                  </p>
+                )}
+                {build.note && (
+                  <p className="text-white/45 text-sm leading-relaxed mb-4">
+                    {build.note}
+                  </p>
+                )}
+                {build.progress > 0 && (
+                  <>
+                    <div className="pixel-progress-track">
+                      <div
+                        className="pixel-progress-fill"
+                        style={{ width: `${build.progress}%` }}
+                      />
+                    </div>
+                    <p className="font-pixel text-[7px] text-white/20 mt-1.5 text-right">
+                      {build.progress}%
+                    </p>
+                  </>
+                )}
               </PixelCard>
             ))}
           </div>
