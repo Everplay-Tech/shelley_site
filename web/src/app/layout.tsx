@@ -20,6 +20,11 @@ import { TransitionProvider } from "@/components/TransitionContext";
 import { CodecProvider } from "@/hooks/useCodecOverlay";
 import { ZoneSidebarProvider } from "@/components/ZoneSidebarContext";
 
+const AuthProvider = dynamic(
+  () => import("@/components/AuthProvider"),
+  { ssr: false }
+);
+
 const PoEncounterProvider = dynamic(
   () => import("@/components/PoEncounterProvider"),
   { ssr: false }
@@ -124,6 +129,7 @@ export default function RootLayout({
             `,
           }}
         />
+        <AuthProvider>
         <TransitionProvider>
         <CodecProvider>
         <ZoneSidebarProvider>
@@ -151,6 +157,7 @@ export default function RootLayout({
         </ZoneSidebarProvider>
         </CodecProvider>
         </TransitionProvider>
+        </AuthProvider>
       </body>
     </html>
   );

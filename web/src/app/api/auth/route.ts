@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { hash, compare } from "bcryptjs";
-import { SignJWT, jwtVerify } from "jose";
 import { query } from "@/lib/db";
-
-const SESSION_COOKIE = "shelley_session";
-const AUTH_COOKIE = "shelley_auth";
-if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
-  console.error("[auth] CRITICAL: JWT_SECRET is not set in production!");
-}
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "shelley-dev-secret-change-in-prod"
-);
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+import {
+  SESSION_COOKIE,
+  AUTH_COOKIE,
+  COOKIE_MAX_AGE,
+  createAuthToken,
+  verifyAuthToken,
+} from "@/lib/auth-helpers";
 
 interface AccountRow {
   id: number;
@@ -61,10 +57,7 @@ export async function POST(req: Request) {
       }
 
       // Set auth JWT cookie
-      const token = await new SignJWT({ accountId, email: email.toLowerCase() })
-        .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("30d")
-        .sign(JWT_SECRET);
+      const token = await createAuthToken(accountId, email.toLowerCase());
 
       const response = NextResponse.json({ ok: true, accountId });
       response.cookies.set(AUTH_COOKIE, token, {
@@ -106,10 +99,7 @@ export async function POST(req: Request) {
         );
       }
 
-      const token = await new SignJWT({ accountId: account.id, email: account.email })
-        .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("30d")
-        .sign(JWT_SECRET);
+      const token = await createAuthToken(account.id, account.email);
 
       const response = NextResponse.json({ ok: true, accountId: account.id });
       response.cookies.set(AUTH_COOKIE, token, {
@@ -141,11 +131,19 @@ export async function GET() {
   }
 
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const payload = await verifyAuthToken(token);
+
+    // Fetch display_name from DB
+    const result = await query<{ display_name: string | null }>(
+      "SELECT display_name FROM accounts WHERE id = $1",
+      [payload.accountId]
+    );
+
     return NextResponse.json({
       authenticated: true,
       accountId: payload.accountId,
       email: payload.email,
+      displayName: result.rows[0]?.display_name ?? null,
     });
   } catch {
     return NextResponse.json({ authenticated: false });
