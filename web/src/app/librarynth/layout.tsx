@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "The Librarynth",
   description:
-    "Study space meets creative labyrinth. Explore the Xeno Myth universe, guitar philosophy, creative arms, and meet the cast of Shelley Guitar.",
+    "A labyrinth of rooms beneath the workshop. Guitar science, build journals, the Xeno Myth archives. The Crystal Archive remembers everything.",
   openGraph: {
     title: "The Librarynth | Shelley Guitar",
     description:
-      "Study space meets creative labyrinth. Everything Shelley, all in one place.",
+      "A labyrinth of rooms beneath the workshop. The Crystal Archive remembers everything.",
   },
 };
 
