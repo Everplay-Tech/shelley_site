@@ -203,7 +203,9 @@ export default function Contact() {
 
           {/* Discord */}
           <a
-            href="#"
+            href="https://discord.gg/b9cJp9mgS2"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="Join the Shelley Guitars Discord server"
             className="flex items-center gap-4 pixel-panel p-4 hover:border-[#5865F2]/30 transition-colors group"
           >

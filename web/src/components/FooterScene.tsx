@@ -34,7 +34,9 @@ export default function FooterScene() {
           </svg>
         </a>
         <a
-          href="#"
+          href="https://discord.gg/b9cJp9mgS2"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Discord"
           className="text-white/25 hover:text-[#5865F2] transition-colors"
         >
