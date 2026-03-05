@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 import { query } from "@/lib/db";
-
-const AUTH_COOKIE = "shelley_auth";
-if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
-  console.error("[rewards] CRITICAL: JWT_SECRET is not set in production!");
-}
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "shelley-dev-secret-change-in-prod"
-);
+import { AUTH_COOKIE, verifyAuthToken } from "@/lib/auth-helpers";
 
 interface AccountRow {
   rewards_earned: string[];
@@ -70,8 +62,8 @@ export async function GET() {
 
   let accountId: number;
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    accountId = payload.accountId as number;
+    const payload = await verifyAuthToken(token);
+    accountId = payload.accountId;
   } catch {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
