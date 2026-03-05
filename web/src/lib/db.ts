@@ -170,5 +170,19 @@ export async function initSchema(): Promise<void> {
       quantity INTEGER DEFAULT 1,
       price_cents INTEGER NOT NULL
     );
+
+    -- Library Items (owned content per account)
+    CREATE TABLE IF NOT EXISTS library_items (
+      id SERIAL PRIMARY KEY,
+      account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+      product_id INTEGER REFERENCES products(id),
+      source TEXT NOT NULL DEFAULT 'purchase'
+        CHECK (source IN ('purchase', 'reward', 'free', 'gift')),
+      order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+      granted_at TIMESTAMPTZ DEFAULT NOW(),
+      download_count INTEGER DEFAULT 0,
+      last_downloaded_at TIMESTAMPTZ,
+      UNIQUE(account_id, product_id)
+    );
   `);
 }
