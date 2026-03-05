@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePoEncounter } from "@/hooks/usePoEncounter";
 import { useZoneSidebar } from "@/components/ZoneSidebarContext";
+import { checkIsMobile } from "@/hooks/useDeviceCapabilities";
 import EncounterNote from "./EncounterNote";
 
 // ─── ZoneDropEncounter ─────────────────────────────────────────────────────
@@ -19,8 +20,6 @@ const FADE_DURATION_MS = 200;
 const EXIT_DURATION_MS = 800;
 const DRIFT_DURATION_MS = 1500;
 const WAITING_TIMEOUT_MS = 8000;
-const MOBILE_BREAKPOINT = 768;
-
 type ZoneObjectType = "pick" | "splat" | "page" | "pigeon";
 
 type InternalState =
@@ -50,14 +49,6 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    setMobile(window.innerWidth <= MOBILE_BREAKPOINT);
-  }, []);
-  return mobile;
-}
-
 // Map zone IDs to object types
 function getObjectType(zoneId: string | undefined | null): ZoneObjectType {
   switch (zoneId) {
@@ -85,7 +76,6 @@ export default function ZoneDropEncounter() {
 
   const zone = useZoneSidebar();
   const reducedMotion = usePrefersReducedMotion();
-  const isMobile = useIsMobile();
 
   const objectType = getObjectType(zone?.id);
 
@@ -97,6 +87,13 @@ export default function ZoneDropEncounter() {
     if (typeof window === "undefined") return { x: 400, y: 300 };
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const mobile = checkIsMobile();
+    if (mobile) {
+      return {
+        x: randomBetween(vw * 0.15, vw * 0.65),
+        y: randomBetween(vh * 0.25, vh * 0.55),
+      };
+    }
     return {
       x: randomBetween(vw * 0.4, vw * 0.7),
       y: randomBetween(vh * 0.3, vh * 0.7),
@@ -108,6 +105,24 @@ export default function ZoneDropEncounter() {
     if (typeof window === "undefined") return { x: SIDEBAR_WIDTH, y: 0 };
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const mobile = checkIsMobile();
+
+    if (mobile) {
+      // On mobile, objects enter from edges/bottom instead of sidebar
+      switch (objectType) {
+        case "pick":
+          return { x: -30, y: randomBetween(vh * 0.3, vh * 0.5) };
+        case "splat":
+          return { x: landingPos.x, y: -50 };
+        case "page":
+          return { x: randomBetween(vw * 0.2, vw * 0.7), y: -60 };
+        case "pigeon":
+          return { x: -40, y: randomBetween(vh * 0.15, vh * 0.3) };
+        default:
+          return { x: -30, y: vh / 2 };
+      }
+    }
+
     switch (objectType) {
       case "pick":
         // Flicked from left
@@ -255,7 +270,6 @@ export default function ZoneDropEncounter() {
   }, [dismissEncounter]);
 
   // ─── Don't render conditions ─────────────────────────────────────
-  if (isMobile) return null;
   if (activeEncounter !== "zone_drop") return null;
   if (internalState === "done") return null;
 

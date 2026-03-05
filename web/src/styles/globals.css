@@ -1891,6 +1891,47 @@ body.sidebar-collapsed .site-content {
   }
 }
 
+/* ─── Cursor Stalk Tilt Prompt (mobile iOS) ─── */
+.cursor-stalk-tilt-prompt {
+  animation: cursor-stalk-prompt-enter 300ms steps(3) forwards;
+}
+.cursor-stalk-tilt-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 20px;
+  background: rgba(16, 16, 16, 0.95);
+  border: 1px solid rgba(255, 191, 0, 0.3);
+  border-radius: 8px;
+  color: #ffbf00;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.cursor-stalk-tilt-btn:active {
+  background: rgba(255, 191, 0, 0.15);
+}
+.cursor-stalk-tilt-eyes {
+  font-size: 16px;
+  letter-spacing: 4px;
+}
+.cursor-stalk-tilt-text {
+  font-family: var(--font-pixel, monospace);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+}
+@keyframes cursor-stalk-prompt-enter {
+  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor-stalk-tilt-prompt {
+    animation: none;
+  }
+}
+
 /* ─── SCREEN READER ONLY ─── */
 
 .sr-only {
@@ -2015,12 +2056,7 @@ body.sidebar-collapsed .site-content {
   }
 }
 
-/* ── Mobile: hide paper plane encounter ── */
-@media (max-width: 768px) {
-  .paper-plane-encounter {
-    display: none;
-  }
-}
+/* Paper plane renders on all screen sizes — mobile positions adapt in JS */
 
 /* ═══════════════════════════════════════
    KNOCK ENCOUNTER
@@ -2277,6 +2313,105 @@ html.knock-shake-2 {
 }
 
 /* ═══════════════════════════════════════
+   Codec Ring Mobile Toast
+   ═══════════════════════════════════════ */
+.codec-ring-mobile-toast {
+  position: fixed;
+  bottom: 60px;
+  left: 8px;
+  right: 8px;
+  z-index: 56;
+  transform: translateY(120%);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.codec-ring-mobile-toast--visible {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.codec-ring-mobile-toast-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(16, 16, 16, 0.95);
+  border: 1px solid rgba(255, 191, 0, 0.3);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.codec-ring-mobile-icon {
+  font-size: 20px;
+  color: #ffbf00;
+  flex-shrink: 0;
+}
+.codec-ring-mobile-shake {
+  display: inline-block;
+  animation: phone-ring-shake 400ms steps(6);
+}
+.codec-ring-mobile-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.codec-ring-mobile-label {
+  font-family: var(--font-pixel, monospace);
+  font-size: 9px;
+  color: #ffbf00;
+  letter-spacing: 0.15em;
+}
+.codec-ring-mobile-sub {
+  font-family: var(--font-pixel, monospace);
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.codec-ring-mobile-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.codec-ring-mobile-answer {
+  font-family: var(--font-pixel, monospace);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 6px 12px;
+  background: rgba(255, 191, 0, 0.15);
+  border: 1px solid rgba(255, 191, 0, 0.4);
+  color: #ffbf00;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.codec-ring-mobile-answer:active {
+  background: rgba(255, 191, 0, 0.3);
+}
+.codec-ring-mobile-ignore {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Hide mobile toast on desktop */
+@media (min-width: 769px) {
+  .codec-ring-mobile-toast {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codec-ring-mobile-toast {
+    transition: none;
+  }
+  .codec-ring-mobile-shake {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════
    Zone Drop Encounter Animations
    ═══════════════════════════════════════ */
 
@@ -2451,9 +2586,4 @@ html.knock-shake-2 {
   }
 }
 
-/* ── Mobile: hide zone drop encounter ── */
-@media (max-width: 768px) {
-  .zone-drop-encounter {
-    display: none;
-  }
-}
+/* Zone drop renders on all screen sizes — mobile positions adapt in JS */

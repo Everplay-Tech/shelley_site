@@ -24,6 +24,10 @@ const CODEC_RING_DATE_KEY = "po_codec_ring_date";
 const CODEC_RING_DAILY_CAP = 3;
 const PHONE_TAB_HOVER_MS = 2_500;
 const SCROLL_BACK_UP_THRESHOLD = 0.5; // must scroll past 50% first
+const LONG_PRESS_MS = 1_500;
+const SHAKE_THRESHOLD = 25; // m/s^2 total acceleration
+const SHAKE_COOLDOWN_MS = 1_000;
+const DOUBLE_TAP_WINDOW_MS = 400;
 
 function isInteractiveElement(el: Element | null): boolean {
   if (!el) return false;
@@ -195,7 +199,7 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
       }, IDLE_THRESHOLD_MS);
     };
 
-    const events = ["mousemove", "scroll", "click", "keydown"] as const;
+    const events = ["mousemove", "scroll", "click", "keydown", "touchstart"] as const;
     events.forEach((e) => window.addEventListener(e, resetIdle, { passive: true }));
     resetIdle(); // start initial timer
 
@@ -227,8 +231,9 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
     };
   }, [fireEncounter]);
 
-  // --- C) HOVER DWELL ---
+  // --- C) HOVER DWELL + LONG-PRESS ---
   useEffect(() => {
+    // === Desktop: mouseover dwell (4s on interactive elements) ===
     let dwellTimer: ReturnType<typeof setTimeout> | null = null;
     let currentTarget: Element | null = null;
 
@@ -250,12 +255,41 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
       if (dwellTimer) clearTimeout(dwellTimer);
     };
 
+    // === Mobile: long-press (1.5s hold on interactive element) ===
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const onTouchStart = (e: TouchEvent) => {
+      const target = e.target as Element | null;
+      if (!isInteractiveElement(target)) return;
+      if (longPressTimer) clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(() => {
+        fireEncounter("knock");
+      }, LONG_PRESS_MS);
+    };
+
+    const onTouchEnd = () => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    };
+
+    const onTouchMove = () => {
+      // Finger moved — cancel long press
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    };
+
     document.addEventListener("mouseover", onOver, { passive: true });
     document.addEventListener("mouseout", onOut, { passive: true });
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: true });
+
     return () => {
       if (dwellTimer) clearTimeout(dwellTimer);
+      if (longPressTimer) clearTimeout(longPressTimer);
       document.removeEventListener("mouseover", onOver);
       document.removeEventListener("mouseout", onOut);
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+      document.removeEventListener("touchmove", onTouchMove);
     };
   }, [fireEncounter]);
 
@@ -291,6 +325,81 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
         tab.removeEventListener("mouseenter", onEnter);
         tab.removeEventListener("mouseleave", onLeave);
       }
+    };
+  }, [fireEncounter]);
+
+  // --- D1b) CODEC RING: Mobile — shake detection OR double-tap dead space ---
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Only on touch devices (no hover pointer)
+    if (window.matchMedia("(hover: hover)").matches) return;
+
+    let shakeCleanup: (() => void) | null = null;
+    let doubleTapCleanup: (() => void) | null = null;
+    let lastShakeTime = 0;
+    let motionAvailable = false;
+
+    // --- Shake detection via DeviceMotion ---
+    const setupShake = () => {
+      // iOS requires requestPermission (user gesture) — can't call from effect.
+      // Only listen if permission is not needed (Android) or already granted.
+      const needsPermission =
+        typeof DeviceMotionEvent !== "undefined" &&
+        typeof (DeviceMotionEvent as any).requestPermission === "function";
+
+      if (typeof DeviceMotionEvent === "undefined") return;
+      if (needsPermission) return; // Will rely on double-tap fallback on iOS
+
+      motionAvailable = true;
+
+      const onMotion = (e: DeviceMotionEvent) => {
+        const acc = e.accelerationIncludingGravity;
+        if (!acc || acc.x === null || acc.y === null || acc.z === null) return;
+        const total = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
+        const now = Date.now();
+        if (total > SHAKE_THRESHOLD && now - lastShakeTime > SHAKE_COOLDOWN_MS) {
+          lastShakeTime = now;
+          if (canCodecRing()) {
+            incrementCodecRingCount();
+            fireEncounter("codec_ring");
+          }
+        }
+      };
+      window.addEventListener("devicemotion", onMotion);
+      shakeCleanup = () => window.removeEventListener("devicemotion", onMotion);
+    };
+
+    setupShake();
+
+    // --- Double-tap fallback on dead space (only if shake unavailable) ---
+    if (!motionAvailable) {
+      let lastTapTime = 0;
+
+      const onTouchEnd = (e: TouchEvent) => {
+        const target = e.target as Element | null;
+        // Only fire on non-interactive "dead space"
+        if (isInteractiveElement(target)) return;
+        if (target?.closest("a, button, [role='button'], input, textarea, select")) return;
+
+        const now = Date.now();
+        if (now - lastTapTime < DOUBLE_TAP_WINDOW_MS) {
+          lastTapTime = 0;
+          if (canCodecRing()) {
+            incrementCodecRingCount();
+            fireEncounter("codec_ring");
+          }
+        } else {
+          lastTapTime = now;
+        }
+      };
+
+      document.addEventListener("touchend", onTouchEnd, { passive: true });
+      doubleTapCleanup = () => document.removeEventListener("touchend", onTouchEnd);
+    }
+
+    return () => {
+      shakeCleanup?.();
+      doubleTapCleanup?.();
     };
   }, [fireEncounter]);
 

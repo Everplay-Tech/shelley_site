@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import { usePoEncounter } from "@/hooks/usePoEncounter";
+import { checkIsMobile, tryVibrate } from "@/hooks/useDeviceCapabilities";
 import SpeechBubble from "./SpeechBubble";
 
 /* -----------------------------------------
@@ -21,7 +22,6 @@ const SIDEBAR_WIDTH = 200; // matches .site-sidebar { width: 200px }
 const RIPPLE_TOP_RATIO = 0.6; // knock point ~60% down sidebar height
 const BUBBLE_GAP = 8;
 const BUBBLE_LEFT = SIDEBAR_WIDTH + BUBBLE_GAP;
-const MOBILE_BP = 768;
 
 // --- Timing (ms) ---
 const KNOCK_2_DELAY = 400;
@@ -67,10 +67,7 @@ export default function KnockEncounter() {
   }, []);
 
   // --- Mobile check ---
-  const isMobile = useCallback(
-    () => typeof window !== "undefined" && window.innerWidth <= MOBILE_BP,
-    []
-  );
+  const isMobile = useCallback(() => checkIsMobile(), []);
 
   // --- Timer management ---
   const schedule = useCallback((fn: () => void, ms: number) => {
@@ -113,18 +110,20 @@ export default function KnockEncounter() {
       return;
     }
 
-    // Knock 1 at 0ms — shake the screen
+    // Knock 1 at 0ms — shake the screen + haptic
     flashBorder();
     spawnRipple();
+    tryVibrate([50, 30, 80]);
     document.documentElement.classList.add("knock-shake");
     schedule(() => {
       document.documentElement.classList.remove("knock-shake");
     }, 200);
 
-    // Knock 2 at 400ms — second shake
+    // Knock 2 at 400ms — second shake + haptic
     schedule(() => {
       flashBorder();
       spawnRipple();
+      tryVibrate([80, 20, 100]);
       document.documentElement.classList.add("knock-shake-2");
       schedule(() => {
         document.documentElement.classList.remove("knock-shake-2");

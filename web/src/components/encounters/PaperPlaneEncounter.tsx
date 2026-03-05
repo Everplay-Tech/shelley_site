@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePoEncounter } from "@/hooks/usePoEncounter";
+import { checkIsMobile } from "@/hooks/useDeviceCapabilities";
 import EncounterNote from "./EncounterNote";
 
 // ─── PaperPlaneEncounter ────────────────────────────────────────────────────
@@ -20,8 +21,6 @@ const FADE_DURATION_MS = 200;
 const EXIT_FLIGHT_DURATION_MS = 800;
 const DRIFT_DURATION_MS = 1500;
 const WAITING_TIMEOUT_MS = 8000;
-const MOBILE_BREAKPOINT = 768;
-
 type InternalState =
   | "flying" // entering animation
   | "landed" // waiting for click
@@ -49,14 +48,6 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    setMobile(window.innerWidth <= MOBILE_BREAKPOINT);
-  }, []);
-  return mobile;
-}
-
 export default function PaperPlaneEncounter() {
   const {
     activeEncounter,
@@ -67,7 +58,6 @@ export default function PaperPlaneEncounter() {
   } = usePoEncounter();
 
   const reducedMotion = usePrefersReducedMotion();
-  const isMobile = useIsMobile();
 
   // Internal animation state — independent from encounterPhase
   const [internalState, setInternalState] = useState<InternalState>("flying");
@@ -79,16 +69,31 @@ export default function PaperPlaneEncounter() {
     if (typeof window === "undefined") return { x: 400, y: 300 };
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const mobile = checkIsMobile();
+    if (mobile) {
+      return {
+        x: randomBetween(vw * 0.15, vw * 0.65),
+        y: randomBetween(vh * 0.25, vh * 0.55),
+      };
+    }
     return {
       x: randomBetween(vw * 0.4, vw * 0.7),
       y: randomBetween(vh * 0.3, vh * 0.7),
     };
   }, []);
 
-  // Start position — left edge, sidebar boundary
+  // Start position — left edge (desktop) or bottom (mobile)
   const startPos = useMemo(() => {
     if (typeof window === "undefined") return { x: SIDEBAR_WIDTH, y: 300 };
+    const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const mobile = checkIsMobile();
+    if (mobile) {
+      return {
+        x: randomBetween(vw * 0.2, vw * 0.6),
+        y: vh + 30,
+      };
+    }
     return {
       x: SIDEBAR_WIDTH,
       y: randomBetween(vh * 0.3, vh * 0.6),
@@ -228,7 +233,6 @@ export default function PaperPlaneEncounter() {
   }, [dismissEncounter]);
 
   // ─── Don't render conditions ───────────────────────────────────────
-  if (isMobile) return null;
   if (activeEncounter !== "paper_plane") return null;
   if (internalState === "done") return null;
 

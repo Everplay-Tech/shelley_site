@@ -23,6 +23,9 @@ const CursorStalkEncounter = dynamic(() => import("./CursorStalkEncounter"), {
 const ZoneDropEncounter = dynamic(() => import("./ZoneDropEncounter"), {
   ssr: false,
 });
+const CodecRingMobileToast = dynamic(() => import("./CodecRingMobileToast"), {
+  ssr: false,
+});
 
 export default function PoEncounterLayer() {
   return (
@@ -34,6 +37,7 @@ export default function PoEncounterLayer() {
       <PaperPlaneEncounter />
       <KnockEncounter />
       <CodecRingEncounter />
+      <CodecRingMobileToast />
       <CursorStalkEncounter />
       <ZoneDropEncounter />
     </div>

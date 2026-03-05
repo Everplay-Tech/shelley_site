@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { usePoEncounter } from "@/hooks/usePoEncounter";
+import { checkIsMobile } from "@/hooks/useDeviceCapabilities";
 
 /* -----------------------------------------
    CodecRingEncounter (T6)
@@ -39,10 +40,11 @@ export default function CodecRingEncounter() {
     return id;
   }, []);
 
-  // ── Open the phone booth panel and add ringing class when entering ──
+  // ── Open the phone booth panel and add ringing class when entering (desktop only) ──
   useEffect(() => {
     if (activeEncounter !== "codec_ring") return;
     if (encounterPhase !== "entering") return;
+    if (checkIsMobile()) return; // Mobile toast handles this
 
     // Force-open the phone booth panel
     const booth = document.querySelector(".phone-booth");

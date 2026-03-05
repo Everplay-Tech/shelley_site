@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { usePoEncounter } from "@/hooks/usePoEncounter";
+import { checkIsMobile } from "@/hooks/useDeviceCapabilities";
 import SpeechBubble from "./SpeechBubble";
 
 const EYE_LEFT_X = 0.4;
@@ -11,10 +12,8 @@ const MAX_OFFSET = 3;
 const BUBBLE_DELAY_MS = 500;
 const BUBBLE_LINGER_MS = 2000;
 const AMBIENT_TIMEOUT_MS = 15_000;
-
-function isMobile(): boolean {
-  return typeof window !== "undefined" && window.innerWidth <= 768;
-}
+const TILT_NEUTRAL_BETA = 45; // phone held at ~45deg = neutral
+const TILT_RANGE = 15; // +-15deg maps to full eye range
 
 function prefersReducedMotion(): boolean {
   return (
@@ -39,6 +38,9 @@ export default function CursorStalkEncounter() {
   const [eyesBright, setEyesBright] = useState(false);
   const [eyesFading, setEyesFading] = useState(false);
   const [eyesPulse, setEyesPulse] = useState(false);
+  // Mobile tilt permission prompt
+  const [showTiltPrompt, setShowTiltPrompt] = useState(false);
+  const [tiltActive, setTiltActive] = useState(false);
 
   const mousePos = useRef({ x: 0, y: 0 });
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,7 +65,7 @@ export default function CursorStalkEncounter() {
     return true;
   }, []);
 
-  // --- Mount: detect reduced motion, mobile ---
+  // --- Mount: detect reduced motion ---
   useEffect(() => {
     reducedMotion.current = prefersReducedMotion();
   }, []);
@@ -71,10 +73,6 @@ export default function CursorStalkEncounter() {
   // --- When encounter becomes active ---
   useEffect(() => {
     if (!active) return;
-    if (isMobile()) {
-      clearEncounter();
-      return;
-    }
 
     // Try to find Po sprite — if not visible, silent exit
     if (!updateEyeBasePositions()) {
@@ -82,18 +80,56 @@ export default function CursorStalkEncounter() {
       return;
     }
 
+    const mobile = checkIsMobile();
+
     // Recalculate eye positions on scroll/resize
     const recalc = () => updateEyeBasePositions();
     window.addEventListener("scroll", recalc, { passive: true });
     window.addEventListener("resize", recalc, { passive: true });
 
-    // Mouse tracking
-    const onMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    let motionCleanup: (() => void) | null = null;
 
-    // Ambient timeout — 15s without hover → fade out
+    if (mobile) {
+      // === MOBILE: Tilt tracking ===
+      const needsPermission =
+        typeof DeviceOrientationEvent !== "undefined" &&
+        typeof (DeviceOrientationEvent as any).requestPermission === "function";
+
+      if (typeof DeviceOrientationEvent === "undefined") {
+        // No orientation API — bail
+        clearEncounter();
+        return;
+      }
+
+      if (needsPermission) {
+        // iOS: show tap-to-permit prompt (user gesture needed)
+        setShowTiltPrompt(true);
+      } else {
+        // Android: orientation available without permission
+        const onOrientation = (e: DeviceOrientationEvent) => {
+          const beta = e.beta ?? 0;
+          const gamma = e.gamma ?? 0;
+          const normalizedX = Math.max(-1, Math.min(1, gamma / TILT_RANGE));
+          const normalizedY = Math.max(-1, Math.min(1, (beta - TILT_NEUTRAL_BETA) / TILT_RANGE));
+          mousePos.current = {
+            x: (window.innerWidth / 2) + normalizedX * (window.innerWidth / 2),
+            y: (window.innerHeight / 2) + normalizedY * (window.innerHeight / 2),
+          };
+        };
+        window.addEventListener("deviceorientation", onOrientation);
+        motionCleanup = () => window.removeEventListener("deviceorientation", onOrientation);
+        setTiltActive(true);
+      }
+    } else {
+      // === DESKTOP: Mouse tracking ===
+      const onMouseMove = (e: MouseEvent) => {
+        mousePos.current = { x: e.clientX, y: e.clientY };
+      };
+      window.addEventListener("mousemove", onMouseMove, { passive: true });
+      motionCleanup = () => window.removeEventListener("mousemove", onMouseMove);
+    }
+
+    // Ambient timeout — 15s without interaction → fade out
     ambientTimerRef.current = setTimeout(() => {
       setEyesFading(true);
       setTimeout(() => clearEncounter(), 500);
@@ -102,14 +138,49 @@ export default function CursorStalkEncounter() {
     return () => {
       window.removeEventListener("scroll", recalc);
       window.removeEventListener("resize", recalc);
-      window.removeEventListener("mousemove", onMouseMove);
+      motionCleanup?.();
       if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current);
     };
   }, [active, clearEncounter, updateEyeBasePositions]);
 
+  // --- iOS tap-to-permit: request DeviceOrientation permission ---
+  const handleTiltPermit = useCallback(async () => {
+    setShowTiltPrompt(false);
+    try {
+      const result = await (DeviceOrientationEvent as any).requestPermission();
+      if (result === "granted") {
+        const onOrientation = (e: DeviceOrientationEvent) => {
+          const beta = e.beta ?? 0;
+          const gamma = e.gamma ?? 0;
+          const normalizedX = Math.max(-1, Math.min(1, gamma / TILT_RANGE));
+          const normalizedY = Math.max(-1, Math.min(1, (beta - TILT_NEUTRAL_BETA) / TILT_RANGE));
+          mousePos.current = {
+            x: (window.innerWidth / 2) + normalizedX * (window.innerWidth / 2),
+            y: (window.innerHeight / 2) + normalizedY * (window.innerHeight / 2),
+          };
+        };
+        window.addEventListener("deviceorientation", onOrientation);
+        setTiltActive(true);
+        // Reset ambient timeout since user engaged
+        if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current);
+        ambientTimerRef.current = setTimeout(() => {
+          setEyesFading(true);
+          setTimeout(() => clearEncounter(), 500);
+        }, AMBIENT_TIMEOUT_MS);
+      } else {
+        clearEncounter();
+      }
+    } catch {
+      clearEncounter();
+    }
+  }, [clearEncounter]);
+
   // --- Animation loop for eye tracking ---
   useEffect(() => {
     if (!active || !eyeBasePositions || reducedMotion.current) return;
+    // On mobile, wait until tilt is active (or prompt is showing)
+    const mobile = checkIsMobile();
+    if (mobile && !tiltActive) return;
 
     const animate = () => {
       const { x, y } = mousePos.current;
@@ -137,26 +208,57 @@ export default function CursorStalkEncounter() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [active, eyeBasePositions]);
+  }, [active, eyeBasePositions, tiltActive]);
 
-  // --- Hover detection on Po sprite area ---
+  // --- Hover/tap detection on Po sprite area ---
   useEffect(() => {
     if (!active) return;
 
     const el = document.querySelector("[data-po-zone-sprite]");
     if (!el) return;
+    const mobile = checkIsMobile();
 
+    if (mobile) {
+      // Tap to trigger bubble on mobile
+      const onTap = () => {
+        setHovering(true);
+        setEyesBright(true);
+        if (ambientTimerRef.current) {
+          clearTimeout(ambientTimerRef.current);
+          ambientTimerRef.current = null;
+        }
+        const delay = reducedMotion.current ? 0 : BUBBLE_DELAY_MS;
+        hoverTimerRef.current = setTimeout(() => {
+          setBubbleVisible(true);
+        }, delay);
+        // Auto-hide after linger
+        lingerTimerRef.current = setTimeout(() => {
+          setBubbleVisible(false);
+          setHovering(false);
+          setEyesBright(false);
+          // Restart ambient timeout
+          ambientTimerRef.current = setTimeout(() => {
+            setEyesFading(true);
+            setTimeout(() => clearEncounter(), 500);
+          }, AMBIENT_TIMEOUT_MS);
+        }, BUBBLE_DELAY_MS + BUBBLE_LINGER_MS);
+      };
+      el.addEventListener("click", onTap);
+      return () => {
+        el.removeEventListener("click", onTap);
+        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+        if (lingerTimerRef.current) clearTimeout(lingerTimerRef.current);
+      };
+    }
+
+    // Desktop hover detection
     const onEnter = () => {
       setHovering(true);
       setEyesBright(true);
-
-      // Reset ambient timeout on hover
       if (ambientTimerRef.current) {
         clearTimeout(ambientTimerRef.current);
         ambientTimerRef.current = null;
       }
-
-      // Show bubble after delay (or immediately for reduced motion)
       const delay = reducedMotion.current ? 0 : BUBBLE_DELAY_MS;
       hoverTimerRef.current = setTimeout(() => {
         setBubbleVisible(true);
@@ -170,13 +272,9 @@ export default function CursorStalkEncounter() {
         clearTimeout(hoverTimerRef.current);
         hoverTimerRef.current = null;
       }
-
-      // Linger the bubble for 2s then hide
       lingerTimerRef.current = setTimeout(() => {
         setBubbleVisible(false);
       }, BUBBLE_LINGER_MS);
-
-      // Restart ambient timeout
       ambientTimerRef.current = setTimeout(() => {
         setEyesFading(true);
         setTimeout(() => clearEncounter(), 500);
@@ -215,6 +313,8 @@ export default function CursorStalkEncounter() {
       setEyesBright(false);
       setEyesFading(false);
       setEyesPulse(false);
+      setShowTiltPrompt(false);
+      setTiltActive(false);
     }
   }, [active]);
 
@@ -235,9 +335,35 @@ export default function CursorStalkEncounter() {
     .join(" ");
 
   const opacity = eyesFading ? 0 : 1;
+  const mobile = checkIsMobile();
 
   return (
     <>
+      {/* Tilt permission prompt (iOS mobile only) */}
+      {showTiltPrompt && (
+        <div
+          className="cursor-stalk-tilt-prompt"
+          style={{
+            position: "fixed",
+            bottom: 70,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 56,
+          }}
+        >
+          <button
+            onClick={handleTiltPermit}
+            className="cursor-stalk-tilt-btn"
+            aria-label="Allow Po to track your device tilt"
+          >
+            <span className="cursor-stalk-tilt-eyes" aria-hidden="true">
+              &#x1F441; &#x1F441;
+            </span>
+            <span className="cursor-stalk-tilt-text">Po is watching... TAP</span>
+          </button>
+        </div>
+      )}
+
       {/* Left eye */}
       <div
         className={eyeClassName}
@@ -264,12 +390,19 @@ export default function CursorStalkEncounter() {
       {bubbleVisible && (
         <SpeechBubble
           text="...you can see me?"
-          pointerDirection="left"
+          pointerDirection={mobile ? "down" : "left"}
           onClick={handleBubbleClick}
-          position={{
-            x: eyeBasePositions.rx + 40,
-            y: eyeBasePositions.ly - 10,
-          }}
+          position={
+            mobile
+              ? {
+                  x: eyeBasePositions.lx - 30,
+                  y: eyeBasePositions.ly - 50,
+                }
+              : {
+                  x: eyeBasePositions.rx + 40,
+                  y: eyeBasePositions.ly - 10,
+                }
+          }
         />
       )}
     </>
