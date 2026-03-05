@@ -10,6 +10,7 @@ interface EncounterNoteProps {
   position: { x: number; y: number };
   onAccept: () => void;
   onDismiss: () => void;
+  variant?: "standard" | "spell";
 }
 
 // Ragged paper edge — pre-computed polygon vertices
@@ -53,6 +54,7 @@ export default function EncounterNote({
   position,
   onAccept,
   onDismiss,
+  variant = "standard",
 }: EncounterNoteProps) {
   const yesRef = useRef<HTMLButtonElement>(null);
 
@@ -88,30 +90,54 @@ export default function EncounterNote({
       }}
     >
       {/* Question text */}
-      <p
-        style={{
-          fontFamily: "var(--font-pixel), monospace",
-          fontSize: 8,
-          lineHeight: 1.6,
-          color: "#3a2e22",
-          textAlign: "center",
-          letterSpacing: "0.03em",
-          margin: 0,
-        }}
-      >
-        do you want to
-        <br />
-        talk to me?
-      </p>
+      {variant === "spell" ? (
+        <p
+          style={{
+            fontFamily: "var(--font-pixel), monospace",
+            fontSize: 7,
+            lineHeight: 1.8,
+            color: "#ffbf00",
+            textAlign: "center",
+            letterSpacing: "0.03em",
+            margin: 0,
+            fontStyle: "italic",
+            textShadow: "0 0 4px rgba(255, 191, 0, 0.3)",
+          }}
+        >
+          a measure of Scratch&apos;s sun...
+          <br />
+          a pinch of Hendrix&apos;s truth...
+          <br />
+          dare you hear a Soul
+          <br />
+          at the White Heat?
+        </p>
+      ) : (
+        <p
+          style={{
+            fontFamily: "var(--font-pixel), monospace",
+            fontSize: 8,
+            lineHeight: 1.6,
+            color: "#3a2e22",
+            textAlign: "center",
+            letterSpacing: "0.03em",
+            margin: 0,
+          }}
+        >
+          do you want to
+          <br />
+          talk to me?
+        </p>
+      )}
 
       {/* Checkbox buttons */}
       <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-        {/* YES */}
+        {/* YES / ACCEPT */}
         <button
           ref={yesRef}
           onClick={onAccept}
           className="encounter-note-btn"
-          aria-label="Yes, talk to Po"
+          aria-label={variant === "spell" ? "Accept the spell" : "Yes, talk to Po"}
           style={{
             display: "flex",
             alignItems: "center",
@@ -120,6 +146,7 @@ export default function EncounterNote({
             border: "none",
             padding: 2,
             cursor: "pointer",
+            ...(variant === "spell" ? { filter: "drop-shadow(0 0 3px rgba(255, 191, 0, 0.5))" } : {}),
           }}
         >
           <span
@@ -131,7 +158,7 @@ export default function EncounterNote({
               justifyContent: "center",
               width: 12,
               height: 12,
-              border: "1px solid #4a3728",
+              border: `1px solid ${variant === "spell" ? "#ffbf00" : "#4a3728"}`,
               background: "transparent",
               flexShrink: 0,
               transition: "background 150ms ease",
@@ -142,7 +169,7 @@ export default function EncounterNote({
                 fontFamily: "var(--font-pixel), monospace",
                 fontSize: 8,
                 lineHeight: 1,
-                color: "#4a3728",
+                color: variant === "spell" ? "#ffbf00" : "#4a3728",
               }}
             >
               &#x2713;
@@ -152,15 +179,15 @@ export default function EncounterNote({
             style={{
               fontFamily: "var(--font-pixel), monospace",
               fontSize: 7,
-              color: "#4a3728",
+              color: variant === "spell" ? "#ffbf00" : "#4a3728",
               letterSpacing: "0.04em",
             }}
           >
-            yes
+            {variant === "spell" ? "dare" : "yes"}
           </span>
         </button>
 
-        {/* NO */}
+        {/* NO / DISMISS */}
         <button
           onClick={onDismiss}
           className="encounter-note-btn"
