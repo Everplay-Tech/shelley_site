@@ -1,14 +1,31 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import GodotEmbed from "./GodotEmbed";
+import PoGameIntro from "./PoGameIntro";
 import { useTransition } from "./TransitionContext";
 import { reportGameEvent } from "@/lib/player-state";
 import type { GodotEvent } from "@/lib/godot-messages";
 import { emitGameEvent } from "@/lib/game-events";
+import { getZoneForRoute } from "@/lib/zone-config";
 
 const MiniGameTransition: React.FC = () => {
   const { isActive, activeGame, quickTransit, pendingUrl, skip, complete, isReplay, setGamesEnabled } = useTransition();
+  const [introPhase, setIntroPhase] = useState<"intro" | "game">("game");
+
+  const zone = pendingUrl ? getZoneForRoute(pendingUrl) : null;
+
+  // Reset intro phase when a new transition begins
+  useEffect(() => {
+    if (isActive && activeGame) {
+      const showIntro = !quickTransit && !isReplay && !!zone;
+      setIntroPhase(showIntro ? "intro" : "game");
+    }
+  }, [isActive, activeGame, quickTransit, isReplay, zone]);
+
+  const handleIntroComplete = useCallback(() => {
+    setIntroPhase("game");
+  }, []);
 
   const handleGodotEvent = useCallback(
     (event: GodotEvent) => {
@@ -74,31 +91,40 @@ const MiniGameTransition: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-black transition-wipe-in flex flex-col items-center justify-center" role="dialog" aria-label="Game transition" aria-modal="true">
       <div className="transition-scanline-edge" aria-hidden="true" />
-      <div className="w-full max-w-4xl px-4">
-        <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
-        <div className="mt-4 flex justify-between items-center">
-          <p className="font-pixel text-[7px] text-white/40 tracking-wider">
-            {activeGame.label?.toUpperCase() ?? "LOADING..."}
-          </p>
-          <div className="flex items-center gap-3">
-            {!isReplay && (
-              <button
-                onClick={() => {
-                  setGamesEnabled(false);
-                  handleSkip();
-                }}
-                className="font-pixel text-[6px] text-white/20 hover:text-white/50 transition-colors tracking-wider"
-                aria-label="Turn off transition games"
-              >
-                TURN OFF GAMES
+
+      {/* Po intro animation before game loads */}
+      {introPhase === "intro" && zone && (
+        <PoGameIntro zoneId={zone.id} onComplete={handleIntroComplete} />
+      )}
+
+      {/* Game content */}
+      {introPhase === "game" && (
+        <div className="w-full max-w-4xl px-4">
+          <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
+          <div className="mt-4 flex justify-between items-center">
+            <p className="font-pixel text-[7px] text-white/40 tracking-wider">
+              {activeGame.label?.toUpperCase() ?? "LOADING..."}
+            </p>
+            <div className="flex items-center gap-3">
+              {!isReplay && (
+                <button
+                  onClick={() => {
+                    setGamesEnabled(false);
+                    handleSkip();
+                  }}
+                  className="font-pixel text-[6px] text-white/20 hover:text-white/50 transition-colors tracking-wider"
+                  aria-label="Turn off transition games"
+                >
+                  TURN OFF GAMES
+                </button>
+              )}
+              <button onClick={handleSkip} className="pixel-btn-ghost" aria-label={isReplay ? "Close game (Escape)" : "Skip game and continue to page (Escape)"}>
+                {isReplay ? "CLOSE (ESC)" : "SKIP (ESC)"}
               </button>
-            )}
-            <button onClick={handleSkip} className="pixel-btn-ghost" aria-label={isReplay ? "Close game (Escape)" : "Skip game and continue to page (Escape)"}>
-              {isReplay ? "CLOSE (ESC)" : "SKIP (ESC)"}
-            </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
