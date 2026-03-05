@@ -1214,9 +1214,14 @@ a:focus-visible {
 
 .sidebar-nav-icon {
   width: 1rem;
-  text-align: center;
-  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0.5;
+}
+.sidebar-nav-icon svg {
+  width: 14px;
+  height: 14px;
 }
 .sidebar-nav-link--active .sidebar-nav-icon {
   opacity: 1;
@@ -1444,8 +1449,11 @@ body.sidebar-collapsed .site-content {
   }
 
   .sidebar-nav-icon {
-    font-size: 10px;
     width: auto;
+  }
+  .sidebar-nav-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .sidebar-nav-label {
@@ -1459,6 +1467,10 @@ body.sidebar-collapsed .site-content {
   .site-content {
     padding-left: 0;
     padding-bottom: 3.5rem;
+  }
+
+  .footer-scene {
+    padding-bottom: 38px;
   }
 }
 
