@@ -112,5 +112,18 @@ export async function initSchema(): Promise<void> {
     -- Index for account lookups
     CREATE INDEX IF NOT EXISTS idx_game_progress_account
       ON game_progress(account_id);
+
+    -- Game Saves (3 slots per game per account)
+    CREATE TABLE IF NOT EXISTS game_saves (
+      id SERIAL PRIMARY KEY,
+      account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+      game_name TEXT NOT NULL,
+      slot INTEGER NOT NULL CHECK (slot BETWEEN 1 AND 3),
+      save_label TEXT DEFAULT '',
+      save_data JSONB NOT NULL DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(account_id, game_name, slot)
+    );
   `);
 }

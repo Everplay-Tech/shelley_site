@@ -54,6 +54,26 @@ export interface NarrativeOverrideCommand {
   };
 }
 
+export interface OfferSavesCommand {
+  command: "offer_saves";
+  data: {
+    saves: Array<{
+      slot: number;
+      label: string;
+      updatedAt: string;
+      saveData: Record<string, unknown>;
+    }>;
+  };
+}
+
+export interface LoadSaveCommand {
+  command: "load_save";
+  data: {
+    slot: number;
+    saveData: Record<string, unknown>;
+  };
+}
+
 export type GodotCommand =
   | StartCommand
   | PauseCommand
@@ -61,7 +81,9 @@ export type GodotCommand =
   | MoveToCommand
   | ConfigCommand
   | VirtualInputCommand
-  | NarrativeOverrideCommand;
+  | NarrativeOverrideCommand
+  | OfferSavesCommand
+  | LoadSaveCommand;
 
 export type GodotCommandType = GodotCommand["command"];
 
@@ -142,6 +164,19 @@ export interface MorphCompleteEvent {
   type: "morph_complete";
 }
 
+export interface SaveStateEvent {
+  type: "save_state";
+  data: {
+    slot: number;
+    label: string;
+    saveData: Record<string, unknown>;
+  };
+}
+
+export interface RequestSavesEvent {
+  type: "request_saves";
+}
+
 export type GodotEvent =
   | NavigateEvent
   | MiniGameCompleteEvent
@@ -156,7 +191,9 @@ export type GodotEvent =
   | GameSessionEvent
   | PieceCollectedEvent
   | MorphToPlatformerEvent
-  | MorphCompleteEvent;
+  | MorphCompleteEvent
+  | SaveStateEvent
+  | RequestSavesEvent;
 
 export type GodotEventType = GodotEvent["type"];
 
@@ -177,6 +214,8 @@ const VALID_EVENT_TYPES: ReadonlySet<string> = new Set([
   "piece_collected",
   "morph_to_platformer",
   "morph_complete",
+  "save_state",
+  "request_saves",
 ]);
 
 export function isGodotEvent(data: unknown): data is GodotEvent {

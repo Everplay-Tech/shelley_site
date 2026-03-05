@@ -1,17 +1,58 @@
 "use client";
 
-import React, { useEffect, useCallback, useState } from "react";
-import GodotEmbed from "./GodotEmbed";
+import React, { useEffect, useCallback, useState, useRef } from "react";
+import GodotEmbed, { type GodotEmbedHandle } from "./GodotEmbed";
 import PoGameIntro from "./PoGameIntro";
 import { useTransition } from "./TransitionContext";
 import { reportGameEvent } from "@/lib/player-state";
-import type { GodotEvent } from "@/lib/godot-messages";
+import type { GodotEvent, OfferSavesCommand } from "@/lib/godot-messages";
 import { emitGameEvent } from "@/lib/game-events";
 import { getZoneForRoute } from "@/lib/zone-config";
+
+interface SaveEntry {
+  slot: number;
+  label: string;
+  updatedAt: string;
+  saveData: Record<string, unknown>;
+}
+
+async function fetchSavesForGame(gameName: string): Promise<SaveEntry[]> {
+  try {
+    const res = await fetch(`/api/saves?game=${encodeURIComponent(gameName)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.saves ?? []).map((s: Record<string, unknown>) => ({
+      slot: s.slot as number,
+      label: (s.label ?? "") as string,
+      updatedAt: (s.updatedAt ?? "") as string,
+      saveData: (s.saveData ?? {}) as Record<string, unknown>,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function postSave(
+  gameName: string,
+  slot: number,
+  saveData: Record<string, unknown>,
+  label: string
+) {
+  try {
+    await fetch("/api/saves", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ game: gameName, slot, saveData, label }),
+    });
+  } catch {
+    // Save failed silently — game continues
+  }
+}
 
 const MiniGameTransition: React.FC = () => {
   const { isActive, activeGame, quickTransit, pendingUrl, skip, complete, isReplay, setGamesEnabled } = useTransition();
   const [introPhase, setIntroPhase] = useState<"intro" | "game">("game");
+  const godotRef = useRef<GodotEmbedHandle>(null);
 
   const zone = pendingUrl ? getZoneForRoute(pendingUrl) : null;
 
@@ -27,12 +68,26 @@ const MiniGameTransition: React.FC = () => {
     setIntroPhase("game");
   }, []);
 
+  // Send offer_saves command to Godot with current save data
+  const sendOfferSaves = useCallback(
+    (saves: SaveEntry[]) => {
+      const cmd: OfferSavesCommand = {
+        command: "offer_saves",
+        data: { saves },
+      };
+      godotRef.current?.sendCommand(cmd);
+    },
+    []
+  );
+
   const handleGodotEvent = useCallback(
     (event: GodotEvent) => {
       emitGameEvent(event);
+
+      const gameName = activeGame?.gameName ?? "unknown";
+
       if (event.type === "minigame_complete") {
         const data = "data" in event ? event.data : { score: 0, skipped: false };
-        const gameName = activeGame?.gameName ?? "unknown";
 
         if (data.skipped) {
           reportGameEvent({ type: "skipped", gameName });
@@ -44,9 +99,33 @@ const MiniGameTransition: React.FC = () => {
           });
         }
         complete();
+        return;
+      }
+
+      // Game ready — offer existing saves if user is authenticated
+      if (event.type === "game_ready" && activeGame) {
+        fetchSavesForGame(activeGame.gameName).then((saves) => {
+          if (saves.length > 0) {
+            sendOfferSaves(saves);
+          }
+        });
+        return;
+      }
+
+      // Godot wants to persist a save
+      if (event.type === "save_state" && activeGame) {
+        const { slot, label, saveData } = event.data;
+        postSave(activeGame.gameName, slot, saveData, label);
+        return;
+      }
+
+      // Godot requests current saves (e.g. after load menu opened)
+      if (event.type === "request_saves" && activeGame) {
+        fetchSavesForGame(activeGame.gameName).then(sendOfferSaves);
+        return;
       }
     },
-    [activeGame, complete]
+    [activeGame, complete, sendOfferSaves]
   );
 
   const handleSkip = useCallback(() => {
@@ -100,7 +179,7 @@ const MiniGameTransition: React.FC = () => {
       {/* Game content */}
       {introPhase === "game" && (
         <div className="w-full max-w-4xl px-4">
-          <GodotEmbed gameName={activeGame.gameName} onEvent={handleGodotEvent} />
+          <GodotEmbed ref={godotRef} gameName={activeGame.gameName} onEvent={handleGodotEvent} />
           <div className="mt-4 flex justify-between items-center">
             <p className="font-pixel text-[7px] text-white/40 tracking-wider">
               {activeGame.label?.toUpperCase() ?? "LOADING..."}
