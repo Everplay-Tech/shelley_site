@@ -112,5 +112,65 @@ export async function initSchema(): Promise<void> {
     -- Index for account lookups
     CREATE INDEX IF NOT EXISTS idx_game_progress_account
       ON game_progress(account_id);
+
+    -- Products (Stripe-synced catalog)
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      stripe_product_id TEXT UNIQUE,
+      stripe_price_id TEXT NOT NULL DEFAULT '',
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      product_type TEXT NOT NULL DEFAULT 'digital'
+        CHECK (product_type IN ('physical', 'digital')),
+      content_type TEXT DEFAULT NULL,
+      price_cents INTEGER NOT NULL DEFAULT 0,
+      currency TEXT DEFAULT 'usd',
+      image_url TEXT DEFAULT NULL,
+      file_key TEXT DEFAULT NULL,
+      active BOOLEAN DEFAULT TRUE,
+      metadata JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Orders
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE SET NULL,
+      stripe_checkout_session_id TEXT UNIQUE,
+      stripe_payment_intent_id TEXT,
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'paid', 'fulfilled', 'refunded', 'failed')),
+      total_cents INTEGER NOT NULL DEFAULT 0,
+      currency TEXT DEFAULT 'usd',
+      metadata JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Order Items
+    CREATE TABLE IF NOT EXISTS order_items (
+      id SERIAL PRIMARY KEY,
+      order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      product_id INTEGER NOT NULL REFERENCES products(id),
+      quantity INTEGER DEFAULT 1,
+      price_cents INTEGER NOT NULL DEFAULT 0
+    );
+
+    -- Library Items (owned content per account)
+    CREATE TABLE IF NOT EXISTS library_items (
+      id SERIAL PRIMARY KEY,
+      account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+      product_id INTEGER REFERENCES products(id),
+      source TEXT NOT NULL DEFAULT 'purchase'
+        CHECK (source IN ('purchase', 'reward', 'free', 'gift')),
+      order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+      granted_at TIMESTAMPTZ DEFAULT NOW(),
+      download_count INTEGER DEFAULT 0,
+      last_downloaded_at TIMESTAMPTZ,
+      UNIQUE(account_id, product_id)
+    );
+
+    -- Stripe customer link
+    ALTER TABLE accounts ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
   `);
 }
