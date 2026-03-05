@@ -93,15 +93,17 @@ export async function initSchema(): Promise<void> {
       updated_by TEXT DEFAULT 'admin'
     );
 
-    -- Magic link tokens
+    -- Magic link / password reset tokens
     CREATE TABLE IF NOT EXISTS magic_tokens (
       id SERIAL PRIMARY KEY,
       email TEXT NOT NULL,
       token TEXT UNIQUE NOT NULL,
+      purpose TEXT NOT NULL DEFAULT 'magic_link',
       expires_at TIMESTAMPTZ NOT NULL,
       used BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+    ALTER TABLE magic_tokens ADD COLUMN IF NOT EXISTS purpose TEXT NOT NULL DEFAULT 'magic_link';
 
     -- Index for fast session lookups
     CREATE INDEX IF NOT EXISTS idx_game_progress_session

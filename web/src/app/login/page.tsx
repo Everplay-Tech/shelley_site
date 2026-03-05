@@ -177,7 +177,18 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="text-center text-white/30 text-xs mt-6">
+            {mode === "password" && (
+              <p className="text-center text-white/30 text-xs mt-2">
+                <Link
+                  href="/forgot-password"
+                  className="text-white/40 hover:text-white/60 transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </p>
+            )}
+
+            <p className="text-center text-white/30 text-xs mt-4">
               No account?{" "}
               <Link
                 href="/signup"
