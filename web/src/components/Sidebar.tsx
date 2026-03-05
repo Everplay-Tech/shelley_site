@@ -7,6 +7,7 @@ import { clsx } from "clsx";
 import dynamic from "next/dynamic";
 import { useTransition } from "./TransitionContext";
 import { useZoneSidebar } from "./ZoneSidebarContext";
+import { useAuth } from "@/hooks/useAuth";
 import { getGameForRoute } from "@/lib/game-routes";
 import GameCartridge from "./GameCartridge";
 import {
@@ -33,6 +34,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { startTransition, isActive } = useTransition();
   const zone = useZoneSidebar();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const gameConfig = zone ? getGameForRoute(pathname) : null;
   const [collapsed, setCollapsed] = useState(false);
 
@@ -128,6 +130,22 @@ export default function Sidebar() {
               />
             )}
 
+          </div>
+        )}
+
+        {/* ── Auth Button (bottom) ── */}
+        {!authLoading && (
+          <div className="mt-auto px-3 pb-3">
+            <Link
+              href={isAuthenticated ? "/profile" : "/login"}
+              className="sidebar-nav-link text-center w-full justify-center"
+            >
+              <span className="font-pixel text-[8px] tracking-wider truncate">
+                {isAuthenticated
+                  ? (user?.displayName || user?.email || "PROFILE").toUpperCase()
+                  : "LOG IN"}
+              </span>
+            </Link>
           </div>
         )}
       </aside>
