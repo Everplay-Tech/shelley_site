@@ -57,6 +57,9 @@ export default function PaperPlaneEncounter() {
     clearEncounter,
   } = usePoEncounter();
 
+  // 1/42 chance this plane carries a spell fragment instead of a codec invite
+  const [isSpellVariant] = useState(() => Math.random() < 1 / 42);
+
   const reducedMotion = usePrefersReducedMotion();
 
   // Internal animation state — independent from encounterPhase
@@ -224,8 +227,13 @@ export default function PaperPlaneEncounter() {
 
   // ─── Note callbacks ────────────────────────────────────────────────
   const handleNoteAccept = useCallback(() => {
-    acceptEncounter();
-  }, [acceptEncounter]);
+    if (isSpellVariant) {
+      // Spell variant: just dismiss with glow (no codec)
+      dismissEncounter();
+    } else {
+      acceptEncounter();
+    }
+  }, [acceptEncounter, dismissEncounter, isSpellVariant]);
 
   const handleNoteDismiss = useCallback(() => {
     dismissReason.current = "click";
@@ -307,6 +315,7 @@ export default function PaperPlaneEncounter() {
           }}
           onAccept={handleNoteAccept}
           onDismiss={handleNoteDismiss}
+          variant={isSpellVariant ? "spell" : "standard"}
         />
       )}
     </div>

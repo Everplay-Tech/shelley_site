@@ -1,10 +1,16 @@
 "use client";
 
 import React, { createContext, useState, useCallback, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import type { PoEncounterState, EncounterType, EncounterPhase } from "@/hooks/usePoEncounter";
 import { useCodecOverlay } from "@/hooks/useCodecOverlay";
 import { useZoneSidebar } from "@/components/ZoneSidebarContext";
 import { useTransition } from "@/components/TransitionContext";
+import { useIdleSpell } from "@/hooks/useIdleSpell";
+
+const SpellOverlay = dynamic(() => import("@/components/SpellOverlay"), {
+  ssr: false,
+});
 
 export const PoEncounterContext = createContext<PoEncounterState | null>(null);
 
@@ -92,6 +98,9 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
   const codec = useCodecOverlay();
   const zone = useZoneSidebar();
   const transition = useTransition();
+
+  // --- Idle spell easter egg ---
+  const { showSpell, dismissSpell } = useIdleSpell();
 
   // --- Encounter state machine ---
   const [activeEncounter, setActiveEncounter] = useState<EncounterType | null>(null);
@@ -460,6 +469,7 @@ export function PoEncounterProvider({ children }: { children: React.ReactNode })
   return (
     <PoEncounterContext.Provider value={value}>
       {children}
+      {showSpell && <SpellOverlay onDismiss={dismissSpell} />}
     </PoEncounterContext.Provider>
   );
 }

@@ -2752,3 +2752,35 @@ html.knock-shake-2 {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ─── SPELL OVERLAY ─── */
+/* Ink materializing on parchment — line-by-line reveal */
+
+.spell-line {
+  opacity: 0;
+  filter: blur(2px);
+  animation: spell-materialize 800ms ease-out forwards;
+}
+
+@keyframes spell-materialize {
+  0% {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 0.7;
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spell-line {
+    animation: none;
+    opacity: 1;
+    filter: none;
+  }
+}
