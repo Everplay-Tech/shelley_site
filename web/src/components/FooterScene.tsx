@@ -45,7 +45,9 @@ export default function FooterScene() {
           </svg>
         </a>
         <a
-          href="#"
+          href="https://www.youtube.com/@solemashi2950"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="YouTube"
           className="text-white/25 hover:text-red-400 transition-colors"
         >

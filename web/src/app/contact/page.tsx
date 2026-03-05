@@ -223,7 +223,9 @@ export default function Contact() {
 
           {/* YouTube */}
           <a
-            href="#"
+            href="https://www.youtube.com/@solemashi2950"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="Shelley Guitars on YouTube"
             className="flex items-center gap-4 pixel-panel p-4 hover:border-red-500/30 transition-colors group"
           >
