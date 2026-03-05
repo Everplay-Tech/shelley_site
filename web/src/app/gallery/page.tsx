@@ -9,12 +9,12 @@ import { useSetZoneSidebar } from "@/components/ZoneSidebarContext";
 /* ─── Instagram post panes ──────────────────────────────────────────────── */
 
 const instaPosts = [
-  { id: 1, url: "", thumbnail: "", alt: "", coverLabel: "PEEK" },
-  { id: 2, url: "", thumbnail: "", alt: "", coverLabel: "PEEK" },
-  { id: 3, url: "", thumbnail: "", alt: "", coverLabel: "PEEK" },
-  { id: 4, url: "", thumbnail: "", alt: "", coverLabel: "PEEK" },
-  { id: 5, url: "", thumbnail: "", alt: "", coverLabel: "PEEK" },
-  { id: 6, url: "", thumbnail: "", alt: "", coverLabel: "PEEK" },
+  { id: 1, url: "", thumbnail: "", alt: "", coverImage: "/sprites/po/gallery/po_curtain.png", coverLabel: "PEEK" },
+  { id: 2, url: "", thumbnail: "", alt: "", coverImage: "/sprites/po/gallery/po_box.png", coverLabel: "PEEK" },
+  { id: 3, url: "", thumbnail: "", alt: "", coverImage: "/sprites/po/gallery/po_peek.png", coverLabel: "PEEK" },
+  { id: 4, url: "", thumbnail: "", alt: "", coverImage: "/sprites/po/gallery/po_scroll.png", coverLabel: "PEEK" },
+  { id: 5, url: "", thumbnail: "", alt: "", coverImage: "/sprites/po/gallery/po_door.png", coverLabel: "PEEK" },
+  { id: 6, url: "", thumbnail: "", alt: "", coverImage: "/sprites/po/gallery/po_tada.png", coverLabel: "PEEK" },
 ];
 
 /* ─── Completed instruments ─────────────────────────────────────────────── */
@@ -105,13 +105,12 @@ export default function Gallery() {
 
                   {/* Cover layer — Po with curtain/reveal prop */}
                   <div className="absolute inset-0 bg-shelley-charcoal/95 flex flex-col items-center justify-center transition-all duration-300 ease-out group-hover:opacity-0 group-hover:scale-110">
-                    {/* Po sprite */}
-                    <div
-                      className="w-12 h-12 sm:w-16 sm:h-16 bg-no-repeat bg-contain bg-center image-rendering-pixelated mb-1"
-                      style={{
-                        backgroundImage: "url(/sprites/po/costumes/artist_static.png)",
-                        imageRendering: "pixelated",
-                      }}
+                    {/* Po sprite — unique pose per pane */}
+                    <img
+                      src={post.coverImage}
+                      alt=""
+                      className="w-12 h-12 sm:w-16 sm:h-16 mb-1"
+                      style={{ imageRendering: "pixelated" }}
                     />
                     <span className="font-pixel text-[6px] text-purple-400/30 tracking-wider">
                       {post.coverLabel}
