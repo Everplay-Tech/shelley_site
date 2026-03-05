@@ -16,6 +16,8 @@ import {
   GalleryIcon,
   LibrarynthIcon,
   ContactIcon,
+  ShopIcon,
+  LibraryIcon,
 } from "./ZoneIcons";
 
 const PoZoneAnimation = dynamic(() => import("./PoZoneAnimation"), {
@@ -28,6 +30,8 @@ const navItems = [
   { name: "Gallery", href: "/gallery", icon: GalleryIcon },
   { name: "Librarynth", href: "/librarynth", icon: LibrarynthIcon },
   { name: "Contact", href: "/contact", icon: ContactIcon },
+  { name: "Shop", href: "/shop", icon: ShopIcon },
+  { name: "Library", href: "/library", icon: LibraryIcon },
 ];
 
 export default function Sidebar() {

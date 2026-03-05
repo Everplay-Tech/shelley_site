@@ -125,5 +125,50 @@ export async function initSchema(): Promise<void> {
       updated_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(account_id, game_name, slot)
     );
+
+    -- Stripe customer link on accounts
+    ALTER TABLE accounts ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+
+    -- Products (Stripe-synced catalog)
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      stripe_product_id TEXT UNIQUE,
+      stripe_price_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      product_type TEXT NOT NULL CHECK (product_type IN ('physical', 'digital')),
+      content_type TEXT DEFAULT NULL,
+      price_cents INTEGER NOT NULL,
+      currency TEXT DEFAULT 'usd',
+      image_url TEXT DEFAULT NULL,
+      file_key TEXT DEFAULT NULL,
+      active BOOLEAN DEFAULT TRUE,
+      metadata JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Orders
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE SET NULL,
+      stripe_checkout_session_id TEXT UNIQUE,
+      stripe_payment_intent_id TEXT,
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'paid', 'fulfilled', 'refunded', 'failed')),
+      total_cents INTEGER NOT NULL,
+      currency TEXT DEFAULT 'usd',
+      metadata JSONB DEFAULT '{}',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Order Items
+    CREATE TABLE IF NOT EXISTS order_items (
+      id SERIAL PRIMARY KEY,
+      order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      product_id INTEGER NOT NULL REFERENCES products(id),
+      quantity INTEGER DEFAULT 1,
+      price_cents INTEGER NOT NULL
+    );
   `);
 }

@@ -111,6 +111,51 @@ export function LibrarynthIcon() {
   );
 }
 
+export function ShopIcon() {
+  return (
+    <svg {...svgProps}>
+      {/* Bag body */}
+      <rect x="3" y="6" width="10" height="8" />
+      {/* Bag opening */}
+      <rect x="4" y="5" width="8" height="1" fillOpacity="0.6" />
+      {/* Handle */}
+      <rect x="5" y="2" width="1" height="4" fillOpacity="0.5" />
+      <rect x="10" y="2" width="1" height="4" fillOpacity="0.5" />
+      <rect x="6" y="2" width="4" height="1" fillOpacity="0.5" />
+      {/* Dollar sign */}
+      <rect x="7" y="8" width="2" height="1" fillOpacity="0.3" />
+      <rect x="7" y="9" width="1" height="1" fillOpacity="0.3" />
+      <rect x="7" y="10" width="2" height="1" fillOpacity="0.3" />
+      <rect x="8" y="11" width="1" height="1" fillOpacity="0.3" />
+      <rect x="7" y="12" width="2" height="1" fillOpacity="0.3" />
+    </svg>
+  );
+}
+
+export function LibraryIcon() {
+  return (
+    <svg {...svgProps}>
+      {/* Shelf top */}
+      <rect x="2" y="2" width="12" height="1" />
+      {/* Book 1 - tall */}
+      <rect x="3" y="3" width="2" height="10" fillOpacity="0.7" />
+      {/* Book 2 - medium */}
+      <rect x="5" y="4" width="2" height="9" fillOpacity="0.5" />
+      {/* Book 3 - tall */}
+      <rect x="7" y="3" width="2" height="10" fillOpacity="0.8" />
+      {/* Book 4 - short */}
+      <rect x="9" y="5" width="2" height="8" fillOpacity="0.4" />
+      {/* Book 5 - medium */}
+      <rect x="11" y="4" width="2" height="9" fillOpacity="0.6" />
+      {/* Shelf bottom */}
+      <rect x="2" y="13" width="12" height="1" />
+      {/* Shelf sides */}
+      <rect x="2" y="2" width="1" height="12" fillOpacity="0.3" />
+      <rect x="13" y="2" width="1" height="12" fillOpacity="0.3" />
+    </svg>
+  );
+}
+
 export function ContactIcon() {
   return (
     <svg {...svgProps}>
