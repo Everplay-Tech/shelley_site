@@ -38,6 +38,49 @@ export default function MuralSection({ mural }: Props) {
     return () => pan.removeEventListener("wheel", handleWheel);
   }, []);
 
+  // Touch: lock direction after first significant move
+  useEffect(() => {
+    const pan = panRef.current;
+    if (!pan) return;
+
+    let startX = 0;
+    let startY = 0;
+    let locked: "x" | "y" | null = null;
+
+    const onStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      locked = null;
+    };
+
+    const onMove = (e: TouchEvent) => {
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      if (!locked) {
+        // Need enough movement to determine direction
+        if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+        locked = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+
+      if (locked === "x") {
+        // Horizontal: prevent vertical scroll, pan manually
+        e.preventDefault();
+        pan.scrollLeft -= (e.touches[0].clientX - startX);
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+      // locked === "y": let it propagate to parent for snap scroll
+    };
+
+    pan.addEventListener("touchstart", onStart, { passive: true });
+    pan.addEventListener("touchmove", onMove, { passive: false });
+    return () => {
+      pan.removeEventListener("touchstart", onStart);
+      pan.removeEventListener("touchmove", onMove);
+    };
+  }, []);
+
   return (
     <section className={`mural-section mural-${mural.variant}`}>
       {/* Ambient overlays driven by variant */}
