@@ -1390,6 +1390,28 @@ body.sidebar-collapsed .site-content {
   padding-left: 0;
 }
 
+/* ── Shop fullscreen: no footer, no padding, no scroll ── */
+body.shop-fullscreen {
+  overflow: hidden;
+}
+body.shop-fullscreen > footer {
+  display: none !important;
+}
+body.shop-fullscreen #main-content > div {
+  padding: 0;
+  max-width: none;
+}
+body.shop-fullscreen #main-content {
+  min-height: auto;
+}
+body.shop-fullscreen .site-sidebar {
+  display: none !important;
+}
+body.shop-fullscreen .site-content {
+  padding-left: 0 !important;
+}
+
+
 /* ── Mobile: bottom bar ── */
 @media (max-width: 768px) {
   .site-sidebar {

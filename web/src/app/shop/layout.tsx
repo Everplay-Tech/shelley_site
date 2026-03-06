@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Shop",
   description:
-    "Shelley Guitar shop — handcrafted guitars, picks, digital music, comics, and more from the world of Po.",
+    "The Shelley Shop — handcrafted guitars, picks, digital music, and more. Browse the shelves, grab what speaks to you.",
   openGraph: {
     title: "Shop | Shelley Guitar",
     description:
-      "Handcrafted guitars, picks, digital music, comics, and more.",
+      "Handcrafted guitars, picks, digital music, and more from Shelley Guitar.",
   },
 };
 
