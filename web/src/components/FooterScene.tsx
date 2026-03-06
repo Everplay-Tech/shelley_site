@@ -5,20 +5,20 @@ import { hasCookie } from "@/lib/cookies";
 import { ONBOARDING_COOKIE } from "@/lib/game-routes";
 import PoSprite from "./PoSprite";
 
-type SceneMode = "skyline" | "librarynth";
+type SceneMode = "skyline" | "account";
 
 export default function FooterScene() {
   const [mode, setMode] = useState<SceneMode>("skyline");
 
   useEffect(() => {
     if (hasCookie(ONBOARDING_COOKIE)) {
-      setMode("librarynth");
+      setMode("account");
     }
   }, []);
 
   return (
     <div className="footer-scene relative w-full overflow-hidden">
-      {mode === "skyline" ? <DjinnSkyline /> : <LibrarynthMap />}
+      {mode === "skyline" ? <DjinnSkyline /> : <AccountMap />}
 
       {/* Social links */}
       <div className="relative z-10 flex items-center justify-center gap-4 px-6 pt-3 pb-1">
@@ -131,11 +131,11 @@ function DjinnSkyline() {
   );
 }
 
-// ─── LIBRARYNTH MAP ────────────────────────────────────────────────────────
+// ─── ACCOUNT MAP ──────────────────────────────────────────────────────────
 
-function LibrarynthMap() {
+function AccountMap() {
   return (
-    <div className="librarynth-map relative h-[120px] sm:h-[160px] flex items-end justify-center">
+    <div className="account-map relative h-[120px] sm:h-[160px] flex items-end justify-center">
       {/* Ambient glow backdrop */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0a1225]/80 via-[#0d1a35]/40 to-transparent" />
 
@@ -153,7 +153,7 @@ function LibrarynthMap() {
       {/* Map title */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10">
         <span className="font-pixel text-[6px] text-shelley-spirit-blue/30 tracking-[0.3em]">
-          THE LIBRARYNTH
+          ACCOUNT
         </span>
       </div>
     </div>

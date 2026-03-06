@@ -3,7 +3,7 @@
 import { useRef, useCallback, useEffect, useState } from "react";
 
 /**
- * PoScholar — Speed reader animation (Librarynth / Scholar zone).
+ * PoScholar — Speed reader animation (Account / Scholar zone).
  *
  * Layers (all CSS, no sprite sheets):
  *   0. Po body (static scholar sprite — glasses + book baked in)

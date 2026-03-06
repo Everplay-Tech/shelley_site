@@ -21,7 +21,7 @@ export function GalleryIcon() {
   return <Image {...iconProps} src="/images/nav/gallery.png" alt="" />;
 }
 
-export function LibrarynthIcon() {
+export function AccountIcon() {
   return <Image {...iconProps} src="/images/nav/librarynth.png" alt="" />;
 }
 

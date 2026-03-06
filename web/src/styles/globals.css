@@ -1035,7 +1035,7 @@ body::after {
   animation: moped-ride 18s linear infinite;
 }
 
-/* ─── LIBRARYNTH MAP (footer scene) ─── */
+/* ─── ACCOUNT MAP (footer scene) ─── */
 
 .map-zone-glow {
   box-shadow:
@@ -1414,6 +1414,288 @@ body.shop-fullscreen .site-content {
   padding-left: 0 !important;
 }
 
+
+/* ── Homepage mural: full-viewport, keep sidebar ── */
+body.homepage-mural #main-content > div {
+  padding: 0;
+  max-width: none;
+}
+body.homepage-mural #main-content {
+  min-height: auto;
+}
+body.homepage-mural footer {
+  display: none !important;
+}
+
+/* ─── MURAL SYSTEM ─── */
+
+.mural-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+.mural-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+  height: 100vh;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mural-section {
+  scroll-snap-align: start;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: clip;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Section indicator dots ── */
+.mural-indicator {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mural-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.mural-indicator-dot--active {
+  background: rgba(255, 191, 0, 0.6);
+  border-color: rgba(255, 191, 0, 0.8);
+  box-shadow: 0 0 6px rgba(255, 191, 0, 0.3);
+}
+
+/* ── Horizontal pan viewport ── */
+.mural-pan {
+  position: absolute;
+  inset: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 2;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+.mural-pan::-webkit-scrollbar {
+  display: none;
+}
+
+.mural-pan-img {
+  height: 100%;
+  width: auto;
+  min-width: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* ── Hebrew numeral ── */
+.mural-numeral {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
+  pointer-events: none;
+}
+.mural-numeral span {
+  font-family: serif;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.15);
+  direction: rtl;
+}
+.mural-cave .mural-numeral span {
+  color: rgba(196, 149, 106, 0.2);
+}
+.mural-scroll .mural-numeral span {
+  color: rgba(60, 50, 40, 0.15);
+}
+
+/* ── Section transitions (edge gradients) ── */
+.mural-section-fade-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+  z-index: 5;
+}
+
+.mural-section-fade-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, transparent, rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ── LASCAUX: Dark stone, torch flicker ── */
+.mural-lascaux {
+  background: linear-gradient(135deg, #1a1410 0%, #0d0a07 50%, #1a1410 100%);
+}
+
+.mural-torch-glow {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(
+    ellipse at 25% 45%,
+    rgba(255, 140, 20, 0.1) 0%,
+    rgba(200, 100, 10, 0.05) 25%,
+    transparent 55%
+  );
+  animation: torch-flicker 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes torch-flicker {
+  0% { opacity: 0.5; transform: scale(1) translate(0, 0); }
+  25% { opacity: 0.8; transform: scale(1.02) translate(1%, -0.5%); }
+  50% { opacity: 0.4; transform: scale(0.98) translate(-0.5%, 0.5%); }
+  75% { opacity: 0.7; transform: scale(1.01) translate(0.5%, -0.3%); }
+  100% { opacity: 0.6; transform: scale(1) translate(0, 0); }
+}
+
+/* ── SISTINE: Deep blue/gold, shimmer ── */
+.mural-sistine {
+  background: linear-gradient(180deg, #0a0a2e 0%, #0d1040 40%, #0a0a2e 100%);
+}
+
+.mural-gold-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 35%,
+    rgba(218, 165, 32, 0.04) 45%,
+    rgba(255, 215, 0, 0.06) 50%,
+    rgba(218, 165, 32, 0.04) 55%,
+    transparent 65%
+  );
+  background-size: 300% 300%;
+  animation: gold-shimmer 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes gold-shimmer {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+/* ── SCROLL: Ink wash, mist layers ── */
+.mural-scroll {
+  background: linear-gradient(180deg, #f5f0e8 0%, #e8e0d4 30%, #d4ccc0 60%, #c0b8ac 100%);
+}
+
+.mural-mist {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.mural-mist-far {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(200, 195, 185, 0.15) 20%,
+    transparent 40%,
+    rgba(200, 195, 185, 0.1) 60%,
+    transparent 80%
+  );
+  animation: mist-drift-far 25s ease-in-out infinite alternate;
+}
+
+.mural-mist-near {
+  background: linear-gradient(
+    90deg,
+    transparent 10%,
+    rgba(200, 195, 185, 0.2) 30%,
+    transparent 50%,
+    rgba(200, 195, 185, 0.15) 70%,
+    transparent 90%
+  );
+  animation: mist-drift-near 18s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes mist-drift-far {
+  0% { transform: translateX(-5%); opacity: 0.6; }
+  100% { transform: translateX(5%); opacity: 0.8; }
+}
+
+@keyframes mist-drift-near {
+  0% { transform: translateX(3%); opacity: 0.5; }
+  100% { transform: translateX(-3%); opacity: 0.7; }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .mural-torch-glow,
+  .mural-gold-shimmer,
+  .mural-mist {
+    animation: none !important;
+  }
+  .mural-container {
+    scroll-behavior: auto;
+  }
+}
+
+/* ── Mobile: keep snap, adapt heights ── */
+@media (max-width: 768px) {
+  .mural-wrapper {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .mural-container {
+    scroll-snap-type: y mandatory;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+  .mural-section {
+    height: 100vh;
+    height: 100dvh;
+    scroll-snap-align: start;
+  }
+  .mural-pan-img {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .mural-indicator {
+    display: none;
+  }
+  body.homepage-mural .site-content {
+    padding-bottom: 4rem; /* space for mobile bottom nav */
+  }
+}
 
 /* ── Mobile: bottom bar ── */
 @media (max-width: 768px) {
@@ -2494,7 +2776,7 @@ html.knock-shake-2 {
   }
 }
 
-/* ── 3. LIBRARYNTH: Book Page — floats down with side-to-side sway ── */
+/* ── 3. ACCOUNT: Book Page — floats down with side-to-side sway ── */
 @keyframes zone-drop-page-enter {
   0% {
     transform: translate(0, 0) rotate(-5deg);

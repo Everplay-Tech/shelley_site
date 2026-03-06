@@ -7,6 +7,7 @@
 // Bottom: Dialogue with typewriter (preserved from V1)
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useCodecOverlay } from "@/hooks/useCodecOverlay";
 import { getCodecScript, type CodecLine } from "@/lib/codec-content";
 import { PO_COSTUMES } from "@/lib/zone-config";
@@ -46,6 +47,7 @@ function getCodecContext(zoneId: ReturnType<typeof useCodecOverlay>["zoneId"]) {
 }
 
 export default function CodecOverlay() {
+  const router = useRouter();
   const { isOpen, costume, zoneId, closeCodec } = useCodecOverlay();
   const [lines, setLines] = useState<CodecLine[]>([]);
   const [lineIndex, setLineIndex] = useState(0);
@@ -164,6 +166,15 @@ export default function CodecOverlay() {
       if (e.target === e.currentTarget) handleClose();
     },
     [handleClose]
+  );
+
+  const handleAction = useCallback(
+    (url: string) => {
+      handleClose();
+      // Wait for close animation to finish before navigating
+      setTimeout(() => router.push(url), 200);
+    },
+    [handleClose, router]
   );
 
   if (!isOpen && !closing) return null;
@@ -293,6 +304,18 @@ export default function CodecOverlay() {
                 )}
               </p>
             </div>
+
+            {/* Action button (navigation/product link) */}
+            {currentLine?.action && !isTyping && (
+              <div className="mt-2 relative z-10">
+                <button
+                  onClick={() => handleAction(currentLine.action!.url)}
+                  className="font-pixel text-[7px] px-3 py-1.5 border border-shelley-amber/40 text-shelley-amber/80 hover:bg-shelley-amber/10 hover:border-shelley-amber/60 transition-all tracking-wider"
+                >
+                  {currentLine.action.label}
+                </button>
+              </div>
+            )}
 
             {/* Controls */}
             <div className="flex justify-between items-center relative z-10">

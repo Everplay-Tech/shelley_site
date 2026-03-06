@@ -228,8 +228,8 @@ export default function Workshop() {
           &ldquo;The vibration starts in the player, not the instrument. Electricity is the conduit.
           We build the vessel that turns potential energy into soulfire.&rdquo;
         </p>
-        <a href="/librarynth" className="pixel-btn-ghost">
-          READ MORE IN THE LIBRARYNTH &rarr;
+        <a href="/account" className="pixel-btn-ghost">
+          READ MORE &rarr;
         </a>
       </PixelCard>
     </div>

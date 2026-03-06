@@ -56,7 +56,7 @@ function getObjectType(zoneId: string | undefined | null): ZoneObjectType {
       return "pick";
     case "gallery":
       return "splat";
-    case "librarynth":
+    case "account":
       return "page";
     case "contact":
       return "pigeon";
@@ -564,7 +564,7 @@ function PaintSplatShape({ hoverable }: { hoverable: boolean }) {
   );
 }
 
-// ─── 3. LIBRARYNTH: Book Page ───────────────────────────────────────────────
+// ─── 3. ACCOUNT: Book Page ──────────────────────────────────────────────────
 function BookPageShape({ hoverable }: { hoverable: boolean }) {
   return (
     <div

@@ -1,7 +1,7 @@
 // ─── Zone Configuration ─────────────────────────────────────────────────────
 // Single source of truth for zone theming, ambient effects, Po quotes, and costumes.
 
-export type ZoneId = "workshop" | "gallery" | "librarynth" | "contact";
+export type ZoneId = "workshop" | "gallery" | "account" | "contact";
 
 // ─── Po Costume System ──────────────────────────────────────────────────────
 
@@ -112,11 +112,11 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
     poCostume: "artist",
     cartridgeImage: "/images/cartridges/gallery.png",
   },
-  librarynth: {
-    id: "librarynth",
-    name: "THE LIBRARYNTH",
-    subtitle: "Library + Labyrinth",
-    tagline: "Study space meets creative labyrinth. Everything Shelley, all in one place.",
+  account: {
+    id: "account",
+    name: "ACCOUNT",
+    subtitle: "Your Space",
+    tagline: "Saves, orders, rewards, and everything that's yours.",
     accentColor: "text-shelley-spirit-blue",
     accentHex: "#4a90d9",
     glowClass: "crt-glow-blue",
@@ -124,9 +124,9 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
     particleType: "sparkles",
     borderColorClass: "border-shelley-spirit-blue/20",
     poQuotes: [
-      "The Librarynth... part library, part labyrinth. I once got lost here for three weeks. Or three minutes. Hard to tell.",
-      "Every book in here is a door to somewhere else. Literally. Don't open the red ones.",
-      "Magus keeps his deepest ideas here. I keep my snacks here. Priorities.",
+      "Your account. Saves, orders, the whole deal. I'd organize it for you but... ghost hands.",
+      "Everything you've collected lives here. Including my respect. That's worth something.",
+      "Magus keeps his deepest ideas in here. I keep my snacks. Priorities.",
       "The crystals hum a different note depending on who walks past. Mine is apparently B-flat.",
     ],
     poCostume: "scholar",

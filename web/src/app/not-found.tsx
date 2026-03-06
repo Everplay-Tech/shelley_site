@@ -15,7 +15,7 @@ const LOST_QUOTES = [
 const ZONES = [
   { href: "/workshop", label: "THE WORKSHOP", color: "text-shelley-amber" },
   { href: "/gallery", label: "THE GALLERY", color: "text-shelley-djinn-purple" },
-  { href: "/librarynth", label: "THE LIBRARYNTH", color: "text-shelley-spirit-blue" },
+  { href: "/account", label: "ACCOUNT", color: "text-shelley-spirit-blue" },
   { href: "/contact", label: "GET IN TOUCH", color: "text-shelley-spirit-green" },
 ];
 

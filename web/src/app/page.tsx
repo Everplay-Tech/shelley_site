@@ -7,7 +7,7 @@ import type { GodotEmbedHandle } from "@/components/GodotEmbed";
 // Dynamic imports — code-split heavy components into separate chunks
 const GodotEmbed = dynamic(() => import("@/components/GodotEmbed"), { ssr: false });
 const GameBoyControls = dynamic(() => import("@/components/GameBoyControls"), { ssr: false });
-import PixelCard from "@/components/PixelCard";
+const HomeMural = dynamic(() => import("@/components/HomeMural"), { ssr: false });
 import { getLandingGame, ONBOARDING_COOKIE } from "@/lib/game-routes";
 import { hasCookie, setCookie } from "@/lib/cookies";
 import { reportGameEvent } from "@/lib/player-state";
@@ -43,6 +43,14 @@ export default function Home() {
       timersRef.current.forEach(clearTimeout);
     };
   }, []);
+
+  // Toggle mural body class when game is done
+  useEffect(() => {
+    if (!showGame) {
+      document.body.classList.add("homepage-mural");
+    }
+    return () => document.body.classList.remove("homepage-mural");
+  }, [showGame]);
 
   const isNgPlus = gameConfig.mode === "ng_plus";
 
@@ -463,38 +471,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Site content — revealed after game completes or is skipped */}
-      <div className="flex flex-col gap-12">
-        <section className="text-center py-16">
-          <h2 className="font-pixel text-xl sm:text-3xl tracking-wider mb-6 crt-glow leading-relaxed">
-            RELEASE YOUR INNER{" "}
-            <span className="text-shelley-amber">PROMETHEUS</span>.
-            <br />
-            PLAY WITH <span className="text-shelley-amber">FIRE</span>.
-          </h2>
-          <p className="text-base text-white/50 max-w-2xl mx-auto">
-            When the going gets weird, the weird turn pro. Then they meet Po.
-          </p>
-        </section>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <PixelCard>
-            <h4 className="font-pixel text-[9px] text-white/80 mb-3 tracking-wider">THE WORKSHOP</h4>
-            <p className="text-white/45 text-sm mb-5">Take a look inside the shop where every Shelley guitar is born.</p>
-            <a href="/workshop" className="pixel-btn-ghost">GO &rarr;</a>
-          </PixelCard>
-          <PixelCard>
-            <h4 className="font-pixel text-[9px] text-white/80 mb-3 tracking-wider">THE GALLERY</h4>
-            <p className="text-white/45 text-sm mb-5">Browse our completed works and custom orders.</p>
-            <a href="/gallery" className="pixel-btn-ghost">VIEW &rarr;</a>
-          </PixelCard>
-          <PixelCard>
-            <h4 className="font-pixel text-[9px] text-white/80 mb-3 tracking-wider">THE LIBRARYNTH</h4>
-            <p className="text-white/45 text-sm mb-5">Guitars, comics, music, and philosophy — the creative labyrinth.</p>
-            <a href="/librarynth" className="pixel-btn-ghost">ENTER &rarr;</a>
-          </PixelCard>
-        </div>
-      </div>
+      {/* Panoramic mural — revealed after game completes or is skipped */}
+      <HomeMural />
     </>
   );
 }
