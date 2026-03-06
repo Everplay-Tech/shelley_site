@@ -1213,15 +1213,18 @@ a:focus-visible {
 }
 
 .sidebar-nav-icon {
-  width: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0.5;
 }
-.sidebar-nav-icon svg {
-  width: 14px;
-  height: 14px;
+.nav-pixel-icon {
+  width: 100% !important;
+  height: 100% !important;
+  image-rendering: pixelated;
+  object-fit: contain;
 }
 .sidebar-nav-link--active .sidebar-nav-icon {
   opacity: 1;
@@ -1471,11 +1474,8 @@ body.shop-fullscreen .site-content {
   }
 
   .sidebar-nav-icon {
-    width: auto;
-  }
-  .sidebar-nav-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
   }
 
   .sidebar-nav-label {
