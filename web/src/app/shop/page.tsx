@@ -106,7 +106,18 @@ export default function ShopPage() {
   const [rewardCode, setRewardCode] = useState("");
   const [checkingOut, setCheckingOut] = useState<number | null>(null);
   const [poseIndex, setPoseIndex] = useState<PoseIndex>(0);
+  const [annoyedLine, setAnnoyedLine] = useState<string | null>(null);
   const revertTimer = useRef<ReturnType<typeof setTimeout>>();
+  const clickCount = useRef(0);
+  const armsUpCount = useRef(0);
+
+  const ANNOYED_LINES = [
+    "YO. I\u2019M NOT HERE TO DO JUMPING JACKS FOR YOU.",
+    "STOP MAKING ME RAISE MY ARMS SO YOU CAN SMELL MY PITS. I\u2019M DEAD, NOT DEODORIZED.",
+    "WHAT IS THIS, AN AEROBICS CLASS? BUY SOMETHING.",
+    "I SWEAR IF YOU CLICK ONE MORE TIME I\u2019M CLOSING THE SHOP.",
+    "YOU THINK THIS IS FUNNY? I HAVE BONES TO REST.",
+  ];
 
   /* Pose snaps to a reaction frame, then reverts to neutral after a delay */
   const flashPose = useCallback((pose: PoseIndex, ms = 1200) => {
@@ -120,11 +131,25 @@ export default function ShopPage() {
     if (!loading) flashPose(1, 2000);
   }, [loading, flashPose]);
 
-  /* Click anywhere → arms reaction */
+  /* Click anywhere → arms reaction, with annoyance escalation */
   const handlePageClick = useCallback(() => {
     const pose: PoseIndex = Math.random() < 0.5 ? 2 : 3;
     flashPose(pose);
-  }, [flashPose]);
+    clickCount.current += 1;
+    if (pose === 3) armsUpCount.current += 1;
+
+    // After 5+ clicks with at least 2 arms-up, Po gets annoyed
+    if (clickCount.current >= 5 && armsUpCount.current >= 2 && !annoyedLine) {
+      const line = ANNOYED_LINES[Math.floor(Math.random() * ANNOYED_LINES.length)];
+      setAnnoyedLine(line);
+      // Clear after a while so it can trigger again later
+      setTimeout(() => {
+        setAnnoyedLine(null);
+        clickCount.current = 0;
+        armsUpCount.current = 0;
+      }, 6000);
+    }
+  }, [flashPose, annoyedLine]);
 
   /* Toggle fullscreen body class */
   useEffect(() => {
@@ -293,7 +318,11 @@ export default function ShopPage() {
             }}
           />
 
-          {loading ? (
+          {annoyedLine ? (
+            <p className="font-pixel text-[7px] sm:text-[8px] text-red-400/80 tracking-wider leading-relaxed">
+              {annoyedLine}
+            </p>
+          ) : loading ? (
             <p className="font-pixel text-[7px] text-white/30 tracking-wider animate-pulse">
               HANG ON...
             </p>
