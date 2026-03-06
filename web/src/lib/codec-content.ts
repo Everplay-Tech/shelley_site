@@ -49,6 +49,11 @@ const ZONE_INTROS: Record<ZoneId, CodecLine[]> = {
     { speaker: "PO", text: "Saves, orders, rewards — everything that's yours lives here." },
     { speaker: "PO", text: "I'd give you a tour but I forgot where everything is. Ghost brain." },
   ],
+  librarynth: [
+    { speaker: "PO", text: "The Librarynth." },
+    { speaker: "PO", text: "A labyrinth of rooms beneath the Workshop. Books on every wall. Posters from places that don't exist yet." },
+    { speaker: "PO", text: "I wander the corridors sometimes. Pull things off shelves. Forget why I came in." },
+  ],
   contact: [
     { speaker: "PO", text: "The signal tower." },
     { speaker: "PO", text: "Drop a message from here and it reaches Magus directly. He checks between builds." },
@@ -111,6 +116,24 @@ const ZONE_RETURNS: Record<ZoneId, CodecLine[][]> = {
     [
       { speaker: "PO", text: "Oh good, you're here." },
       { speaker: "PO", text: "I was watching your stuff. Guarding it. Definitely not sleeping." },
+    ],
+  ],
+  librarynth: [
+    [
+      { speaker: "PO", text: "Back in the stacks? Careful, they shift." },
+      { speaker: "PO", text: "Last time I was here I found a book that hadn't been written yet." },
+    ],
+    [
+      { speaker: "PO", text: "The Crystal Archive is humming louder today." },
+      { speaker: "PO", text: "It remembers everything. Even the things you haven't done yet." },
+    ],
+    [
+      { speaker: "PO", text: "The deeper you go, the weirder it gets." },
+      { speaker: "PO", text: "I found a room full of guitar blueprints from the future once. Or the past. Time is funny down here." },
+    ],
+    [
+      { speaker: "PO", text: "The Librarynth likes you. I can tell." },
+      { speaker: "PO", text: "The corridors rearrange for people it trusts. For me they just... loop." },
     ],
   ],
   contact: [

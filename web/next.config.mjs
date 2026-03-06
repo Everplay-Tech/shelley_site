@@ -101,16 +101,6 @@ const nextConfig = {
     ];
   },
 
-  // ── Redirects ──
-  async redirects() {
-    return [
-      {
-        source: "/librarynth",
-        destination: "/account",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;

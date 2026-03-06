@@ -1,7 +1,7 @@
 // ─── Zone Configuration ─────────────────────────────────────────────────────
 // Single source of truth for zone theming, ambient effects, Po quotes, and costumes.
 
-export type ZoneId = "workshop" | "gallery" | "account" | "contact";
+export type ZoneId = "workshop" | "gallery" | "account" | "librarynth" | "contact";
 
 // ─── Po Costume System ──────────────────────────────────────────────────────
 
@@ -128,6 +128,26 @@ export const ZONES: Record<ZoneId, ZoneConfig> = {
       "Everything you've collected lives here. Including my respect. That's worth something.",
       "Magus keeps his deepest ideas in here. I keep my snacks. Priorities.",
       "The crystals hum a different note depending on who walks past. Mine is apparently B-flat.",
+    ],
+    poCostume: "scholar",
+    cartridgeImage: "/images/cartridges/librarynth.png",
+  },
+  librarynth: {
+    id: "librarynth",
+    name: "THE LIBRARYNTH",
+    subtitle: "Librarynth",
+    tagline: "A labyrinth of rooms beneath the workshop. The Crystal Archive remembers everything.",
+    accentColor: "text-shelley-spirit-blue",
+    accentHex: "#4a90d9",
+    glowClass: "crt-glow-blue",
+    sectionHeaderColor: "blue",
+    particleType: "sparkles",
+    borderColorClass: "border-shelley-spirit-blue/20",
+    poQuotes: [
+      "The stacks go deeper than you'd think. I got lost for three days once. ...I think.",
+      "Every book in here is alive. Not literally. Okay, maybe literally.",
+      "The Crystal Archive remembers everything — even the things you haven't done yet.",
+      "Magus keeps his deepest ideas in here. I keep my snacks. Priorities.",
     ],
     poCostume: "scholar",
     cartridgeImage: "/images/cartridges/librarynth.png",

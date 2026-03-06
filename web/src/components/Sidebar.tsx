@@ -17,7 +17,6 @@ import {
   AccountIcon,
   ContactIcon,
   ShopIcon,
-  LibraryIcon,
 } from "./ZoneIcons";
 
 const PoZoneAnimation = dynamic(() => import("./PoZoneAnimation"), {
@@ -31,7 +30,6 @@ const navItems = [
   { name: "Account", href: "/account", icon: AccountIcon },
   { name: "Contact", href: "/contact", icon: ContactIcon },
   { name: "Shop", href: "/shop", icon: ShopIcon },
-  { name: "Library", href: "/library", icon: LibraryIcon },
 ];
 
 export default function Sidebar() {

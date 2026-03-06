@@ -20,6 +20,11 @@ const INTRO_LINES: Record<ZoneId, string[]> = {
     "Let's check in!",
     "Everything's here...",
   ],
+  librarynth: [
+    "Into the stacks...",
+    "The Archive awaits!",
+    "Deeper we go...",
+  ],
   contact: [
     "Signal incoming...",
     "Let's make contact!",
@@ -32,6 +37,7 @@ const INTRO_PORTRAITS: Record<ZoneId, string> = {
   workshop: "/images/intro/workshop.png",
   gallery: "/images/intro/gallery.png",
   account: "/images/intro/librarynth.png",
+  librarynth: "/images/intro/librarynth.png",
   contact: "/images/intro/contact.png",
 };
 
