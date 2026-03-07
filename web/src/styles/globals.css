@@ -1502,8 +1502,6 @@ body.homepage-mural footer {
   height: 100%;
   width: auto;
   min-width: 100%;
-  object-fit: cover;
-  object-position: center;
   display: block;
 }
 
